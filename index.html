@@ -1626,11 +1626,11 @@
 
     function computeTimeMetrics(filterFn) {
       const now = new Date();
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
       const dayOfWeek = now.getDay();
       const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0, 0);
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0, 0).getTime();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
 
       let dailySales = 0;
       let dailyProfit = 0;
@@ -1643,21 +1643,22 @@
       state.transactions.forEach((tx) => {
         if (!tx || tx.voided) return;
         if (filterFn && !filterFn(tx)) return;
-        const created = tx.createdAt ? new Date(tx.createdAt) : now;
+        const parsedMs = tx.createdAt ? Date.parse(tx.createdAt) : NaN;
+        const createdMs = Number.isFinite(parsedMs) ? parsedMs : now.getTime();
         const sales = Number(tx.sales) || 0;
         const profit = Number(tx.profit) || 0;
         const expense = tx.kind === 'expense' ? (Number(tx.amount) || 0) : 0;
 
-        if (created >= startOfDay) {
+        if (createdMs >= startOfDay) {
           dailySales += sales;
           dailyProfit += profit;
           dailyExpenses += expense;
         }
-        if (created >= startOfWeek) {
+        if (createdMs >= startOfWeek) {
           weeklySales += sales;
           weeklyProfit += profit;
         }
-        if (created >= startOfMonth) {
+        if (createdMs >= startOfMonth) {
           monthlySales += sales;
           monthlyProfit += profit;
         }
