@@ -439,27 +439,23 @@
               class="px-2.5 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-brand-purple text-[11px] font-extrabold transition">
               Device Sync
             </button>
+            <button type="button" onclick="exportBackupJSON()"
+              class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
+              Export JSON
+            </button>
+            <label class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition cursor-pointer">
+              Import JSON
+              <input type="file" accept=".json,application/json" onchange="importBackupJSON(event)" class="hidden" />
+            </label>
             <button type="button" onclick="copyJsonBackup()"
               class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
               Copy JSON
             </button>
             <button type="button" onclick="openJsonRestoreModal()"
               class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
-              Restore JSON
+              Paste JSON
             </button>
-            <button type="button" onclick="exportTransactionsCSV()"
-              class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
-              Export CSV
-            </button>
-              <button type="button" onclick="exportTransactionsCSV()"
-                class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
-                Export CSV
-              </button>
-              <label class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition cursor-pointer">
-                Import CSV
-                <input type="file" accept=".csv,text/csv" onchange="importTransactionsCSV(event)" class="hidden" />
-              </label>
-              <button type="button" id="autosync-toggle-btn" onclick="toggleAutoSync()"
+            <button type="button" id="autosync-toggle-btn" onclick="toggleAutoSync()"
                 class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition">
                 Auto Sync: ON
               </button>
@@ -2236,88 +2232,49 @@
     }
 
     // CSV Export / Import & Auto Sync
-    function exportTransactionsCSV() {
+    function exportBackupJSON() {
       try {
-        const headers = ['id', 'kind', 'pos', 'title', 'amount', 'profit', 'paymentMethod', 'voided', 'createdAt'];
-        const rows = state.transactions.map((t) => headers.map((h) => `"${String(t[h] ?? '').replace(/"/g, '""')}"`).join(','));
-        const csv = [headers.join(','), ...rows].join('\n');
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const jsonStr = JSON.stringify(buildSyncEnvelope(), null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `sarisari-ledger-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.download = `sarisari-store-backup-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        showToast('Exported CSV');
+        showToast('Exported JSON backup');
       } catch (err) {
-        console.error('Export CSV error:', err);
-        showToast('Export failed', true);
+        console.error('Export JSON error:', err);
+        showToast('Export JSON failed', true);
       }
     }
 
-    function importTransactionsCSV(event) {
+    function importBackupJSON(event) {
       const file = event?.target?.files?.[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         try {
-          const text = String(reader.result || '');
-          const lines = text.split(/\r?\n/).filter(Boolean);
-          if (lines.length < 2) return showToast('CSV has no rows', true);
-
-          const parseRow = (line) => {
-            const out = [];
-            let cur = '';
-            let inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-              const ch = line[i];
-              if (ch === '"') {
-                if (inQuotes && line[i + 1] === '"') {
-                  cur += '"';
-                  i++;
-                } else {
-                  inQuotes = !inQuotes;
-                }
-              } else if (ch === ',' && !inQuotes) {
-                out.push(cur);
-                cur = '';
-              } else {
-                cur += ch;
-              }
-            }
-            out.push(cur);
-            return out;
-          };
-
-          const headers = parseRow(lines[0]);
-          let imported = 0;
-          for (let i = 1; i < lines.length; i++) {
-            const cols = parseRow(lines[i]);
-            const rec = {};
-            headers.forEach((h, idx) => { rec[h] = cols[idx] ?? ''; });
-            const amount = parseFloat(rec.amount) || 0;
-            if (!rec.title && amount <= 0) continue;
-            state.transactions.unshift({
-              id: rec.id || `tx-imp-${Date.now()}-${i}`,
-              kind: rec.kind || 'sale',
-              pos: rec.pos || 'store',
-              title: rec.title || 'Imported Entry',
-              amount,
-              profit: parseFloat(rec.profit) || 0,
-              paymentMethod: rec.paymentMethod || 'Cash',
-              voided: String(rec.voided).toLowerCase() === 'true',
-              createdAt: rec.createdAt || new Date().toISOString(),
-              items: []
-            });
-            imported++;
+          const text = String(reader.result || '').trim();
+          if (!text) return showToast('JSON file is empty', true);
+          const parsed = JSON.parse(text);
+          const nowIso = new Date().toISOString();
+          state = mergeIncomingState(parsed);
+          if (typeof parsed.voidPassword === 'string' && parsed.voidPassword.trim()) {
+            localStorage.setItem(VOID_PASSWORD_KEY, parsed.voidPassword.trim());
           }
-
-          saveState();
+          localStorage.setItem(UPDATED_AT_KEY, nowIso);
+          const serialized = JSON.stringify(buildSyncEnvelope(nowIso));
+          localStorage.setItem(STORAGE_KEY, serialized);
+          if (autoSyncEnabled) {
+            localStorage.setItem(BACKUP_KEY, serialized);
+            scheduleCloudPush();
+          }
           renderAll();
-          showToast(`Imported ${imported} entries`);
+          showToast('Imported & merged JSON backup');
         } catch (err) {
-          console.error('Import CSV error:', err);
-          showToast('Invalid CSV file', true);
+          console.error('Import JSON error:', err);
+          showToast('Invalid JSON backup file', true);
         } finally {
           event.target.value = '';
         }
