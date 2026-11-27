@@ -657,7 +657,7 @@
           <div class="flex items-center justify-between gap-2 flex-wrap">
             <div>
               <h2 class="text-sm font-black text-slate-900">Sales, Profit &amp; Total Amount</h2>
-              <p class="text-[11px] font-semibold text-slate-500">Expenses deduct from Total Amount only</p>
+              <p class="text-[11px] font-semibold text-slate-500">Expenses deduct from total sales amount</p>
             </div>
             <div class="grid grid-cols-2 sm:flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
               <button type="button" onclick="openCloudSyncModal()"
@@ -727,6 +727,10 @@
               <div class="bg-teal-50/60 rounded-2xl p-2.5 border border-teal-100/80">
                 <p class="text-[10px] font-extrabold text-teal-800">Monthly Profit</p>
                 <p id="rep-monthly-profit" class="text-xs font-black text-slate-900 mt-0.5">₱0.00</p>
+              </div>
+              <div class="bg-rose-50/70 rounded-2xl p-2.5 border border-rose-100/80 col-span-2 md:col-span-4 flex items-center justify-between">
+                <p class="text-[10px] font-extrabold uppercase text-rose-700">Monthly Expenses</p>
+                <p id="rep-monthly-expenses" class="text-sm font-black text-rose-700">₱0.00</p>
               </div>
             </div>
           </div>
@@ -1640,6 +1644,7 @@
       let weeklyProfit = 0;
       let monthlySales = 0;
       let monthlyProfit = 0;
+      let monthlyExpenses = 0;
 
       state.transactions.forEach((tx) => {
         if (!tx || tx.voided) return;
@@ -1671,18 +1676,24 @@
         if (createdMs >= startOfMonth || isToday) {
           monthlySales += sales;
           monthlyProfit += profit;
+          monthlyExpenses += expense;
         }
       });
 
+      const netDailySales = dailySales - dailyExpenses;
+      const netWeeklySales = weeklySales - monthlyExpenses;
+      const netMonthlySales = monthlySales - monthlyExpenses;
+
       return {
-        dailySales,
+        dailySales: netDailySales,
         dailyProfit,
         dailyExpenses,
-        dailyAmount: dailySales - dailyExpenses,
-        weeklySales,
+        dailyAmount: netDailySales,
+        weeklySales: netWeeklySales,
         weeklyProfit,
-        monthlySales,
-        monthlyProfit
+        monthlySales: netMonthlySales,
+        monthlyProfit,
+        monthlyExpenses
       };
     }
 
@@ -2617,6 +2628,7 @@
       setTxt('rep-weekly-profit', formatCurrency(allMetrics.weeklyProfit));
       setTxt('rep-monthly-sales', formatCurrency(allMetrics.monthlySales));
       setTxt('rep-monthly-profit', formatCurrency(allMetrics.monthlyProfit));
+      setTxt('rep-monthly-expenses', formatCurrency(allMetrics.monthlyExpenses));
 
       const counters = [
         { key: 'store', label: 'Store' },
