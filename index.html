@@ -725,6 +725,30 @@
           <h3 class="text-base font-black text-slate-900">Confirm Void Transaction</h3>
           <p id="void-modal-desc" class="text-xs font-semibold text-slate-600 mt-1"></p>
         </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Void Password (default: <span id="void-password-hint" class="font-black text-brand-purple">1234</span>)</label>
+          <input id="void-password-input" type="password" placeholder="Enter void password"
+            class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+          <p id="void-password-error" class="hidden text-[11px] font-bold text-rose-600 mt-1">Incorrect password. Please try again.</p>
+          <button type="button" id="change-void-pass-btn" onclick="toggleChangeVoidPasswordBox()" class="mt-1.5 text-[11px] font-extrabold text-brand-purple hover:underline">
+            Change Void Password
+          </button>
+          <div id="change-void-pass-box" class="hidden mt-2.5 bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
+            <p class="text-[11px] font-extrabold text-slate-800">Set New Void Password</p>
+            <input id="void-current-pass-input" type="password" placeholder="Current password (1234 if default)"
+              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            <input id="void-new-pass-input" type="password" placeholder="New void password"
+              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            <div class="flex items-center justify-end gap-1.5 pt-0.5">
+              <button type="button" onclick="toggleChangeVoidPasswordBox(false)" class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold">
+                Cancel
+              </button>
+              <button type="button" onclick="saveNewVoidPassword()" class="px-3 py-1.5 rounded-xl bg-brand-purple text-white text-[11px] font-extrabold">
+                Save Password
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="flex items-center gap-2">
           <button type="button" onclick="closeVoidModal()" class="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold">
             Cancel
@@ -762,42 +786,27 @@
     const STORAGE_KEY = 'sarisari_pos_state_v1';
     const BACKUP_KEY = 'sarisari_pos_backup_v1';
     const AUTOSYNC_KEY = 'sarisari_pos_autosync_v1';
-
-    const DEFAULT_PRODUCTS = [
-      { id: 'p-1', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 15, cost: 11.5, stock: 36, lowStockThreshold: 5, image: 'https://placehold.co/300x200/f3e8ff/5b21b6?text=Pancit+Canton' },
-      { id: 'p-2', pos: 'store', name: 'Argentina Corned Beef 150g', category: 'Canned Goods', price: 38, cost: 31, stock: 20, lowStockThreshold: 5, image: 'https://placehold.co/300x200/ede9fe/4c1d95?text=Corned+Beef' },
-      { id: 'p-3', pos: 'store', name: 'Safeguard White Bar', category: 'Bath & Hygiene', price: 24, cost: 19, stock: 18, lowStockThreshold: 5, image: 'https://placehold.co/300x200/e0e7ff/3730a3?text=Safeguard' },
-      { id: 'p-4', pos: 'store', name: 'Bear Brand Swakpack 33g', category: 'Milk & Coffee', price: 13, cost: 10, stock: 45, lowStockThreshold: 10, image: 'https://placehold.co/300x200/fce7f3/9d174d?text=Bear+Brand' },
-      { id: 'p-5', pos: 'softdrinks', name: 'Coca-Cola Mismo 295ml', category: 'Softdrinks', price: 15, cost: 11, stock: 48, lowStockThreshold: 10, image: 'https://placehold.co/300x200/fee2e2/991b1b?text=Coke+Mismo' },
-      { id: 'p-6', pos: 'softdrinks', name: 'Sprite Mismo 295ml', category: 'Softdrinks', price: 15, cost: 11, stock: 36, lowStockThreshold: 10, image: 'https://placehold.co/300x200/dcfce7/166534?text=Sprite+Mismo' },
-      { id: 'p-7', pos: 'softdrinks', name: 'Royal Tru-Orange Mismo', category: 'Softdrinks', price: 15, cost: 11, stock: 30, lowStockThreshold: 10, image: 'https://placehold.co/300x200/ffedd5/9a3412?text=Royal+Mismo' },
-      { id: 'p-8', pos: 'cigarettes', name: 'Marlboro Red (Stick)', category: 'Sticks', price: 10, cost: 7.5, stock: 100, lowStockThreshold: 20, image: 'https://placehold.co/300x200/fef3c7/92400e?text=Marlboro+Red' },
-      { id: 'p-9', pos: 'cigarettes', name: 'Fortune Red (Stick)', category: 'Sticks', price: 7, cost: 5, stock: 120, lowStockThreshold: 20, image: 'https://placehold.co/300x200/f1f5f9/334155?text=Fortune+Red' }
-    ];
-
-    let state = {
-      products: [],
-      carts: { store: [], softdrinks: [], cigarettes: [] },
-      transactions: [],
-      utangs: []
-    };
+    const VOID_PASSWORD_KEY = 'sarisari_pos_void_password_v1';
 
     let currentTab = 'store';
     let selectedStoreCategory = 'All';
     let selectedReportFilter = 'all';
     let selectedUtangFilter = 'unpaid';
-    let currentGcashType = 'cash_in';
-    let lowStockModalPos = 'store';
-    let lowStockModalShowAll = false;
-    let autoSyncEnabled = localStorage.getItem(AUTOSYNC_KEY) !== 'false';
-    let toastTimeout = null;
-    let activeCartPos = 'store';
+    let activeGcashType = 'cash_in';
     let pendingVoidId = null;
+    let lowStockModalPos = 'store';
+    let autoSyncEnabled = localStorage.getItem(AUTOSYNC_KEY) !== 'false';
 
-    function formatPeso(val) {
-      const num = Number(val) || 0;
-      return `₱${num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
+    let state = {
+      products: [],
+      carts: {
+        store: [],
+        softdrinks: [],
+        cigarettes: []
+      },
+      transactions: [],
+      utangRecords: []
+    };
 
     function escapeHtml(str) {
       return String(str ?? '')
@@ -808,19 +817,67 @@
         .replace(/'/g, '&#39;');
     }
 
-    function showToast(msg, isAlert = false) {
+    function formatPeso(val) {
+      const num = Number(val) || 0;
+      return '₱' + num.toLocaleString('en-PH', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    let toastTimer = null;
+    function showToast(msg, isError = false) {
       const banner = document.getElementById('toast-banner');
       const inner = document.getElementById('toast-inner');
       if (!banner || !inner) return;
       inner.textContent = msg;
-      inner.className = `rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center ${
-        isAlert ? 'bg-amber-400 text-slate-950' : 'bg-slate-900 text-white'
-      }`;
+      inner.className = isError
+        ? 'rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center bg-rose-600 text-white'
+        : 'rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center bg-slate-900 text-white';
       banner.classList.remove('hidden');
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
         banner.classList.add('hidden');
       }, 2400);
+    }
+
+    function getDefaultProducts() {
+      return [
+        { id: 'st-1', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 15, cost: 11.5, stock: 24, lowStockThreshold: 6, image: '' },
+        { id: 'st-2', pos: 'store', name: 'Well-Milled Rice (1kg)', category: 'Rice & Pantry', price: 54, cost: 47, stock: 15, lowStockThreshold: 5, image: '' },
+        { id: 'st-3', pos: 'store', name: 'Safeguard White (60g)', category: 'Bath & Soap', price: 24, cost: 19, stock: 12, lowStockThreshold: 4, image: '' },
+        { id: 'st-4', pos: 'store', name: 'Bear Brand Swak (33g)', category: 'Milk & Coffee', price: 13, cost: 10, stock: 18, lowStockThreshold: 5, image: '' },
+        { id: 'sd-1', pos: 'softdrinks', name: 'Coca-Cola Mismo (295ml)', category: 'Cola', price: 15, cost: 11, stock: 24, lowStockThreshold: 6, image: '' },
+        { id: 'sd-2', pos: 'softdrinks', name: 'Sprite Mismo (295ml)', category: 'Lemon-Lime', price: 15, cost: 11, stock: 18, lowStockThreshold: 6, image: '' },
+        { id: 'sd-3', pos: 'softdrinks', name: 'Royal Tru-Orange (295ml)', category: 'Citrus', price: 15, cost: 11, stock: 14, lowStockThreshold: 5, image: '' },
+        { id: 'cg-1', pos: 'cigarettes', name: 'Marlboro Red (1 Stick)', category: 'Sticks', price: 10, cost: 7.5, stock: 40, lowStockThreshold: 10, image: '' },
+        { id: 'cg-2', pos: 'cigarettes', name: 'Fortune Red (1 Stick)', category: 'Sticks', price: 8, cost: 6, stock: 35, lowStockThreshold: 10, image: '' }
+      ];
+    }
+
+    function normalizeState(raw) {
+      const base = {
+        products: Array.isArray(raw?.products) && raw.products.length ? raw.products : getDefaultProducts(),
+        carts: {
+          store: Array.isArray(raw?.carts?.store) ? raw.carts.store : [],
+          softdrinks: Array.isArray(raw?.carts?.softdrinks) ? raw.carts.softdrinks : [],
+          cigarettes: Array.isArray(raw?.carts?.cigarettes) ? raw.carts.cigarettes : []
+        },
+        transactions: Array.isArray(raw?.transactions) ? raw.transactions : [],
+        utangRecords: Array.isArray(raw?.utangRecords) ? raw.utangRecords : []
+      };
+      base.products = base.products.map((p, idx) => ({
+        id: p.id || `prod-${Date.now()}-${idx}`,
+        pos: ['store', 'softdrinks', 'cigarettes'].includes(p.pos) ? p.pos : 'store',
+        name: String(p.name || 'Unnamed Item'),
+        category: String(p.category || 'General'),
+        price: Number(p.price) || 0,
+        cost: Number(p.cost) || 0,
+        stock: Math.max(0, parseInt(p.stock, 10) || 0),
+        lowStockThreshold: Math.max(0, parseInt(p.lowStockThreshold, 10) ?? 5),
+        image: String(p.image || '')
+      }));
+      return base;
     }
 
     function saveState() {
@@ -829,98 +886,113 @@
         localStorage.setItem(STORAGE_KEY, serialized);
         if (autoSyncEnabled) {
           localStorage.setItem(BACKUP_KEY, serialized);
-          const syncText = document.getElementById('autosync-status-text');
-          if (syncText) syncText.textContent = 'Synced';
         }
       } catch (err) {
-        console.error('Save state error:', err);
+        console.error('Failed to save state:', err);
       }
     }
 
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(BACKUP_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          state = {
-            products: Array.isArray(parsed.products) && parsed.products.length ? parsed.products : [...DEFAULT_PRODUCTS],
-            carts: {
-              store: Array.isArray(parsed.carts?.store) ? parsed.carts.store : [],
-              softdrinks: Array.isArray(parsed.carts?.softdrinks) ? parsed.carts.softdrinks : [],
-              cigarettes: Array.isArray(parsed.carts?.cigarettes) ? parsed.carts.cigarettes : []
-            },
-            transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [],
-            utangs: Array.isArray(parsed.utangs) ? parsed.utangs : []
-          };
-        } else {
-          state.products = [...DEFAULT_PRODUCTS];
+        const rawStr = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(BACKUP_KEY);
+        if (!rawStr) {
+          state = normalizeState(null);
+          saveState();
+          return;
         }
+        state = normalizeState(JSON.parse(rawStr));
       } catch (err) {
-        console.error('Load state error:', err);
-        state.products = [...DEFAULT_PRODUCTS];
+        console.error('Failed to load state:', err);
+        state = normalizeState(null);
       }
     }
 
-    function switchTab(tabName) {
+    function switchTab(tab) {
       const validTabs = ['store', 'softdrinks', 'cigarettes', 'gcash', 'utang', 'reports'];
-      if (!validTabs.includes(tabName)) return;
-      currentTab = tabName;
+      currentTab = validTabs.includes(tab) ? tab : 'store';
 
-      validTabs.forEach((t) => {
-        const sec = document.getElementById(`tab-${t}`);
-        if (sec) sec.classList.toggle('hidden', t !== tabName);
-
-        const navBtn = document.getElementById(`nav-${t}`);
-        if (navBtn) {
-          if (t === tabName) {
-            navBtn.className = 'flex flex-col items-center py-1.5 rounded-2xl text-brand-purple font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight';
-          } else {
-            navBtn.className = 'flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90';
-          }
-        }
-      });
-
-      const titles = {
+      const subtitles = {
         store: 'Store POS',
-        softdrinks: 'Softdrinks POS',
-        cigarettes: 'Cigarettes / Yosi POS',
+        softdrinks: 'Softdrinks Counter',
+        cigarettes: 'Cigarettes / Yosi Counter',
         gcash: 'GCash & E-Load',
         utang: 'Utang Tracker',
         reports: 'Reports & Ledger'
       };
       const subEl = document.getElementById('header-subtitle');
-      if (subEl) subEl.textContent = titles[tabName] || 'Store POS';
+      if (subEl) subEl.textContent = subtitles[currentTab] || 'Store POS';
 
-      renderAll();
+      for (const t of validTabs) {
+        const sec = document.getElementById(`tab-${t}`);
+        if (sec) sec.classList.toggle('hidden', t !== currentTab);
+
+        const navBtn = document.getElementById(`nav-${t}`);
+        if (navBtn) {
+          if (t === currentTab) {
+            navBtn.className = 'flex flex-col items-center py-1.5 rounded-2xl text-brand-purple font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight';
+          } else {
+            navBtn.className = 'flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90';
+          }
+        }
+      }
+
+      updateCartBar();
+      if (currentTab === 'utang') renderUtangTab();
+      if (currentTab === 'reports') renderReports();
     }
 
-    // Low Stock Helpers & Modal
+    function getActiveCartPos() {
+      if (currentTab === 'softdrinks' || currentTab === 'cigarettes' || currentTab === 'store') {
+        return currentTab;
+      }
+      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
+        if ((state.carts[pos] || []).length > 0) return pos;
+      }
+      return 'store';
+    }
+
+    function updateCartBar() {
+      const bar = document.getElementById('floating-cart-bar');
+      if (!bar) return;
+      if (['gcash', 'utang', 'reports'].includes(currentTab)) {
+        bar.classList.add('hidden');
+        return;
+      }
+      const pos = getActiveCartPos();
+      const cart = state.carts[pos] || [];
+      const count = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+      const total = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
+
+      if (count <= 0) {
+        bar.classList.add('hidden');
+        return;
+      }
+      const countEl = document.getElementById('cart-badge-count');
+      const totalEl = document.getElementById('cart-badge-total');
+      if (countEl) countEl.textContent = String(count);
+      if (totalEl) totalEl.textContent = formatPeso(total);
+      bar.classList.remove('hidden');
+    }
+
     function isLowStock(product) {
-      const stock = Number(product?.stock ?? 0);
-      const threshold = Number(product?.lowStockThreshold ?? 5);
+      const stock = Number(product.stock) || 0;
+      const threshold = Number(product.lowStockThreshold ?? 5);
       return stock <= threshold;
     }
 
-    function getLowStockProducts(pos = null) {
-      return state.products.filter((p) => {
-        if (pos && p.pos !== pos) return false;
-        return isLowStock(p);
-      });
-    }
-
     function renderLowStockBanner(pos) {
-      const banner = document.getElementById(`${pos}-low-stock-alert`);
+      const alertEl = document.getElementById(`${pos}-low-stock-alert`);
       const textEl = document.getElementById(`${pos}-low-stock-text`);
-      if (!banner || !textEl) return;
-      const items = getLowStockProducts(pos);
-      if (!items.length) {
-        banner.classList.add('hidden');
+      if (!alertEl || !textEl) return;
+      const lowItems = state.products.filter((p) => p.pos === pos && isLowStock(p));
+      if (!lowItems.length) {
+        alertEl.classList.add('hidden');
         return;
       }
-      const names = items.slice(0, 3).map((i) => `${i.name} (${i.stock})`).join(', ');
-      const extra = items.length > 3 ? ` +${items.length - 3} more` : '';
-      textEl.textContent = `Low Stock Alert (${items.length}): ${names}${extra}`;
-      banner.classList.remove('hidden');
+      const sample = lowItems.slice(0, 2).map((p) => `${p.name} (${p.stock})`).join(', ');
+      const extra = lowItems.length > 2 ? ` +${lowItems.length - 2} more` : '';
+      textEl.textContent = `Low Stock Alert (${lowItems.length}): ${sample}${extra}`;
+      alertEl.classList.remove('hidden');
     }
 
     function openLowStockModal(pos = 'store') {
@@ -933,32 +1005,29 @@
       document.getElementById('low-stock-modal')?.classList.add('hidden');
     }
 
-    function renderLowStockModal(pos, showAll) {
-      lowStockModalShowAll = Boolean(showAll);
-      const btnCounter = document.getElementById('low-stock-scope-counter');
-      const btnAll = document.getElementById('low-stock-scope-all');
+    function renderLowStockModal(pos = 'store', allCounters = false) {
+      lowStockModalPos = pos;
+      const scopeCounterBtn = document.getElementById('low-stock-scope-counter');
+      const scopeAllBtn = document.getElementById('low-stock-scope-all');
+      if (scopeCounterBtn && scopeAllBtn) {
+        scopeCounterBtn.className = !allCounters
+          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
+          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
+        scopeAllBtn.className = allCounters
+          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
+          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
+      }
+
       const titleEl = document.getElementById('low-stock-modal-title');
-      const listEl = document.getElementById('low-stock-modal-list');
-
-      if (btnCounter && btnAll) {
-        btnCounter.className = `px-3 py-1.5 rounded-2xl text-xs font-extrabold transition ${
-          !lowStockModalShowAll ? 'bg-brand-purple text-white' : 'bg-slate-100 text-slate-700'
-        }`;
-        btnAll.className = `px-3 py-1.5 rounded-2xl text-xs font-extrabold transition ${
-          lowStockModalShowAll ? 'bg-brand-purple text-white' : 'bg-slate-100 text-slate-700'
-        }`;
-      }
-
-      const items = getLowStockProducts(lowStockModalShowAll ? null : pos);
       if (titleEl) {
-        titleEl.textContent = lowStockModalShowAll
-          ? `All Low Stock Products (${items.length})`
-          : `${(pos || 'store').toUpperCase()} Low Stock (${items.length})`;
+        titleEl.textContent = allCounters ? 'All Low Stock Products' : `Low Stock — ${pos.toUpperCase()}`;
       }
 
+      const listEl = document.getElementById('low-stock-modal-list');
       if (!listEl) return;
+      const items = state.products.filter((p) => (allCounters ? true : p.pos === pos) && isLowStock(p));
       if (!items.length) {
-        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-4 text-center text-xs font-bold text-slate-500">No low stock items found.</div>`;
+        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-5 text-center text-xs font-bold text-slate-500">No low-stock items found.</div>`;
         return;
       }
 
@@ -966,338 +1035,185 @@
         <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3 flex items-center justify-between gap-2">
           <div class="min-w-0">
             <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(p.name)}</p>
-            <p class="text-[11px] font-bold text-amber-800">
-              Stock: <span class="font-black">${Number(p.stock || 0)}</span> • Alert ≤ ${Number(p.lowStockThreshold ?? 5)} • <span class="uppercase">${escapeHtml(p.pos)}</span>
-            </p>
+            <p class="text-[11px] font-bold text-amber-800">Stock: ${p.stock} (Alert ≤ ${p.lowStockThreshold}) • ${formatPeso(p.price)}</p>
           </div>
           <button type="button" onclick="closeLowStockModal(); openEditorModal('${p.pos}', '${p.id}')"
-            class="px-3 py-1.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark text-white text-[11px] font-extrabold shrink-0">
+            class="px-3 py-1.5 rounded-xl bg-brand-purple text-white text-[11px] font-extrabold shrink-0">
             Restock / Edit
           </button>
         </div>
       `).join('');
     }
 
-    // Utang Tracker Functions
-    function setUtangFilter(filter) {
-      selectedUtangFilter = filter;
-      ['unpaid', 'paid', 'all'].forEach((f) => {
-        const btn = document.getElementById(`utang-filter-${f}`);
-        if (!btn) return;
-        btn.className = f === filter
-          ? 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
-          : 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition';
-      });
-      renderUtangTab();
-    }
-
-    function addManualUtang() {
-      const custInp = document.getElementById('utang-customer-input');
-      const noteInp = document.getElementById('utang-note-input');
-      const amtInp = document.getElementById('utang-amount-input');
-      const customer = (custInp?.value || '').trim();
-      const note = (noteInp?.value || '').trim();
-      const amount = parseFloat(amtInp?.value);
-
-      if (!customer) return showToast('Enter customer name', true);
-      if (Number.isNaN(amount) || amount <= 0) return showToast('Enter valid utang amount', true);
-
-      state.utangs.unshift({
-        id: `utg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        customer,
-        note: note || 'Utang item',
-        amount,
-        paid: false,
-        createdAt: new Date().toISOString()
-      });
-
-      if (custInp) custInp.value = '';
-      if (noteInp) noteInp.value = '';
-      if (amtInp) amtInp.value = '';
-
-      saveState();
-      renderUtangTab();
-      showToast(`Added utang for ${customer}`);
-    }
-
-    function toggleUtangPaid(utangId) {
-      const u = state.utangs.find((item) => item.id === utangId);
-      if (!u) return;
-      u.paid = !u.paid;
-      u.paidAt = u.paid ? new Date().toISOString() : null;
-      saveState();
-      renderUtangTab();
-      showToast(u.paid ? `Marked ${u.customer} as Paid` : `Marked ${u.customer} as Unpaid`);
-    }
-
-    function deleteUtang(utangId) {
-      state.utangs = state.utangs.filter((item) => item.id !== utangId);
-      saveState();
-      renderUtangTab();
-      showToast('Utang record deleted');
-    }
-
-    function renderUtangTab() {
-      let unpaidSum = 0;
-      let paidSum = 0;
-      let unpaidCount = 0;
-
-      for (const u of state.utangs) {
-        const amt = Number(u.amount) || 0;
-        if (u.paid) {
-          paidSum += amt;
-        } else {
-          unpaidSum += amt;
-          unpaidCount += 1;
-        }
-      }
-
-      const unpaidEl = document.getElementById('utang-unpaid-banner');
-      const paidEl = document.getElementById('utang-paid-banner');
-      const countEl = document.getElementById('utang-count-banner');
-      if (unpaidEl) unpaidEl.textContent = formatPeso(unpaidSum);
-      if (paidEl) paidEl.textContent = formatPeso(paidSum);
-      if (countEl) countEl.textContent = String(unpaidCount);
-
-      const searchVal = (document.getElementById('utang-search')?.value || '').trim().toLowerCase();
-      const listEl = document.getElementById('utang-list');
-      if (!listEl) return;
-
-      const filtered = state.utangs.filter((u) => {
-        if (selectedUtangFilter === 'unpaid' && u.paid) return false;
-        if (selectedUtangFilter === 'paid' && !u.paid) return false;
-        if (!searchVal) return true;
-        return (u.customer || '').toLowerCase().includes(searchVal)
-          || (u.note || '').toLowerCase().includes(searchVal);
-      });
-
-      if (!filtered.length) {
-        listEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No utang records match.</div>`;
-        return;
-      }
-
-      listEl.innerHTML = filtered.map((u) => {
-        const dt = new Date(u.createdAt || Date.now()).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
-        return `
-          <div class="bg-white rounded-2xl p-3.5 shadow-card border ${u.paid ? 'border-emerald-200/80 bg-emerald-50/20' : 'border-amber-200/80'} flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(u.customer)}</p>
-                <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                  u.paid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                }">${u.paid ? 'Paid' : 'Unpaid'}</span>
-              </div>
-              <p class="text-[11px] font-semibold text-slate-600 truncate mt-0.5">${escapeHtml(u.note || 'Utang')}</p>
-              <p class="text-[10px] font-semibold text-slate-400 mt-0.5">${dt}</p>
-            </div>
-            <div class="text-right shrink-0 space-y-1.5">
-              <p class="text-sm font-black ${u.paid ? 'text-emerald-700 line-through' : 'text-amber-700'}">${formatPeso(u.amount)}</p>
-              <div class="flex items-center justify-end gap-1">
-                <button type="button" onclick="toggleUtangPaid('${u.id}')"
-                  class="px-2.5 py-1 rounded-xl ${
-                    u.paid ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  } text-[10px] font-extrabold">
-                  ${u.paid ? 'Undo' : 'Mark Paid'}
-                </button>
-                <button type="button" onclick="deleteUtang('${u.id}')"
-                  class="px-2 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-extrabold">
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Product Catalog Rendering
-    function selectStoreCategory(cat) {
-      selectedStoreCategory = cat || 'All';
-      renderStoreCatalog();
-    }
-
     function renderProductCard(p) {
-      const stock = Number(p.stock || 0);
       const low = isLowStock(p);
-      const out = stock <= 0;
-      const imgSrc = p.image || `https://placehold.co/300x200/ede9fe/5b21b6?text=${encodeURIComponent(p.name || 'Item')}`;
+      const out = (Number(p.stock) || 0) <= 0;
+      const imgHtml = p.image
+        ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null;this.src='https://placehold.co/300x200/f1f5f9/475569?text=${encodeURIComponent(p.name.slice(0, 12))}'" class="w-full h-24 object-contain rounded-2xl bg-slate-100 p-1" />`
+        : `<div class="w-full h-24 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs px-2 text-center">${escapeHtml(p.category)}</div>`;
+
       return `
-        <div class="bg-white rounded-3xl p-2.5 shadow-card border ${out ? 'border-rose-200' : low ? 'border-amber-300' : 'border-slate-100'} flex flex-col justify-between gap-2">
-          <div>
-            <div class="relative rounded-2xl overflow-hidden bg-slate-100 aspect-[4/3] cursor-pointer" onclick="openProductDetail('${p.id}')">
-              <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.name)}" onerror="this.src='https://placehold.co/300x200/ede9fe/5b21b6?text=Item'" class="w-full h-full object-cover" />
-              <span class="absolute top-1.5 left-1.5 text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                out ? 'bg-rose-600 text-white' : low ? 'bg-amber-400 text-slate-950' : 'bg-slate-900/75 text-white'
-              }">
-                ${out ? 'Out' : low ? `Low: ${stock}` : `${stock} left`}
-              </span>
-              <button type="button" onclick="event.stopPropagation(); openEditorModal('${p.pos}', '${p.id}')" title="Edit Product"
-                class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-800 shadow-xs flex items-center justify-center text-xs font-black">
-                ✎
+        <div class="bg-white rounded-3xl p-3 shadow-card border ${low ? 'border-amber-300 bg-amber-50/20' : 'border-slate-100'} flex flex-col justify-between gap-2">
+          <div class="space-y-1.5">
+            <div class="relative">
+              <div onclick="openProductDetail('${p.id}')" class="cursor-pointer">${imgHtml}</div>
+              <button type="button" onclick="event.stopPropagation(); openEditorModal('${p.pos}', '${p.id}')"
+                class="absolute top-1.5 right-1.5 px-2 py-1 rounded-lg bg-white/95 hover:bg-white text-slate-800 text-[10px] font-black shadow-xs border border-slate-200/80">
+                Edit
               </button>
             </div>
-            <p class="text-xs font-black text-slate-900 mt-2 line-clamp-2 leading-snug cursor-pointer" onclick="openProductDetail('${p.id}')">${escapeHtml(p.name)}</p>
-            <p class="text-[10px] font-semibold text-slate-400 truncate">${escapeHtml(p.category || 'General')}</p>
+            <div onclick="openProductDetail('${p.id}')" class="cursor-pointer">
+              <p class="text-xs font-black text-slate-900 line-clamp-2 leading-snug">${escapeHtml(p.name)}</p>
+              <div class="flex items-center justify-between gap-1 mt-1">
+                <span class="text-sm font-black text-brand-purple">${formatPeso(p.price)}</span>
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                  out ? 'bg-rose-100 text-rose-700' : low ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+                }">${out ? 'Out' : `Stock: ${p.stock}`}</span>
+              </div>
+            </div>
           </div>
-
-          <div class="flex items-center justify-between gap-1.5 pt-1">
-            <span class="text-sm font-black text-brand-purple">${formatPeso(p.price)}</span>
-            <button type="button" ${out ? 'disabled' : ''} onclick="addToCart('${p.id}', 1)"
-              class="px-2.5 py-1.5 rounded-xl text-[11px] font-black transition ${
-                out
-                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                  : 'bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white shadow-xs'
-              }">
-              ${out ? 'Sold Out' : '+ Add'}
-            </button>
-          </div>
+          <button type="button" ${out ? 'disabled' : ''} onclick="addToCart('${p.id}')"
+            class="w-full py-2 rounded-2xl text-xs font-black transition ${
+              out
+                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                : 'bg-brand-dark hover:bg-slate-800 active:scale-98 text-white'
+            }">
+            ${out ? 'Out of Stock' : '+ Add to Cart'}
+          </button>
         </div>
       `;
     }
 
+    function selectCategory(cat) {
+      selectedStoreCategory = cat;
+      renderStoreCatalog();
+    }
+
     function renderStoreCatalog() {
       renderLowStockBanner('store');
-      const catEl = document.getElementById('store-categories');
-      const gridEl = document.getElementById('store-grid');
-      const searchVal = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
-      const storeItems = state.products.filter((p) => p.pos === 'store');
+      const items = state.products.filter((p) => p.pos === 'store');
+      const cats = ['All', ...Array.from(new Set(items.map((p) => p.category).filter(Boolean)))];
+      if (!cats.includes(selectedStoreCategory)) selectedStoreCategory = 'All';
 
-      if (catEl) {
-        const cats = ['All', ...Array.from(new Set(storeItems.map((p) => p.category).filter(Boolean)))];
-        if (!cats.includes(selectedStoreCategory)) selectedStoreCategory = 'All';
-        catEl.innerHTML = cats.map((c) => `
-          <button type="button" onclick="selectStoreCategory('${escapeHtml(c)}')"
+      const catBar = document.getElementById('store-categories');
+      if (catBar) {
+        catBar.innerHTML = cats.map((c) => `
+          <button type="button" onclick="selectCategory('${escapeHtml(c).replace(/'/g, "\\'")}')"
             class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
               selectedStoreCategory === c
-                ? 'bg-brand-purple text-white shadow-xs'
-                : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
+                ? 'bg-brand-purple text-white'
+                : 'bg-white text-slate-600 border border-slate-200'
             }">
             ${escapeHtml(c)}
           </button>
         `).join('');
       }
 
-      if (!gridEl) return;
-      const filtered = storeItems.filter((p) => {
+      const q = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
+      const filtered = items.filter((p) => {
         const matchCat = selectedStoreCategory === 'All' || p.category === selectedStoreCategory;
-        const matchSearch = !searchVal
-          || (p.name || '').toLowerCase().includes(searchVal)
-          || (p.category || '').toLowerCase().includes(searchVal);
-        return matchCat && matchSearch;
+        const matchQ = !q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+        return matchCat && matchQ;
       });
 
-      gridEl.innerHTML = filtered.length
-        ? filtered.map(renderProductCard).join('')
-        : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No store products found.</div>`;
+      const grid = document.getElementById('store-grid');
+      if (grid) {
+        grid.innerHTML = filtered.length
+          ? filtered.map(renderProductCard).join('')
+          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No store items found.</div>`;
+      }
     }
 
     function renderSoftdrinksCatalog() {
       renderLowStockBanner('softdrinks');
-      const gridEl = document.getElementById('softdrinks-grid');
-      if (!gridEl) return;
-      const searchVal = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
-      const filtered = state.products.filter((p) => {
-        if (p.pos !== 'softdrinks') return false;
-        return !searchVal || (p.name || '').toLowerCase().includes(searchVal) || (p.category || '').toLowerCase().includes(searchVal);
-      });
-      gridEl.innerHTML = filtered.length
-        ? filtered.map(renderProductCard).join('')
-        : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No softdrinks found.</div>`;
+      const q = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
+      const filtered = state.products.filter((p) => p.pos === 'softdrinks' && (!q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)));
+      const grid = document.getElementById('softdrinks-grid');
+      if (grid) {
+        grid.innerHTML = filtered.length
+          ? filtered.map(renderProductCard).join('')
+          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No softdrinks found.</div>`;
+      }
     }
 
     function renderCigarettesCatalog() {
       renderLowStockBanner('cigarettes');
-      const gridEl = document.getElementById('cigarettes-grid');
-      if (!gridEl) return;
-      const searchVal = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
-      const filtered = state.products.filter((p) => {
-        if (p.pos !== 'cigarettes') return false;
-        return !searchVal || (p.name || '').toLowerCase().includes(searchVal) || (p.category || '').toLowerCase().includes(searchVal);
-      });
-      gridEl.innerHTML = filtered.length
-        ? filtered.map(renderProductCard).join('')
-        : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No cigarettes/yosi items found.</div>`;
+      const q = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
+      const filtered = state.products.filter((p) => p.pos === 'cigarettes' && (!q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)));
+      const grid = document.getElementById('cigarettes-grid');
+      if (grid) {
+        grid.innerHTML = filtered.length
+          ? filtered.map(renderProductCard).join('')
+          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No cigarettes/yosi items found.</div>`;
+      }
     }
 
-    // Product Detail & Editor Modals
-    function openProductDetail(productId) {
-      const p = state.products.find((item) => item.id === productId);
+    function openProductDetail(prodId) {
+      const p = state.products.find((item) => item.id === prodId);
+      if (!p) return;
       const modal = document.getElementById('detail-modal');
-      const content = document.getElementById('detail-content');
-      if (!p || !modal || !content) return;
-
-      const stock = Number(p.stock || 0);
-      const profitPerUnit = Math.max(0, (Number(p.price) || 0) - (Number(p.cost) || 0));
-      const imgSrc = p.image || `https://placehold.co/400x240/ede9fe/5b21b6?text=${encodeURIComponent(p.name)}`;
-
-      content.innerHTML = `
-        <div class="flex items-center justify-between gap-2">
-          <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-purple-100 text-brand-purple">${escapeHtml(p.pos)} • ${escapeHtml(p.category || 'Item')}</span>
-          <button type="button" onclick="closeProductDetail()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
+      const box = document.getElementById('detail-content');
+      if (!modal || !box) return;
+      const profitPerUnit = (Number(p.price) || 0) - (Number(p.cost) || 0);
+      box.innerHTML = `
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-purple-100 text-brand-purple">${escapeHtml(p.pos)} • ${escapeHtml(p.category)}</span>
+            <h3 class="text-base font-black text-slate-900 mt-1">${escapeHtml(p.name)}</h3>
+          </div>
+          <button type="button" onclick="closeDetailModal()" class="text-xs font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">Close</button>
         </div>
-        <div class="rounded-2xl overflow-hidden bg-slate-100 aspect-video">
-          <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.name)}" onerror="this.src='https://placehold.co/400x240/ede9fe/5b21b6?text=Item'" class="w-full h-full object-cover" />
-        </div>
-        <div>
-          <h3 class="text-lg font-black text-slate-900">${escapeHtml(p.name)}</h3>
-          <div class="flex items-center gap-3 mt-1 text-xs font-bold text-slate-600 flex-wrap">
-            <span class="text-brand-purple font-black text-base">${formatPeso(p.price)}</span>
-            <span>Cost: ${formatPeso(p.cost)}</span>
-            <span class="text-emerald-700">Kita/unit: ${formatPeso(profitPerUnit)}</span>
-            <span>Stock: <strong>${stock}</strong> (Alert ≤${p.lowStockThreshold ?? 5})</span>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-slate-50 rounded-2xl p-2.5">
+            <p class="text-[10px] font-bold text-slate-500">Price</p>
+            <p class="text-sm font-black text-brand-purple">${formatPeso(p.price)}</p>
+          </div>
+          <div class="bg-slate-50 rounded-2xl p-2.5">
+            <p class="text-[10px] font-bold text-slate-500">Cost / Kita</p>
+            <p class="text-sm font-black text-emerald-700">${formatPeso(p.cost)} / ${formatPeso(profitPerUnit)}</p>
+          </div>
+          <div class="bg-slate-50 rounded-2xl p-2.5">
+            <p class="text-[10px] font-bold text-slate-500">Stock (Alert ≤${p.lowStockThreshold})</p>
+            <p class="text-sm font-black text-slate-900">${p.stock}</p>
           </div>
         </div>
         <div class="flex items-center gap-2 pt-1">
-          <button type="button" onclick="closeProductDetail(); openEditorModal('${p.pos}', '${p.id}')"
+          <button type="button" onclick="closeDetailModal(); openEditorModal('${p.pos}', '${p.id}')"
             class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold">
-            Edit
+            Edit Product
           </button>
-          <button type="button" ${stock <= 0 ? 'disabled' : ''} onclick="addToCart('${p.id}', 1); closeProductDetail();"
-            class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark disabled:bg-slate-300 text-white text-sm font-black shadow-sm">
-            ${stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+          <button type="button" ${p.stock <= 0 ? 'disabled' : ''} onclick="addToCart('${p.id}'); closeDetailModal()"
+            class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark disabled:bg-slate-200 text-white text-sm font-black">
+            ${p.stock <= 0 ? 'Out of Stock' : '+ Add to Cart'}
           </button>
         </div>
       `;
       modal.classList.remove('hidden');
     }
 
-    function closeProductDetail() {
+    function closeDetailModal() {
       document.getElementById('detail-modal')?.classList.add('hidden');
     }
 
-    function openEditorModal(defaultPos = 'store', productId = null) {
+    function openEditorModal(defaultPos = 'store', prodId = null) {
       const modal = document.getElementById('editor-modal');
       const titleEl = document.getElementById('editor-title');
-      const deleteBtn = document.getElementById('editor-delete-btn');
+      const delBtn = document.getElementById('editor-delete-btn');
       if (!modal) return;
 
-      if (productId) {
-        const p = state.products.find((item) => item.id === productId);
-        if (!p) return;
-        if (titleEl) titleEl.textContent = 'Edit Product';
-        document.getElementById('editor-id').value = p.id;
-        document.getElementById('editor-pos').value = p.pos || defaultPos;
-        document.getElementById('editor-name').value = p.name || '';
-        document.getElementById('editor-category').value = p.category || '';
-        document.getElementById('editor-price').value = p.price ?? 0;
-        document.getElementById('editor-cost').value = p.cost ?? 0;
-        document.getElementById('editor-stock').value = p.stock ?? 0;
-        document.getElementById('editor-low-stock').value = p.lowStockThreshold ?? 5;
-        document.getElementById('editor-image').value = p.image || '';
-        if (deleteBtn) deleteBtn.classList.remove('hidden');
-      } else {
-        if (titleEl) titleEl.textContent = 'Add Product';
-        document.getElementById('editor-id').value = '';
-        document.getElementById('editor-pos').value = defaultPos || 'store';
-        document.getElementById('editor-name').value = '';
-        document.getElementById('editor-category').value = defaultPos === 'softdrinks' ? 'Softdrinks' : defaultPos === 'cigarettes' ? 'Sticks' : 'Pantry';
-        document.getElementById('editor-price').value = '';
-        document.getElementById('editor-cost').value = '';
-        document.getElementById('editor-stock').value = '';
-        document.getElementById('editor-low-stock').value = '5';
-        document.getElementById('editor-image').value = '';
-        if (deleteBtn) deleteBtn.classList.add('hidden');
-      }
+      const existing = prodId ? state.products.find((p) => p.id === prodId) : null;
+      document.getElementById('editor-id').value = existing ? existing.id : '';
+      document.getElementById('editor-pos').value = existing ? existing.pos : (defaultPos || 'store');
+      document.getElementById('editor-name').value = existing ? existing.name : '';
+      document.getElementById('editor-category').value = existing ? existing.category : (defaultPos === 'softdrinks' ? 'Drinks' : defaultPos === 'cigarettes' ? 'Sticks' : 'General');
+      document.getElementById('editor-price').value = existing ? existing.price : '';
+      document.getElementById('editor-cost').value = existing ? existing.cost : '';
+      document.getElementById('editor-stock').value = existing ? existing.stock : '10';
+      document.getElementById('editor-low-stock').value = existing ? (existing.lowStockThreshold ?? 5) : '5';
+      document.getElementById('editor-image').value = existing ? (existing.image || '') : '';
+
+      if (titleEl) titleEl.textContent = existing ? 'Edit Product' : 'Add Product';
+      if (delBtn) delBtn.classList.toggle('hidden', !existing);
 
       modal.classList.remove('hidden');
       setTimeout(() => document.getElementById('editor-name')?.focus(), 40);
@@ -1307,177 +1223,134 @@
       document.getElementById('editor-modal')?.classList.add('hidden');
     }
 
-    function saveProductFromForm(event) {
-      event.preventDefault();
-      try {
-        const id = (document.getElementById('editor-id')?.value || '').trim();
-        const pos = document.getElementById('editor-pos')?.value || 'store';
-        const name = (document.getElementById('editor-name')?.value || '').trim();
-        const category = (document.getElementById('editor-category')?.value || '').trim() || 'General';
-        const price = Math.max(0, parseFloat(document.getElementById('editor-price')?.value) || 0);
-        const cost = Math.max(0, parseFloat(document.getElementById('editor-cost')?.value) || 0);
-        const stock = Math.max(0, parseInt(document.getElementById('editor-stock')?.value, 10) || 0);
-        const lowStockThreshold = Math.max(0, parseInt(document.getElementById('editor-low-stock')?.value, 10) || 0);
-        const image = (document.getElementById('editor-image')?.value || '').trim();
+    function saveProductFromForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('editor-id').value.trim();
+      const pos = document.getElementById('editor-pos').value || 'store';
+      const name = document.getElementById('editor-name').value.trim();
+      const category = document.getElementById('editor-category').value.trim() || 'General';
+      const price = Math.max(0, parseFloat(document.getElementById('editor-price').value) || 0);
+      const cost = Math.max(0, parseFloat(document.getElementById('editor-cost').value) || 0);
+      const stock = Math.max(0, parseInt(document.getElementById('editor-stock').value, 10) || 0);
+      const lowStockThreshold = Math.max(0, parseInt(document.getElementById('editor-low-stock').value, 10) || 0);
+      const image = document.getElementById('editor-image').value.trim();
 
-        if (!name) return showToast('Enter product name', true);
+      if (!name) return showToast('Enter product name', true);
 
-        if (id) {
-          const idx = state.products.findIndex((p) => p.id === id);
-          if (idx > -1) {
-            state.products[idx] = {
-              ...state.products[idx],
-              pos,
-              name,
-              category,
-              price,
-              cost,
-              stock,
-              lowStockThreshold,
-              image
-            };
-            showToast('Product updated');
-          }
-        } else {
-          state.products.unshift({
-            id: `p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-            pos,
-            name,
-            category,
-            price,
-            cost,
-            stock,
-            lowStockThreshold,
-            image
-          });
-          showToast('Product added');
+      if (id) {
+        const prod = state.products.find((p) => p.id === id);
+        if (prod) {
+          prod.pos = pos;
+          prod.name = name;
+          prod.category = category;
+          prod.price = price;
+          prod.cost = cost;
+          prod.stock = stock;
+          prod.lowStockThreshold = lowStockThreshold;
+          prod.image = image;
         }
-
-        saveState();
-        closeEditorModal();
-        renderAll();
-      } catch (err) {
-        console.error('Save product error:', err);
-        showToast('Failed to save product', true);
+        showToast('Product updated');
+      } else {
+        state.products.unshift({
+          id: `prod-${Date.now()}`,
+          pos,
+          name,
+          category,
+          price,
+          cost,
+          stock,
+          lowStockThreshold,
+          image
+        });
+        showToast('Product added');
       }
+
+      saveState();
+      closeEditorModal();
+      renderAll();
     }
 
     function deleteProductFromEditor() {
-      const id = (document.getElementById('editor-id')?.value || '').trim();
+      const id = document.getElementById('editor-id').value.trim();
       if (!id) return;
+      const prod = state.products.find((p) => p.id === id);
+      if (!prod) return;
+
       state.products = state.products.filter((p) => p.id !== id);
-      for (const k of ['store', 'softdrinks', 'cigarettes']) {
-        state.carts[k] = (state.carts[k] || []).filter((c) => c.productId !== id);
+      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
+        state.carts[pos] = (state.carts[pos] || []).filter((item) => item.productId !== id);
       }
       saveState();
       closeEditorModal();
       renderAll();
-      showToast('Product deleted');
+      showToast(`Deleted "${prod.name}"`);
     }
 
     // Cart & Checkout
-    function getActiveCartPos() {
-      if (['store', 'softdrinks', 'cigarettes'].includes(currentTab)) return currentTab;
-      return activeCartPos || 'store';
-    }
-
-    function addToCart(productId, qty = 1) {
-      const p = state.products.find((item) => item.id === productId);
+    function addToCart(prodId) {
+      const p = state.products.find((item) => item.id === prodId);
       if (!p) return;
-      const pos = ['store', 'softdrinks', 'cigarettes'].includes(p.pos) ? p.pos : 'store';
-      activeCartPos = pos;
-      const cart = state.carts[pos] || [];
-      const existing = cart.find((c) => c.productId === productId);
+      const cart = state.carts[p.pos] || (state.carts[p.pos] = []);
+      const existing = cart.find((c) => c.productId === p.id);
       const currentQty = existing ? existing.qty : 0;
-      const maxStock = Number(p.stock || 0);
-
-      if (currentQty + qty > maxStock) {
-        return showToast(`Only ${maxStock} left in stock`, true);
+      if (currentQty + 1 > p.stock) {
+        return showToast(`Only ${p.stock} left in stock`, true);
       }
-
       if (existing) {
-        existing.qty += qty;
+        existing.qty += 1;
+        existing.price = p.price;
+        existing.cost = p.cost;
       } else {
-        cart.push({ productId, qty });
+        cart.push({
+          productId: p.id,
+          name: p.name,
+          price: p.price,
+          cost: p.cost,
+          qty: 1
+        });
       }
-      state.carts[pos] = cart;
       saveState();
       updateCartBar();
       showToast(`Added ${p.name}`);
     }
 
-    function updateCartQty(pos, productId, delta) {
-      const cart = state.carts[pos] || [];
-      const idx = cart.findIndex((c) => c.productId === productId);
-      if (idx === -1) return;
-      const p = state.products.find((item) => item.id === productId);
-      const nextQty = cart[idx].qty + delta;
-      if (nextQty <= 0) {
-        cart.splice(idx, 1);
-      } else if (p && nextQty > Number(p.stock || 0)) {
-        return showToast(`Max stock is ${p.stock}`, true);
-      } else {
-        cart[idx].qty = nextQty;
-      }
-      state.carts[pos] = cart;
-      saveState();
-      updateCartBar();
-      renderCartModalItems(pos);
-    }
-
-    function clearCurrentCart() {
-      const pos = activeCartPos || getActiveCartPos();
-      state.carts[pos] = [];
-      saveState();
-      updateCartBar();
-      renderCartModalItems(pos);
-    }
-
-    function updateCartBar() {
-      const bar = document.getElementById('floating-cart-bar');
-      const badgeCount = document.getElementById('cart-badge-count');
-      const badgeTotal = document.getElementById('cart-badge-total');
-      if (!bar || !badgeCount || !badgeTotal) return;
-
-      const pos = getActiveCartPos();
-      activeCartPos = pos;
-      const cart = state.carts[pos] || [];
-      let count = 0;
-      let total = 0;
-
-      for (const item of cart) {
-        const p = state.products.find((pr) => pr.id === item.productId);
-        if (p) {
-          count += item.qty;
-          total += (Number(p.price) || 0) * item.qty;
-        }
-      }
-
-      if (!['store', 'softdrinks', 'cigarettes'].includes(currentTab) || count === 0) {
-        bar.classList.add('hidden');
-        return;
-      }
-
-      badgeCount.textContent = String(count);
-      badgeTotal.textContent = formatPeso(total);
-      bar.classList.remove('hidden');
-    }
-
     function openCartDrawer(pos = 'store') {
-      activeCartPos = ['store', 'softdrinks', 'cigarettes'].includes(pos) ? pos : 'store';
-      const modal = document.getElementById('cart-modal');
-      const title = document.getElementById('cart-modal-title');
-      if (title) title.textContent = `${activeCartPos.toUpperCase()} Cart & Checkout`;
-      document.getElementById('cart-payment-method').value = 'Cash';
-      document.getElementById('cart-cash-tendered').value = '';
-      document.getElementById('cart-utang-customer').value = '';
-      toggleCartUtangCustomer();
-      renderCartModalItems(activeCartPos);
-      if (modal) modal.classList.remove('hidden');
+      const targetPos = ['store', 'softdrinks', 'cigarettes'].includes(pos) ? pos : getActiveCartPos();
+      currentTab = targetPos;
+      renderCartModal(targetPos);
+      document.getElementById('cart-modal')?.classList.remove('hidden');
     }
 
     function closeCartDrawer() {
       document.getElementById('cart-modal')?.classList.add('hidden');
+    }
+
+    function adjustCartQty(pos, productId, delta) {
+      const cart = state.carts[pos] || [];
+      const item = cart.find((c) => c.productId === productId);
+      const prod = state.products.find((p) => p.id === productId);
+      if (!item) return;
+      const nextQty = item.qty + delta;
+      if (nextQty <= 0) {
+        state.carts[pos] = cart.filter((c) => c.productId !== productId);
+      } else {
+        if (prod && nextQty > prod.stock) {
+          return showToast(`Max stock is ${prod.stock}`, true);
+        }
+        item.qty = nextQty;
+      }
+      saveState();
+      renderCartModal(pos);
+      updateCartBar();
+    }
+
+    function clearCurrentCart() {
+      const pos = getActiveCartPos();
+      state.carts[pos] = [];
+      saveState();
+      renderCartModal(pos);
+      updateCartBar();
+      showToast('Cart cleared');
     }
 
     function toggleCartUtangCustomer() {
@@ -1487,211 +1360,207 @@
       updateCartChangePreview();
     }
 
-    function getCartSubtotal(pos) {
-      const cart = state.carts[pos] || [];
-      let total = 0;
-      let profit = 0;
-      const details = [];
-      for (const item of cart) {
-        const p = state.products.find((pr) => pr.id === item.productId);
-        if (p) {
-          const lineAmt = (Number(p.price) || 0) * item.qty;
-          const lineCost = (Number(p.cost) || 0) * item.qty;
-          total += lineAmt;
-          profit += Math.max(0, lineAmt - lineCost);
-          details.push({ productId: p.id, name: p.name, qty: item.qty, price: Number(p.price) || 0, cost: Number(p.cost) || 0 });
-        }
-      }
-      return { total, profit, details };
-    }
-
     function updateCartChangePreview() {
+      const pos = getActiveCartPos();
+      const cart = state.carts[pos] || [];
+      const total = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
+      const method = document.getElementById('cart-payment-method')?.value || 'Cash';
+      const tenderedRaw = document.getElementById('cart-cash-tendered')?.value;
       const preview = document.getElementById('cart-change-preview');
-      const method = document.getElementById('cart-payment-method')?.value;
-      const tendered = parseFloat(document.getElementById('cart-cash-tendered')?.value);
-      const { total } = getCartSubtotal(activeCartPos);
       if (!preview) return;
-      if (method === 'Cash' && !Number.isNaN(tendered) && tendered >= total && total > 0) {
-        preview.textContent = `Change: ${formatPeso(tendered - total)}`;
-      } else {
+
+      if (method !== 'Cash' || tenderedRaw === '') {
         preview.textContent = '';
+        return;
       }
+      const tendered = parseFloat(tenderedRaw) || 0;
+      const change = tendered - total;
+      preview.textContent = change >= 0 ? `Change / Sukli: ${formatPeso(change)}` : `Kulang pa: ${formatPeso(Math.abs(change))}`;
     }
 
-    function renderCartModalItems(pos) {
+    function renderCartModal(pos = 'store') {
+      const cart = state.carts[pos] || [];
       const listEl = document.getElementById('cart-items-list');
       const totalEl = document.getElementById('cart-summary-total');
-      const cart = state.carts[pos] || [];
-      const { total } = getCartSubtotal(pos);
-      if (totalEl) totalEl.textContent = formatPeso(total);
-      updateCartChangePreview();
-      if (!listEl) return;
+      const titleEl = document.getElementById('cart-modal-title');
+      if (titleEl) titleEl.textContent = `${pos.toUpperCase()} Cart & Checkout`;
 
+      const total = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
+      if (totalEl) totalEl.textContent = formatPeso(total);
+
+      if (!listEl) return;
       if (!cart.length) {
         listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-4 text-center text-xs font-bold text-slate-500">Cart is empty.</div>`;
+        updateCartChangePreview();
         return;
       }
 
-      listEl.innerHTML = cart.map((item) => {
-        const p = state.products.find((pr) => pr.id === item.productId);
-        if (!p) return '';
-        const lineTotal = (Number(p.price) || 0) * item.qty;
-        return `
-          <div class="bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-2">
-            <div class="min-w-0">
-              <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(p.name)}</p>
-              <p class="text-[11px] font-bold text-slate-500">${formatPeso(p.price)} × ${item.qty} = <span class="text-brand-purple font-black">${formatPeso(lineTotal)}</span></p>
-            </div>
-            <div class="flex items-center gap-1.5 shrink-0">
-              <button type="button" onclick="updateCartQty('${pos}', '${p.id}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-slate-700">-</button>
-              <span class="text-xs font-black w-5 text-center">${item.qty}</span>
-              <button type="button" onclick="updateCartQty('${pos}', '${p.id}', 1)" class="w-7 h-7 rounded-xl bg-brand-purple text-white font-black">+</button>
-            </div>
+      listEl.innerHTML = cart.map((item) => `
+        <div class="bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(item.name)}</p>
+            <p class="text-[11px] font-bold text-slate-500">${formatPeso(item.price)} each</p>
           </div>
-        `;
-      }).join('');
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="adjustCartQty('${pos}', '${item.productId}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">-</button>
+            <span class="text-xs font-black w-6 text-center">${item.qty}</span>
+            <button type="button" onclick="adjustCartQty('${pos}', '${item.productId}', 1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">+</button>
+          </div>
+        </div>
+      `).join('');
+
+      toggleCartUtangCustomer();
     }
 
     function completeCartCheckout() {
-      try {
-        const pos = activeCartPos || getActiveCartPos();
-        const { total, profit, details } = getCartSubtotal(pos);
-        if (!details.length || total <= 0) return showToast('Cart is empty', true);
+      const pos = getActiveCartPos();
+      const cart = state.carts[pos] || [];
+      if (!cart.length) return showToast('Cart is empty', true);
 
-        const paymentMethod = document.getElementById('cart-payment-method')?.value || 'Cash';
-        const customerName = (document.getElementById('cart-utang-customer')?.value || '').trim();
+      let totalAmount = 0;
+      let totalProfit = 0;
+      const lowAlertNames = [];
 
-        if (paymentMethod === 'Utang' && !customerName) {
-          return showToast('Enter customer name for Utang', true);
-        }
+      for (const item of cart) {
+        const prod = state.products.find((p) => p.id === item.productId);
+        const qty = Number(item.qty) || 0;
+        const price = Number(item.price) || 0;
+        const cost = prod ? (Number(prod.cost) || 0) : (Number(item.cost) || 0);
 
-        const lowAlerts = [];
-        for (const d of details) {
-          const prod = state.products.find((pr) => pr.id === d.productId);
-          if (prod) {
-            prod.stock = Math.max(0, (Number(prod.stock) || 0) - d.qty);
-            if (isLowStock(prod)) lowAlerts.push(`${prod.name} (${prod.stock})`);
+        if (prod) {
+          if (qty > prod.stock) {
+            return showToast(`Insufficient stock for ${prod.name}`, true);
+          }
+          prod.stock = Math.max(0, (Number(prod.stock) || 0) - qty);
+          if (isLowStock(prod)) {
+            lowAlertNames.push(`${prod.name} (${prod.stock})`);
           }
         }
+        totalAmount += price * qty;
+        totalProfit += (price - cost) * qty;
+      }
 
-        const titleSummary = details.map((d) => `${d.name} x${d.qty}`).join(', ');
-        state.transactions.unshift({
-          id: `tx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          kind: 'sale',
-          pos,
-          title: titleSummary,
-          amount: total,
-          profit,
-          paymentMethod,
-          customerName: paymentMethod === 'Utang' ? customerName : '',
-          voided: false,
-          createdAt: new Date().toISOString(),
-          items: details
+      const method = document.getElementById('cart-payment-method')?.value || 'Cash';
+      const utangCustomer = (document.getElementById('cart-utang-customer')?.value || '').trim();
+      if (method === 'Utang' && !utangCustomer) {
+        return showToast('Enter customer name for Utang', true);
+      }
+
+      const title = cart.map((i) => `${i.name} x${i.qty}`).join(', ');
+      const txId = `tx-${Date.now()}`;
+
+      state.transactions.unshift({
+        id: txId,
+        kind: 'sale',
+        pos,
+        title,
+        amount: totalAmount,
+        profit: totalProfit,
+        paymentMethod: method,
+        customerName: method === 'Utang' ? utangCustomer : '',
+        voided: false,
+        createdAt: new Date().toISOString(),
+        items: cart.map((i) => ({ productId: i.productId, name: i.name, qty: i.qty, price: i.price }))
+      });
+
+      if (method === 'Utang') {
+        state.utangRecords.unshift({
+          id: `ut-${Date.now()}`,
+          txId,
+          customerName: utangCustomer,
+          note: title,
+          amount: totalAmount,
+          paid: false,
+          createdAt: new Date().toISOString()
         });
+      }
 
-        if (paymentMethod === 'Utang') {
-          state.utangs.unshift({
-            id: `utg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-            customer: customerName,
-            note: titleSummary,
-            amount: total,
-            paid: false,
-            createdAt: new Date().toISOString()
-          });
-        }
+      state.carts[pos] = [];
+      const tenderedEl = document.getElementById('cart-cash-tendered');
+      const custEl = document.getElementById('cart-utang-customer');
+      if (tenderedEl) tenderedEl.value = '';
+      if (custEl) custEl.value = '';
 
-        state.carts[pos] = [];
-        saveState();
-        closeCartDrawer();
-        renderAll();
+      saveState();
+      closeCartDrawer();
+      renderAll();
 
-        if (lowAlerts.length) {
-          showToast(`Sale complete! Low stock: ${lowAlerts.join(', ')}`, true);
-        } else {
-          showToast(`Sale complete (${formatPeso(total)})`);
-        }
-      } catch (err) {
-        console.error('Checkout error:', err);
-        showToast('Checkout failed', true);
+      if (lowAlertNames.length) {
+        showToast(`Sale saved! Low stock: ${lowAlertNames.join(', ')}`);
+      } else {
+        showToast(`Sale completed (${formatPeso(totalAmount)})`);
       }
     }
 
     // GCash & E-Load
     function setGcashType(type) {
-      currentGcashType = type;
-      ['cash_in', 'cash_out', 'eload'].forEach((t) => {
+      activeGcashType = type;
+      for (const t of ['cash_in', 'cash_out', 'eload']) {
         const btn = document.getElementById(`gcash-type-${t}`);
-        if (!btn) return;
-        btn.className = t === type
-          ? 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition'
-          : 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
-      });
+        if (btn) {
+          btn.className = t === type
+            ? 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition'
+            : 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
+        }
+      }
       autoSuggestGcashFee();
     }
 
     function setGcashAmount(val) {
-      const inp = document.getElementById('gcash-amount');
-      if (inp) {
-        inp.value = val;
+      const amtEl = document.getElementById('gcash-amount');
+      if (amtEl) {
+        amtEl.value = String(val);
         autoSuggestGcashFee();
       }
     }
 
     function autoSuggestGcashFee() {
       const amt = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
-      const feeInp = document.getElementById('gcash-fee');
-      if (!feeInp || amt <= 0) return;
+      const feeEl = document.getElementById('gcash-fee');
+      if (!feeEl || amt <= 0) return;
       const suggested = Math.max(5, Math.ceil(amt / 500) * 10);
-      feeInp.value = suggested.toFixed(2);
+      feeEl.value = suggested.toFixed(2);
     }
 
     function clearGcashForm() {
-      document.getElementById('gcash-amount').value = '';
-      document.getElementById('gcash-fee').value = '';
-      document.getElementById('gcash-note').value = '';
+      const amtEl = document.getElementById('gcash-amount');
+      const feeEl = document.getElementById('gcash-fee');
+      const noteEl = document.getElementById('gcash-note');
+      if (amtEl) amtEl.value = '';
+      if (feeEl) feeEl.value = '';
+      if (noteEl) noteEl.value = '';
     }
 
     function recordGcashTransaction() {
-      try {
-        const amount = Math.max(0, parseFloat(document.getElementById('gcash-amount')?.value) || 0);
-        const fee = Math.max(0, parseFloat(document.getElementById('gcash-fee')?.value) || 0);
-        const note = (document.getElementById('gcash-note')?.value || '').trim();
-        if (amount <= 0) return showToast('Enter valid GCash / E-Load amount', true);
+      const amount = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
+      const fee = Math.max(0, parseFloat(document.getElementById('gcash-fee')?.value) || 0);
+      const note = (document.getElementById('gcash-note')?.value || '').trim();
+      if (amount <= 0) return showToast('Enter valid GCash amount', true);
 
-        const typeLabels = { cash_in: 'GCash Cash In', cash_out: 'GCash Cash Out', eload: 'E-Load' };
-        const label = `${typeLabels[currentGcashType] || 'GCash'}${note ? ` (${note})` : ''}`;
+      const labelMap = { cash_in: 'GCash Cash In', cash_out: 'GCash Cash Out', eload: 'E-Load' };
+      const title = `${labelMap[activeGcashType] || 'GCash'} ${formatPeso(amount)}${note ? ` (${note})` : ''}`;
 
-        state.transactions.unshift({
-          id: `tx-gc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          kind: 'gcash',
-          pos: 'gcash',
-          title: label,
-          amount,
-          profit: fee,
-          paymentMethod: 'GCash',
-          voided: false,
-          createdAt: new Date().toISOString(),
-          items: []
-        });
+      state.transactions.unshift({
+        id: `tx-gc-${Date.now()}`,
+        kind: 'gcash',
+        pos: 'gcash',
+        title,
+        amount,
+        profit: fee,
+        paymentMethod: 'GCash',
+        voided: false,
+        createdAt: new Date().toISOString(),
+        items: []
+      });
 
-        clearGcashForm();
-        saveState();
-        renderAll();
-        showToast(`Recorded ${label}`);
-      } catch (err) {
-        console.error('GCash error:', err);
-        showToast('Failed to record GCash entry', true);
-      }
+      saveState();
+      clearGcashForm();
+      renderAll();
+      showToast(`GCash recorded (Fee: ${formatPeso(fee)})`);
     }
 
     // Expenses
     function openExpenseModal() {
-      const sel = document.getElementById('expense-counter');
-      if (sel && ['store', 'softdrinks', 'cigarettes', 'gcash'].includes(currentTab)) {
-        sel.value = currentTab;
-      }
-      document.getElementById('expense-desc').value = '';
-      document.getElementById('expense-amount').value = '';
       document.getElementById('expense-modal')?.classList.remove('hidden');
       setTimeout(() => document.getElementById('expense-desc')?.focus(), 40);
     }
@@ -1700,58 +1569,247 @@
       document.getElementById('expense-modal')?.classList.add('hidden');
     }
 
-    function recordExpense(event) {
-      event.preventDefault();
-      try {
-        const pos = document.getElementById('expense-counter')?.value || 'general';
-        const desc = (document.getElementById('expense-desc')?.value || '').trim();
-        const amount = Math.max(0, parseFloat(document.getElementById('expense-amount')?.value) || 0);
-        if (!desc || amount <= 0) return showToast('Enter description and valid amount', true);
+    function recordExpense(e) {
+      e.preventDefault();
+      const counter = document.getElementById('expense-counter')?.value || 'general';
+      const desc = (document.getElementById('expense-desc')?.value || '').trim();
+      const amount = parseFloat(document.getElementById('expense-amount')?.value) || 0;
+      if (!desc || amount <= 0) return showToast('Enter valid expense details', true);
 
-        state.transactions.unshift({
-          id: `tx-exp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          kind: 'expense',
-          pos,
-          title: desc,
-          amount,
-          profit: 0,
-          paymentMethod: 'Cash',
-          voided: false,
-          createdAt: new Date().toISOString(),
-          items: []
-        });
+      state.transactions.unshift({
+        id: `tx-exp-${Date.now()}`,
+        kind: 'expense',
+        pos: counter,
+        title: desc,
+        amount,
+        profit: 0,
+        paymentMethod: 'Cash',
+        voided: false,
+        createdAt: new Date().toISOString(),
+        items: []
+      });
 
-        saveState();
-        closeExpenseModal();
-        renderAll();
-        showToast('Expense recorded');
-      } catch (err) {
-        console.error('Expense error:', err);
-        showToast('Failed to record expense', true);
+      document.getElementById('expense-desc').value = '';
+      document.getElementById('expense-amount').value = '';
+      saveState();
+      closeExpenseModal();
+      renderAll();
+      showToast('Expense recorded');
+    }
+
+    // Utang Tracker
+    function setUtangFilter(filter) {
+      selectedUtangFilter = filter;
+      for (const f of ['unpaid', 'paid', 'all']) {
+        const btn = document.getElementById(`utang-filter-${f}`);
+        if (btn) {
+          btn.className = f === filter
+            ? 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
+            : 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition';
+        }
+      }
+      renderUtangTab();
+    }
+
+    function addManualUtang() {
+      const customerName = (document.getElementById('utang-customer-input')?.value || '').trim();
+      const note = (document.getElementById('utang-note-input')?.value || '').trim();
+      const amount = parseFloat(document.getElementById('utang-amount-input')?.value) || 0;
+      if (!customerName || amount <= 0) return showToast('Enter customer name and amount', true);
+
+      state.utangRecords.unshift({
+        id: `ut-${Date.now()}`,
+        txId: null,
+        customerName,
+        note: note || 'Manual Utang',
+        amount,
+        paid: false,
+        createdAt: new Date().toISOString()
+      });
+
+      document.getElementById('utang-customer-input').value = '';
+      document.getElementById('utang-note-input').value = '';
+      document.getElementById('utang-amount-input').value = '';
+
+      saveState();
+      renderUtangTab();
+      showToast('Utang record added');
+    }
+
+    function toggleUtangPaid(id) {
+      const rec = state.utangRecords.find((u) => u.id === id);
+      if (!rec) return;
+      rec.paid = !rec.paid;
+      saveState();
+      renderUtangTab();
+      showToast(rec.paid ? 'Marked as Paid' : 'Marked as Unpaid');
+    }
+
+    function deleteUtang(id) {
+      state.utangRecords = state.utangRecords.filter((u) => u.id !== id);
+      saveState();
+      renderUtangTab();
+      showToast('Utang record removed');
+    }
+
+    function renderUtangTab() {
+      const activeList = state.utangRecords.filter((u) => {
+        if (!u.txId) return true;
+        const linkedTx = state.transactions.find((t) => t.id === u.txId);
+        return !linkedTx || !linkedTx.voided;
+      });
+
+      const unpaidSum = activeList.filter((u) => !u.paid).reduce((s, u) => s + (Number(u.amount) || 0), 0);
+      const paidSum = activeList.filter((u) => u.paid).reduce((s, u) => s + (Number(u.amount) || 0), 0);
+      const unpaidCount = activeList.filter((u) => !u.paid).length;
+
+      const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+      setTxt('utang-unpaid-banner', formatPeso(unpaidSum));
+      setTxt('utang-paid-banner', formatPeso(paidSum));
+      setTxt('utang-count-banner', String(unpaidCount));
+
+      const q = (document.getElementById('utang-search')?.value || '').trim().toLowerCase();
+      const filtered = activeList.filter((u) => {
+        const matchStatus = selectedUtangFilter === 'all' || (selectedUtangFilter === 'paid' ? u.paid : !u.paid);
+        const matchQ = !q || u.customerName.toLowerCase().includes(q) || (u.note || '').toLowerCase().includes(q);
+        return matchStatus && matchQ;
+      });
+
+      const listEl = document.getElementById('utang-list');
+      if (!listEl) return;
+      if (!filtered.length) {
+        listEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No utang records matching filter.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map((u) => `
+        <div class="bg-white rounded-2xl p-3.5 shadow-card border border-slate-100 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(u.customerName)}</p>
+              <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${
+                u.paid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+              }">${u.paid ? 'PAID' : 'UNPAID'}</span>
+            </div>
+            <p class="text-[11px] font-semibold text-slate-500 truncate mt-0.5">${escapeHtml(u.note || '')}</p>
+          </div>
+          <div class="text-right shrink-0 space-y-1">
+            <p class="text-sm font-black ${u.paid ? 'text-emerald-700' : 'text-amber-700'}">${formatPeso(u.amount)}</p>
+            <div class="flex items-center justify-end gap-2">
+              <button type="button" onclick="toggleUtangPaid('${u.id}')" class="text-[10px] font-extrabold text-brand-purple hover:underline">
+                ${u.paid ? 'Unmark' : 'Mark Paid'}
+              </button>
+              <button type="button" onclick="deleteUtang('${u.id}')" class="text-[10px] font-extrabold text-rose-600 hover:underline">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function changeVoidPassword() {
+      toggleChangeVoidPasswordBox();
+    }
+
+    function toggleChangeVoidPasswordBox(forceOpen = null) {
+      const box = document.getElementById('change-void-pass-box');
+      if (!box) return;
+      const shouldOpen = forceOpen === null ? box.classList.contains('hidden') : Boolean(forceOpen);
+      box.classList.toggle('hidden', !shouldOpen);
+      const curEl = document.getElementById('void-current-pass-input');
+      const newEl = document.getElementById('void-new-pass-input');
+      if (curEl) curEl.value = '';
+      if (newEl) newEl.value = '';
+      if (shouldOpen) {
+        setTimeout(() => curEl?.focus(), 30);
       }
     }
 
-    // Void Transaction
+    function saveNewVoidPassword() {
+      const currentPass = getVoidPassword();
+      const curInput = document.getElementById('void-current-pass-input');
+      const newInput = document.getElementById('void-new-pass-input');
+      const enteredCurrent = curInput?.value ?? '';
+      const nextPass = (newInput?.value || '').trim();
+
+      if (enteredCurrent !== currentPass) {
+        showToast('Wrong current password', true);
+        curInput?.focus();
+        return;
+      }
+      if (!nextPass) {
+        showToast('Enter a new void password', true);
+        newInput?.focus();
+        return;
+      }
+
+      localStorage.setItem(VOID_PASSWORD_KEY, nextPass);
+      const hintEl = document.getElementById('void-password-hint');
+      if (hintEl) hintEl.textContent = 'Custom';
+      toggleChangeVoidPasswordBox(false);
+      showToast('Void password updated');
+    }
+
+    function getVoidPassword() {
+      return localStorage.getItem(VOID_PASSWORD_KEY) || '1234';
+    }
+
     function openVoidModal(txId) {
       const tx = state.transactions.find((t) => t.id === txId);
       if (!tx || tx.voided) return;
       pendingVoidId = txId;
       const descEl = document.getElementById('void-modal-desc');
+      const passInput = document.getElementById('void-password-input');
+      const errEl = document.getElementById('void-password-error');
+      const hintEl = document.getElementById('void-password-hint');
+
+      toggleChangeVoidPasswordBox(false);
+
       if (descEl) {
         descEl.textContent = `Void "${tx.title}" (${formatPeso(tx.amount)})? Stock will be restored for product sales.`;
+      }
+      if (passInput) {
+        passInput.value = '';
+      }
+      if (errEl) {
+        errEl.classList.add('hidden');
+      }
+      if (hintEl) {
+        hintEl.textContent = getVoidPassword() === '1234' ? '1234' : 'Custom';
       }
       const btn = document.getElementById('void-confirm-btn');
       if (btn) btn.onclick = confirmVoidTransaction;
       document.getElementById('void-modal')?.classList.remove('hidden');
+      setTimeout(() => passInput?.focus(), 40);
     }
 
     function closeVoidModal() {
       pendingVoidId = null;
+      const passInput = document.getElementById('void-password-input');
+      const errEl = document.getElementById('void-password-error');
+      if (passInput) passInput.value = '';
+      if (errEl) errEl.classList.add('hidden');
       document.getElementById('void-modal')?.classList.add('hidden');
     }
 
     function confirmVoidTransaction() {
       if (!pendingVoidId) return;
+      const passInput = document.getElementById('void-password-input');
+      const errEl = document.getElementById('void-password-error');
+      const entered = passInput?.value || '';
+
+      if (entered !== getVoidPassword()) {
+        if (errEl) errEl.classList.remove('hidden');
+        passInput?.focus();
+        showToast('Incorrect void password', true);
+        return;
+      }
+
+      if (errEl) errEl.classList.add('hidden');
       const tx = state.transactions.find((t) => t.id === pendingVoidId);
       if (!tx || tx.voided) return closeVoidModal();
 
@@ -2147,6 +2205,9 @@
         } else if (container.id === 'cart-modal') {
           e.preventDefault();
           completeCartCheckout();
+        } else if (target.id === 'void-password-input') {
+          e.preventDefault();
+          confirmVoidTransaction();
         }
       }
     });
