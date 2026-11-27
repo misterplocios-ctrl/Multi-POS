@@ -18,29 +18,42 @@
           },
           colors: {
             brand: {
-              purple: '#6D28D9',
-              purpleDark: '#5B21B6',
-              dark: '#0B1220',
-              teal: '#14B8A6',
+              purple: '#DB2777',
+              purpleDark: '#BE185D',
+              dark: '#3B0A2A',
+              teal: '#F472B6',
             },
           },
           boxShadow: {
-            card: '0 4px 18px -4px rgba(15, 23, 42, 0.08)',
-            float: '0 10px 28px -6px rgba(15, 23, 42, 0.22)',
+            card: '0 4px 18px -4px rgba(190, 24, 93, 0.12)',
+            float: '0 10px 28px -6px rgba(157, 23, 77, 0.25)',
           },
         },
       },
     };
   </script>
   <style>
+    :root {
+      --ui-bg: #FDF2F8;
+      --ui-surface: #FFFFFF;
+      --ui-border: #FBCFE8;
+      --ui-accent: #DB2777;
+      --ui-accent-dark: #BE185D;
+      --ui-accent-light: #EC4899;
+      --ui-accent-soft: #FCE7F3;
+      --ui-accent-text: #BE185D;
+      --ui-glow: rgba(219, 39, 119, 0.48);
+    }
     * {
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     html, body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: #F4F5F7;
-      color: #0F172A;
+      background-color: var(--ui-bg);
+      color: #2A0E1E;
       overflow-x: hidden;
+      transition: background-color 0.35s ease, color 0.25s ease;
     }
     input, select, textarea {
       font-size: 16px !important;
@@ -66,53 +79,227 @@
     .nav-btn-float {
       animation: navButtonFloat 0.36s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       transform: translateY(-4px) scale(1.03);
-      box-shadow: 0 8px 18px -6px rgba(109, 40, 217, 0.35);
+      box-shadow: 0 8px 18px -6px var(--ui-glow);
     }
     .nav-btn-active-highlight {
-      background: linear-gradient(135deg, rgba(109, 40, 217, 0.92) 0%, rgba(91, 33, 182, 0.95) 100%);
+      background: linear-gradient(135deg, var(--ui-accent-light) 0%, var(--ui-accent) 52%, var(--ui-accent-dark) 100%) !important;
       color: #FFFFFF !important;
-      box-shadow: 0 8px 20px -5px rgba(109, 40, 217, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.45), 0 0 0 1.5px rgba(255, 255, 255, 0.65);
+      box-shadow: 0 10px 22px -5px var(--ui-glow), inset 0 1.5px 1px rgba(255, 255, 255, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.55);
     }
     .liquid-glass-dock {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(248, 250, 252, 0.56) 100%);
-      backdrop-filter: blur(22px) saturate(185%) contrast(106%);
-      -webkit-backdrop-filter: blur(22px) saturate(185%) contrast(106%);
-      border: 1px solid rgba(255, 255, 255, 0.78);
-      box-shadow: 0 14px 34px -10px rgba(15, 23, 42, 0.22), 0 2px 8px -2px rgba(109, 40, 217, 0.12), inset 0 1.5px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.4);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, color-mix(in srgb, var(--ui-accent-soft) 88%, white 12%) 100%);
+      backdrop-filter: blur(24px) saturate(190%) contrast(106%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(106%);
+      border: 1px solid var(--ui-border);
+      box-shadow: 0 14px 34px -10px var(--ui-glow), 0 4px 12px -3px rgba(15, 23, 42, 0.12), inset 0 1.5px 1px rgba(255, 255, 255, 0.95);
+      transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+    .modal-backdrop-polished {
+      background: rgba(15, 23, 42, 0.52);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .modal-panel-polished {
+      box-shadow: 0 24px 54px -14px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.7);
+    }
+    input[type="search"],
+    input[type="text"],
+    input[type="number"],
+    input[type="password"],
+    input[type="date"],
+    select,
+    textarea {
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+    input[type="search"]:focus,
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="password"]:focus,
+    input[type="date"]:focus,
+    select:focus,
+    textarea:focus {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-accent) 18%, transparent);
+    }
+    .theme-accent-btn {
+      background-color: var(--ui-accent) !important;
+      border-color: var(--ui-accent-dark) !important;
+      color: #FFFFFF !important;
+    }
+    .theme-accent-btn:hover {
+      background-color: var(--ui-accent-dark) !important;
+    }
+    .theme-accent-text {
+      color: var(--ui-accent-text) !important;
+    }
+    .theme-accent-badge {
+      background-color: var(--ui-accent-soft) !important;
+      color: var(--ui-accent-text) !important;
+      border-color: var(--ui-border) !important;
+    }
+    /* Adopt best-seller theme color across primary/action buttons */
+    button.bg-brand-purple,
+    button[class*="bg-brand-purple"],
+    .bg-brand-purple,
+    .bg-brand-purpleDark {
+      background-color: var(--ui-accent) !important;
+      border-color: var(--ui-accent-dark) !important;
+      color: #FFFFFF !important;
+    }
+    button.bg-brand-purple:hover,
+    button[class*="bg-brand-purple"]:hover,
+    .bg-brand-purple:hover,
+    .bg-brand-purpleDark:hover {
+      background-color: var(--ui-accent-dark) !important;
+    }
+    .text-brand-purple {
+      color: var(--ui-accent-text) !important;
+    }
+    .bg-purple-100,
+    .bg-purple-50 {
+      background-color: var(--ui-accent-soft) !important;
+    }
+    .text-purple-700 {
+      color: var(--ui-accent-text) !important;
+    }
+    @keyframes smoothTabIn {
+      0% {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes buttonPressBounce {
+      0% {
+        transform: scale(1);
+      }
+      35% {
+        transform: scale(0.9);
+      }
+      70% {
+        transform: scale(1.07);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    @keyframes buttonOpenPop {
+      0% {
+        opacity: 0.45;
+        transform: translateY(14px) scale(0.84);
+        box-shadow: 0 0 0 0 var(--ui-glow);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 12px 22px -6px var(--ui-glow);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        box-shadow: 0 0 0 0 transparent;
+      }
+    }
+    .btn-bounce-active {
+      animation: buttonOpenPop 0.38s cubic-bezier(0.22, 1, 0.36, 1) !important;
+      transform-origin: center bottom;
+    }
+    .btn-bounce-active.nav-btn-float {
+      animation: buttonOpenPop 0.38s cubic-bezier(0.22, 1, 0.36, 1), navButtonFloat 0.36s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards !important;
+    }
+    .tab-smooth-enter {
+      animation: smoothTabIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes smoothModalIn {
+      0% {
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .modal-smooth-enter {
+      animation: smoothModalIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .smooth-card {
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease;
+    }
+    .smooth-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px -8px rgba(190, 24, 93, 0.16);
+    }
+    .smooth-card:active {
+      transform: scale(0.99);
+    }
+    button,
+    [role="button"] {
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+    }
+    button:active:not(:disabled),
+    [role="button"]:active:not(:disabled) {
+      transform: scale(0.94);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tab-smooth-enter,
+      .modal-smooth-enter,
+      .nav-btn-float,
+      .btn-bounce-active,
+      .smooth-card {
+        animation: none !important;
+        transition: none !important;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen flex justify-center selection:bg-purple-200 selection:text-brand-dark">
-  <div id="app-shell" class="w-full max-w-md md:max-w-5xl lg:max-w-6xl min-h-screen bg-[#F4F5F7] relative pb-28 flex flex-col md:shadow-xl md:my-4 md:min-h-[calc(100vh-2rem)] md:rounded-3xl md:border md:border-slate-200/80">
+<body class="min-h-screen flex justify-center selection:bg-pink-200 selection:text-slate-900">
+  <div id="app-shell" style="background-color: var(--ui-bg); border-color: var(--ui-border);" class="w-full max-w-md md:max-w-5xl lg:max-w-6xl min-h-screen relative pb-28 flex flex-col md:shadow-xl md:my-4 md:min-h-[calc(100vh-2rem)] md:rounded-3xl md:border transition-colors duration-300">
 
     <!-- TOP HEADER -->
-    <header class="sticky top-0 z-30 bg-[#F4F5F7]/95 backdrop-blur px-4 md:px-6 pt-3 pb-2 border-b border-slate-200/60 flex items-center justify-between gap-2 md:rounded-t-3xl">
-      <div class="flex items-center gap-2">
-        <div class="w-9 h-9 rounded-2xl bg-brand-purple text-white flex items-center justify-center font-black text-sm shadow-sm">
-          POS
+    <header style="background-color: color-mix(in srgb, var(--ui-bg) 94%, white 6%); border-color: var(--ui-border);" class="sticky top-0 z-30 backdrop-blur px-4 md:px-6 pt-3 pb-2.5 border-b flex flex-col gap-2 md:rounded-t-3xl transition-colors duration-300">
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 class="text-base md:text-lg font-black tracking-tight text-slate-900 leading-tight truncate">Sari-Sari Counter</h1>
+            <span class="hidden sm:inline-flex items-center text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/90 text-slate-600 border border-slate-200/80">POS</span>
+          </div>
+          <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
+            <p id="header-subtitle" class="text-[11px] font-semibold theme-accent-text leading-tight truncate">Store POS</p>
+            <span id="best-seller-ui-pill" class="hidden text-[10px] font-extrabold px-2 py-0.5 rounded-full theme-accent-badge border truncate max-w-[210px]"></span>
+          </div>
         </div>
-        <div>
-          <h1 class="text-sm md:text-base font-black tracking-tight text-slate-900 leading-tight">Sari-Sari Counter</h1>
-          <p id="header-subtitle" class="text-[11px] font-semibold text-slate-500 leading-tight">Store POS</p>
-        </div>
+        <button id="header-cart-btn" type="button" onclick="openCartDrawer(getActiveCartPos())" title="Open Cart"
+          class="relative w-10 h-10 rounded-2xl bg-white hover:bg-pink-50 active:scale-95 text-slate-600 border border-pink-200/80 flex items-center justify-center shadow-xs shrink-0 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span id="header-cart-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-black flex items-center justify-center ring-2 ring-[#FDF2F8]">0</span>
+        </button>
       </div>
 
-      <div class="flex items-center gap-1.5">
+      <div class="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2">
         <button type="button" onclick="openBarcodeScanner('pos')"
-          class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 active:scale-95 text-slate-900 border border-slate-200 text-xs font-extrabold transition flex items-center gap-1"
+          class="min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 active:scale-95 text-slate-900 border border-slate-200 text-xs sm:text-sm font-extrabold transition flex items-center justify-center gap-1.5"
           title="Scan Barcode">
-          <svg class="w-3.5 h-3.5 text-brand-purple" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h2v12H4V6zm4 0h1v12H8V6zm3 0h2v12h-2V6zm4 0h1v12h-1V6zm3 0h2v12h-2V6z" />
+          <svg class="w-4 h-4 text-brand-purple shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" />
+            <path stroke-linecap="round" d="M7 7v10M10 7v10M13 7v10M17 7v10" />
           </svg>
           <span>Scan</span>
         </button>
         <button id="header-add-btn" type="button" onclick="openEditorModal(currentTab === 'softdrinks' ? 'softdrinks' : currentTab === 'cigarettes' ? 'cigarettes' : 'store')"
-          class="px-3 py-1.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs font-extrabold shadow-sm transition flex items-center gap-1">
+          class="theme-accent-btn min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-4 py-2 rounded-xl active:scale-95 text-xs sm:text-sm font-extrabold shadow-sm transition flex items-center justify-center gap-1">
           <span>+</span>
-          <span>Add Product</span>
+          <span class="truncate">Add Product</span>
         </button>
         <button type="button" onclick="openExpenseModal()"
-          class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 active:scale-95 text-rose-600 border border-rose-200 text-xs font-extrabold transition flex items-center gap-1">
+          class="min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 active:scale-95 text-rose-600 border border-rose-200 text-xs sm:text-sm font-extrabold transition flex items-center justify-center gap-1">
           <span>-</span>
           <span>Expense</span>
         </button>
@@ -346,13 +533,13 @@
             </div>
             <div class="flex items-center gap-2">
               <input id="gcash-puhunan-input" type="number" step="0.01" min="0" placeholder="Capital (₱)"
-                class="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+                class="min-w-0 flex-1 min-h-[44px] rounded-xl border border-slate-200 px-3 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
               <button type="button" onclick="setGcashPuhunan()"
-                class="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-98 text-white text-xs font-extrabold transition shrink-0">
+                class="min-h-[44px] px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs sm:text-sm font-extrabold transition shrink-0">
                 Set
               </button>
               <button type="button" onclick="addGcashPuhunan()"
-                class="px-3.5 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-98 text-white text-xs font-extrabold transition shrink-0">
+                class="min-h-[44px] px-4 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs sm:text-sm font-extrabold transition shrink-0">
                 + Add
               </button>
             </div>
@@ -363,15 +550,15 @@
 
             <div class="grid grid-cols-3 gap-2">
               <button type="button" id="gcash-type-cash_in" onclick="setGcashType('cash_in')"
-                class="gcash-type-btn py-2.5 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition">
+                class="gcash-type-btn min-h-[44px] py-2.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold bg-brand-purple text-white transition">
                 Cash In
               </button>
               <button type="button" id="gcash-type-cash_out" onclick="setGcashType('cash_out')"
-                class="gcash-type-btn py-2.5 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">
+                class="gcash-type-btn min-h-[44px] py-2.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-100 text-slate-700 transition">
                 Cash Out
               </button>
               <button type="button" id="gcash-type-eload" onclick="setGcashType('eload')"
-                class="gcash-type-btn py-2.5 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">
+                class="gcash-type-btn min-h-[44px] py-2.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-100 text-slate-700 transition">
                 E-Load
               </button>
             </div>
@@ -379,12 +566,12 @@
             <div>
               <label class="block text-[11px] font-bold text-slate-600 mb-1">Amount (₱)</label>
               <input id="gcash-amount" type="number" step="0.01" min="1" oninput="autoSuggestGcashFee()" placeholder="0.00"
-                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
-              <div class="flex items-center gap-1.5 mt-2 flex-wrap">
-                <button type="button" onclick="setGcashAmount(100)" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱100</button>
-                <button type="button" onclick="setGcashAmount(200)" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱200</button>
-                <button type="button" onclick="setGcashAmount(500)" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱500</button>
-                <button type="button" onclick="setGcashAmount(1000)" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱1,000</button>
+                class="w-full min-h-[44px] rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+              <div class="grid grid-cols-4 sm:flex items-center gap-1.5 sm:gap-2 mt-2 flex-wrap">
+                <button type="button" onclick="setGcashAmount(100)" class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-extrabold text-slate-700">₱100</button>
+                <button type="button" onclick="setGcashAmount(200)" class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-extrabold text-slate-700">₱200</button>
+                <button type="button" onclick="setGcashAmount(500)" class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-extrabold text-slate-700">₱500</button>
+                <button type="button" onclick="setGcashAmount(1000)" class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-extrabold text-slate-700">₱1,000</button>
               </div>
             </div>
 
@@ -403,11 +590,11 @@
 
             <div class="flex items-center gap-2 pt-1">
               <button type="button" onclick="recordGcashTransaction()"
-                class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark active:scale-98 text-white text-sm font-black shadow-sm transition">
+                class="flex-1 min-h-[46px] py-3 px-4 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm transition">
                 Record GCash Entry
               </button>
               <button type="button" onclick="clearGcashForm()"
-                class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition">
+                class="min-h-[46px] px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs sm:text-sm font-extrabold transition">
                 Clear
               </button>
             </div>
@@ -458,21 +645,21 @@
             </div>
           </div>
           <button type="button" onclick="addManualUtang()"
-            class="w-full py-2.5 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-black shadow-sm transition">
+            class="w-full min-h-[44px] py-2.5 px-4 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm transition">
             + Add Utang Record
           </button>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-2">
           <input id="utang-search" type="search" oninput="renderUtangTab()" placeholder="Search customer name or item..."
-            class="flex-1 bg-white rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 placeholder-slate-400 border border-slate-200/80 focus:outline-none focus:border-brand-purple" />
-          <div class="flex items-center gap-1.5">
+            class="flex-1 min-h-[44px] bg-white rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 placeholder-slate-400 border border-slate-200/80 focus:outline-none focus:border-brand-purple" />
+          <div class="grid grid-cols-3 sm:flex items-center gap-1.5">
             <button type="button" id="utang-filter-unpaid" onclick="setUtangFilter('unpaid')"
-              class="px-3 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition">Unpaid</button>
+              class="min-h-[40px] px-3.5 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition">Unpaid</button>
             <button type="button" id="utang-filter-paid" onclick="setUtangFilter('paid')"
-              class="px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition">Paid</button>
+              class="min-h-[40px] px-3.5 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition">Paid</button>
             <button type="button" id="utang-filter-all" onclick="setUtangFilter('all')"
-              class="px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition">All</button>
+              class="min-h-[40px] px-3.5 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition">All</button>
           </div>
         </div>
 
@@ -487,29 +674,29 @@
               <h2 class="text-sm font-black text-slate-900">Sales, Profit &amp; Total Amount</h2>
               <p class="text-[11px] font-semibold text-slate-500">Expenses deduct from Total Amount only</p>
             </div>
-            <div class="flex items-center gap-1.5 flex-wrap">
+            <div class="grid grid-cols-2 sm:flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
             <button type="button" onclick="openCloudSyncModal()"
-              class="px-2.5 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-brand-purple text-[11px] font-extrabold transition">
+              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-brand-purple text-xs font-extrabold transition">
               Device Sync
             </button>
             <button type="button" onclick="exportBackupJSON()"
-              class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
+              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
               Export JSON
             </button>
-            <label class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition cursor-pointer">
+            <label class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition cursor-pointer flex items-center justify-center">
               Import JSON
               <input type="file" accept=".json,application/json" onchange="importBackupJSON(event)" class="hidden" />
             </label>
             <button type="button" onclick="copyJsonBackup()"
-              class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
+              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
               Copy JSON
             </button>
             <button type="button" onclick="openJsonRestoreModal()"
-              class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
+              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
               Paste JSON
             </button>
             <button type="button" id="autosync-toggle-btn" onclick="toggleAutoSync()"
-                class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition">
+                class="min-h-[38px] px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-extrabold transition">
                 Auto Sync: ON
               </button>
             </div>
@@ -588,9 +775,9 @@
     <!-- FLOATING CART BAR -->
     <div id="floating-cart-bar" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md md:max-w-xl px-4 z-30">
       <button type="button" onclick="openCartDrawer(getActiveCartPos())"
-        class="w-full bg-brand-purple hover:bg-brand-purpleDark active:scale-99 text-white rounded-2xl px-4 py-3 shadow-float flex items-center justify-between gap-2 transition">
+        class="theme-accent-btn w-full active:scale-99 rounded-2xl px-4 py-3 shadow-float flex items-center justify-between gap-2 transition">
         <div class="flex items-center gap-2">
-          <span id="cart-badge-count" class="bg-white text-brand-purple font-black text-xs px-2 py-0.5 rounded-full">0</span>
+          <span id="cart-badge-count" class="bg-white theme-accent-text font-black text-xs px-2 py-0.5 rounded-full">0</span>
           <span class="text-xs font-extrabold">View Cart &amp; Checkout</span>
         </div>
         <span id="cart-badge-total" class="text-sm font-black">₱0.00</span>
@@ -599,37 +786,37 @@
 
     <!-- BOTTOM NAVIGATION -->
     <nav class="liquid-glass-dock fixed bottom-2 left-1/2 -translate-x-1/2 w-[calc(100%-1rem)] max-w-md md:max-w-2xl rounded-3xl md:bottom-3 px-1.5 py-1.5 z-30 grid grid-cols-6 gap-1">
-      <button type="button" id="nav-store" onclick="switchTab('store')" class="flex flex-col items-center py-1.5 rounded-2xl text-brand-purple font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight">
+      <button type="button" id="nav-store" onclick="switchTab('store')" class="flex flex-col items-center py-1.5 rounded-2xl text-white font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 10l1-5h16l1 5M5 10v10h14V10M9 20v-6h6v6" />
         </svg>
         <span class="text-[11px] font-black leading-none">Store</span>
       </button>
-      <button type="button" id="nav-softdrinks" onclick="switchTab('softdrinks')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
+      <button type="button" id="nav-softdrinks" onclick="switchTab('softdrinks')" class="flex flex-col items-center py-1.5 rounded-2xl theme-accent-badge font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 3h8l-1 4H9L8 3zm1 4h6l-1 13a2 2 0 01-2 1.8h0A2 2 0 0110 20L9 7z" />
         </svg>
         <span class="text-[11px] font-black leading-none">Drinks</span>
       </button>
-      <button type="button" id="nav-cigarettes" onclick="switchTab('cigarettes')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
+      <button type="button" id="nav-cigarettes" onclick="switchTab('cigarettes')" class="flex flex-col items-center py-1.5 rounded-2xl theme-accent-badge font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 17h14v3H3v-3zm17 0h1v3h-1v-3zM18 13c0-1.5 2-2 2-3.5S18 7 18 5.5" />
         </svg>
         <span class="text-[11px] font-black leading-none">Yosi</span>
       </button>
-      <button type="button" id="nav-gcash" onclick="switchTab('gcash')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
+      <button type="button" id="nav-gcash" onclick="switchTab('gcash')" class="flex flex-col items-center py-1.5 rounded-2xl theme-accent-badge font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2m-3-3h7m0 0l-2.5-2.5M21 12l-2.5 2.5" />
         </svg>
         <span class="text-[11px] font-black">GCash</span>
       </button>
-      <button type="button" id="nav-utang" onclick="switchTab('utang')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
+      <button type="button" id="nav-utang" onclick="switchTab('utang')" class="flex flex-col items-center py-1.5 rounded-2xl theme-accent-badge font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h4m5-11H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2z" />
         </svg>
         <span class="text-[11px] font-black">Utang</span>
       </button>
-      <button type="button" id="nav-reports" onclick="switchTab('reports')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
+      <button type="button" id="nav-reports" onclick="switchTab('reports')" class="flex flex-col items-center py-1.5 rounded-2xl theme-accent-badge font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9m6 10V5m6 14v-7m4 7H2" />
         </svg>
@@ -643,15 +830,15 @@
     </div>
 
     <!-- PRODUCT DETAIL MODAL -->
-    <div id="detail-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-float max-h-[90vh] overflow-y-auto">
+    <div id="detail-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
         <div id="detail-content"></div>
       </div>
     </div>
 
     <!-- PRODUCT EDITOR MODAL -->
-    <div id="editor-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[92vh] overflow-y-auto">
+    <div id="editor-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 max-h-[92vh] overflow-y-auto">
         <div class="flex items-center justify-between">
           <h3 id="editor-title" class="text-base font-black text-slate-900">Add Product</h3>
           <button type="button" onclick="closeEditorModal()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2 py-1 rounded-lg bg-slate-100">Close</button>
@@ -737,8 +924,8 @@
     </div>
 
     <!-- CART & CHECKOUT DRAWER MODAL -->
-    <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[90vh] overflow-y-auto">
+    <div id="cart-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between">
           <div>
             <h3 id="cart-modal-title" class="text-base font-black text-slate-900">Cart &amp; Checkout</h3>
@@ -781,10 +968,10 @@
           </div>
           <p id="cart-change-preview" class="text-xs font-extrabold text-emerald-700"></p>
           <div class="flex items-center gap-2 pt-1">
-            <button type="button" onclick="clearCurrentCart()" class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold">
+            <button type="button" onclick="clearCurrentCart()" class="min-h-[44px] px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs sm:text-sm font-extrabold">
               Clear
             </button>
-            <button type="button" onclick="completeCartCheckout()" class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-sm font-black shadow-sm">
+            <button type="button" onclick="completeCartCheckout()" class="flex-1 min-h-[44px] py-3 px-4 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm">
               Complete Sale
             </button>
           </div>
@@ -793,8 +980,8 @@
     </div>
 
     <!-- EXPENSE MODAL -->
-    <div id="expense-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float">
+    <div id="expense-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5">
         <div class="flex items-center justify-between">
           <h3 class="text-base font-black text-slate-900">Record Expense</h3>
           <button type="button" onclick="closeExpenseModal()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
@@ -820,7 +1007,7 @@
             <input id="expense-amount" type="number" step="0.01" min="0.01" required placeholder="0.00"
               class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900" />
           </div>
-          <button type="submit" class="w-full py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-black shadow-sm">
+          <button type="submit" class="w-full min-h-[44px] py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xs sm:text-sm font-black shadow-sm">
             Save Expense
           </button>
         </form>
@@ -828,8 +1015,8 @@
     </div>
 
     <!-- VOID CONFIRMATION MODAL -->
-    <div id="void-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-float">
+    <div id="void-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-4">
         <div>
           <h3 class="text-base font-black text-slate-900">Confirm Void Transaction</h3>
           <p id="void-modal-desc" class="text-xs font-semibold text-slate-600 mt-1"></p>
@@ -869,9 +1056,53 @@
       </div>
     </div>
 
+    <!-- PARTIAL PAYMENT MODAL FOR UTANG -->
+    <div id="partial-utang-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-black text-slate-900">Record Partial Payment</h3>
+            <p id="partial-utang-subtitle" class="text-xs font-semibold text-slate-500 mt-0.5"></p>
+          </div>
+          <button type="button" onclick="closePartialUtangModal()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
+        </div>
+        <form onsubmit="submitPartialUtangPayment(event)" class="space-y-3">
+          <input type="hidden" id="partial-utang-id" />
+          <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 flex items-center justify-between text-xs">
+            <span class="font-bold text-amber-900">Remaining Balance:</span>
+            <span id="partial-utang-remaining" class="font-black text-amber-950 text-sm">₱0.00</span>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Partial Payment Amount (₱)</label>
+            <input id="partial-utang-amount" type="number" step="0.01" min="0.01" required placeholder="0.00"
+              class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            <div class="grid grid-cols-4 gap-1.5 mt-2">
+              <button type="button" onclick="setQuickPartialAmount(20)" class="min-h-[36px] rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱20</button>
+              <button type="button" onclick="setQuickPartialAmount(50)" class="min-h-[36px] rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱50</button>
+              <button type="button" onclick="setQuickPartialAmount(100)" class="min-h-[36px] rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱100</button>
+              <button type="button" onclick="setFullRemainingPartialAmount()" class="min-h-[36px] rounded-xl bg-emerald-100 hover:bg-emerald-200 text-xs font-extrabold text-emerald-800">Full Bal</button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Payment Note (optional)</label>
+            <input id="partial-utang-note" type="text" placeholder="e.g. Cash, GCash"
+              class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900 focus:outline-none focus:border-brand-purple" />
+          </div>
+          <div class="flex items-center gap-2 pt-1">
+            <button type="button" onclick="closePartialUtangModal()" class="flex-1 min-h-[44px] py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-extrabold">
+              Cancel
+            </button>
+            <button type="submit" class="flex-1 min-h-[44px] py-2.5 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs sm:text-sm font-black">
+              Save Partial Payment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- LOW STOCK & OUT OF STOCK PRODUCTS MODAL -->
-    <div id="low-stock-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[88vh] overflow-y-auto">
+    <div id="low-stock-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 max-h-[88vh] overflow-y-auto">
         <div class="flex items-center justify-between gap-2">
           <div>
             <h3 id="low-stock-modal-title" class="text-base font-black text-slate-900">Stock Alerts</h3>
@@ -895,8 +1126,8 @@
     </div>
 
     <!-- CROSS-DEVICE CLOUD SYNC MODAL -->
-    <div id="cloud-sync-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[90vh] overflow-y-auto">
+    <div id="cloud-sync-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between gap-2">
           <div>
             <h3 class="text-base font-black text-slate-900">Cross-Device Auto Sync</h3>
@@ -932,8 +1163,8 @@
     </div>
 
     <!-- MANUAL JSON BACKUP / RESTORE MODAL -->
-    <div id="json-restore-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[90vh] overflow-y-auto">
+    <div id="json-restore-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between gap-2">
           <div>
             <h3 class="text-base font-black text-slate-900">Restore / Merge JSON Backup</h3>
@@ -955,8 +1186,8 @@
     </div>
 
     <!-- BARCODE SCANNER MODAL -->
-    <div id="barcode-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[92vh] overflow-y-auto">
+    <div id="barcode-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 max-h-[92vh] overflow-y-auto">
         <div class="flex items-center justify-between gap-2">
           <div>
             <h3 id="barcode-modal-title" class="text-base font-black text-slate-900">Barcode Scanner</h3>
@@ -1039,6 +1270,108 @@
     let cloudSyncTimer = null;
     let cloudPollInterval = null;
     let isSyncingCloud = false;
+    let audioCtx = null;
+
+    // Cash register beep tone inspired by ID 1417 on add-to-cart
+    function playCartBeep() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!audioCtx) {
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const now = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const overtone = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const overtoneGain = audioCtx.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(2793.83, now); // Crisp F7 register beep
+
+        overtone.type = 'triangle';
+        overtone.frequency.setValueAtTime(5587.65, now); // Subtle high harmonic bite
+
+        gain.gain.setValueAtTime(0.0008, now);
+        gain.gain.exponentialRampToValueAtTime(0.14, now + 0.005);
+        gain.gain.setValueAtTime(0.13, now + 0.095);
+        gain.gain.exponentialRampToValueAtTime(0.0006, now + 0.125);
+
+        overtoneGain.gain.setValueAtTime(0.0004, now);
+        overtoneGain.gain.exponentialRampToValueAtTime(0.045, now + 0.005);
+        overtoneGain.gain.exponentialRampToValueAtTime(0.0003, now + 0.11);
+
+        osc.connect(gain);
+        overtone.connect(overtoneGain);
+        overtoneGain.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        overtone.start(now);
+        osc.stop(now + 0.135);
+        overtone.stop(now + 0.135);
+      } catch (err) {
+        console.warn('Beep audio error:', err);
+      }
+    }
+
+    function playCashierSaleSound() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!audioCtx) {
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const now = audioCtx.currentTime;
+
+        // Crisp mall POS checkout confirmation chime + subtle register click
+        const notes = [
+          { freq: 1318.51, start: 0, dur: 0.085, peak: 0.14 },     // E6
+          { freq: 1760.0, start: 0.075, dur: 0.24, peak: 0.17 }     // A6
+        ];
+
+        for (const n of notes) {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(n.freq, now + n.start);
+
+          gain.gain.setValueAtTime(0.0008, now + n.start);
+          gain.gain.exponentialRampToValueAtTime(n.peak, now + n.start + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0006, now + n.start + n.dur);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + n.start);
+          osc.stop(now + n.start + n.dur + 0.02);
+        }
+
+        // Subtle POS terminal / cash drawer click at the end
+        const clickOsc = audioCtx.createOscillator();
+        const clickGain = audioCtx.createGain();
+        clickOsc.type = 'triangle';
+        clickOsc.frequency.setValueAtTime(520, now + 0.21);
+        clickOsc.frequency.exponentialRampToValueAtTime(160, now + 0.265);
+
+        clickGain.gain.setValueAtTime(0.001, now + 0.21);
+        clickGain.gain.exponentialRampToValueAtTime(0.09, now + 0.218);
+        clickGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.27);
+
+        clickOsc.connect(clickGain);
+        clickGain.connect(audioCtx.destination);
+        clickOsc.start(now + 0.21);
+        clickOsc.stop(now + 0.28);
+      } catch (err) {
+        console.warn('Cashier sound error:', err);
+      }
+    }
 
     function escapeHtml(str) {
       return String(str ?? '')
@@ -1486,14 +1819,22 @@
 
       for (const t of validTabs) {
         const sec = document.getElementById(`tab-${t}`);
-        if (sec) sec.classList.toggle('hidden', t !== currentTab);
-
-        const navBtn = document.getElementById(`nav-${t}`);
-        if (navBtn) {
-          if (t === currentTab) {
-            navBtn.className = 'flex flex-col items-center py-1.5 rounded-2xl text-brand-purple font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight';
-          } else {
-            navBtn.className = 'flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90';
+        if (sec) {
+          const isActive = t === currentTab;
+          sec.classList.toggle('hidden', !isActive);
+          sec.classList.remove('tab-smooth-enter');
+          if (isActive) {
+            void sec.offsetWidth;
+            sec.classList.add('tab-smooth-enter');
+          }
+        }
+        for (const navBtn of [document.getElementById(`nav-${t}`)]) {
+          if (navBtn) {
+            if (t === currentTab) {
+              navBtn.className = 'flex flex-col items-center py-1.5 rounded-2xl text-white font-extrabold transition duration-200 active:scale-90 nav-btn-float nav-btn-active-highlight';
+            } else {
+              navBtn.className = 'flex flex-col items-center py-1.5 rounded-2xl theme-accent-badge font-bold transition duration-200 active:scale-90';
+            }
           }
         }
       }
@@ -1515,15 +1856,31 @@
 
     function updateCartBar() {
       const bar = document.getElementById('floating-cart-bar');
+      const headerBtn = document.getElementById('header-cart-btn');
+      const headerBadge = document.getElementById('header-cart-badge');
+      const pos = getActiveCartPos();
+      const cart = state.carts[pos] || [];
+      const count = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+      const total = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
+      const activeTxCount = (state.transactions || []).filter((tx) => tx && !tx.voided).length;
+      const shouldHighlightCart = activeTxCount > 0 || count > 0;
+
+      if (headerBtn) {
+        headerBtn.className = shouldHighlightCart
+          ? 'relative w-10 h-10 rounded-2xl theme-accent-btn active:scale-95 ring-2 ring-white/80 flex items-center justify-center shadow-sm shrink-0 transition'
+          : 'relative w-10 h-10 rounded-2xl bg-white hover:bg-slate-50 active:scale-95 text-slate-600 border border-slate-200/80 flex items-center justify-center shadow-xs shrink-0 transition';
+      }
+
+      if (headerBadge) {
+        headerBadge.textContent = String(count);
+        headerBadge.classList.toggle('hidden', count <= 0);
+      }
+
       if (!bar) return;
       if (['gcash', 'utang', 'reports'].includes(currentTab)) {
         bar.classList.add('hidden');
         return;
       }
-      const pos = getActiveCartPos();
-      const cart = state.carts[pos] || [];
-      const count = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
-      const total = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
 
       if (count <= 0) {
         bar.classList.add('hidden');
@@ -1673,7 +2030,7 @@
         : `<div class="w-full h-24 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs px-2 text-center">${escapeHtml(p.category)}</div>`;
 
       return `
-        <div class="bg-white rounded-3xl p-3 shadow-card border ${
+        <div class="smooth-card bg-white rounded-3xl p-3 shadow-card border ${
           exp?.tone === 'expired' ? 'border-rose-300 bg-rose-50/20' : low ? 'border-amber-300 bg-amber-50/20' : 'border-slate-100'
         } flex flex-col justify-between gap-2">
           <div class="space-y-1.5">
@@ -1690,18 +2047,18 @@
                 exp.tone === 'expired' ? 'text-rose-600' : exp.tone === 'soon' ? 'text-amber-700' : 'text-slate-500'
               }">${escapeHtml(exp.label)}</p>` : ''}
               <div class="flex items-center justify-between gap-1 mt-1">
-                <span class="text-sm font-black text-brand-purple">${formatPeso(p.price)}</span>
+                <span class="text-sm font-black theme-accent-text">${formatPeso(p.price)}</span>
                 <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
                   out ? 'bg-rose-100 text-rose-700' : low ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
                 }">${out ? 'Out' : `Stock: ${p.stock}`}</span>
               </div>
             </div>
           </div>
-          <button type="button" ${out ? 'disabled' : ''} onclick="addToCart('${p.id}')"
-            class="w-full py-2 rounded-2xl text-xs font-black transition ${
+          <button type="button" onclick="addToCart('${p.id}')"
+            class="w-full min-h-[38px] sm:min-h-[42px] py-2 px-2.5 rounded-2xl text-xs font-black transition ${
               out
                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                : 'bg-brand-dark hover:bg-slate-800 active:scale-98 text-white'
+                : 'bg-brand-dark hover:bg-slate-800 active:scale-95 text-white'
             }">
             ${out ? 'Out of Stock' : '+ Add to Cart'}
           </button>
@@ -1724,7 +2081,7 @@
       if (catBar) {
         catBar.innerHTML = cats.map((c) => `
           <button type="button" onclick="selectCategory('${escapeHtml(c).replace(/'/g, "\\'")}')"
-            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
+            class="min-h-[36px] px-3.5 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
               selectedStoreCategory === c
                 ? 'bg-brand-purple text-white'
                 : 'bg-white text-slate-600 border border-slate-200'
@@ -1948,6 +2305,7 @@
       }
       saveState();
       updateCartBar();
+      playCartBeep();
       showToast(`Added ${p.name}`);
     }
 
@@ -2153,6 +2511,7 @@
       saveState();
       closeCartDrawer();
       renderAll();
+      playCashierSaleSound();
 
       if (outAlertNames.length && lowAlertNames.length) {
         showToast(`Sale saved! Out of stock: ${outAlertNames.join(', ')} | Low stock: ${lowAlertNames.join(', ')}`);
@@ -2359,6 +2718,99 @@
       showToast(rec.paid ? `Marked ${rec.customerName}'s utang as PAID` : `Marked ${rec.customerName}'s utang as UNPAID`);
     }
 
+    function getUtangRemaining(rec) {
+      const original = Math.max(0, Number(rec?.amount) || 0);
+      const paidSoFar = Math.max(0, Number(rec?.paidAmount) || 0);
+      if (rec?.paid) return 0;
+      return Math.max(0, original - paidSoFar);
+    }
+
+    function openPartialUtangModal(utangId) {
+      const rec = state.utangRecords.find((u) => u.id === utangId);
+      if (!rec) return;
+      const remaining = getUtangRemaining(rec);
+      if (remaining <= 0) {
+        return showToast(`${rec.customerName}'s utang has no remaining balance`);
+      }
+      document.getElementById('partial-utang-id').value = rec.id;
+      document.getElementById('partial-utang-subtitle').textContent = `${rec.customerName} • ${rec.note || 'Store Credit'}`;
+      document.getElementById('partial-utang-remaining').textContent = formatPeso(remaining);
+      const amtInput = document.getElementById('partial-utang-amount');
+      const noteInput = document.getElementById('partial-utang-note');
+      if (amtInput) {
+        amtInput.value = '';
+        amtInput.max = String(remaining.toFixed(2));
+      }
+      if (noteInput) noteInput.value = '';
+      document.getElementById('partial-utang-modal')?.classList.remove('hidden');
+      setTimeout(() => amtInput?.focus(), 40);
+    }
+
+    function closePartialUtangModal() {
+      document.getElementById('partial-utang-modal')?.classList.add('hidden');
+    }
+
+    function setQuickPartialAmount(val) {
+      const id = document.getElementById('partial-utang-id')?.value;
+      const rec = state.utangRecords.find((u) => u.id === id);
+      const remaining = rec ? getUtangRemaining(rec) : val;
+      const capped = Math.min(remaining, Math.max(0, Number(val) || 0));
+      const amtInput = document.getElementById('partial-utang-amount');
+      if (amtInput && capped > 0) amtInput.value = capped.toFixed(2);
+    }
+
+    function setFullRemainingPartialAmount() {
+      const id = document.getElementById('partial-utang-id')?.value;
+      const rec = state.utangRecords.find((u) => u.id === id);
+      if (!rec) return;
+      const remaining = getUtangRemaining(rec);
+      const amtInput = document.getElementById('partial-utang-amount');
+      if (amtInput) amtInput.value = remaining.toFixed(2);
+    }
+
+    function submitPartialUtangPayment(e) {
+      e.preventDefault();
+      const id = document.getElementById('partial-utang-id')?.value;
+      const rec = state.utangRecords.find((u) => u.id === id);
+      if (!rec) return;
+
+      const remaining = getUtangRemaining(rec);
+      const payAmt = parseFloat(document.getElementById('partial-utang-amount')?.value) || 0;
+      const note = (document.getElementById('partial-utang-note')?.value || '').trim();
+
+      if (payAmt <= 0) return showToast('Enter a valid partial payment amount', true);
+      if (payAmt > remaining + 0.009) {
+        return showToast(`Amount exceeds remaining balance (${formatPeso(remaining)})`, true);
+      }
+
+      const appliedPay = Math.min(remaining, payAmt);
+      rec.paidAmount = Math.max(0, Number(rec.paidAmount) || 0) + appliedPay;
+      if (!Array.isArray(rec.payments)) rec.payments = [];
+      rec.payments.push({
+        amount: appliedPay,
+        note,
+        paidAt: new Date().toISOString()
+      });
+
+      const nextRemaining = Math.max(0, (Number(rec.amount) || 0) - rec.paidAmount);
+      if (nextRemaining <= 0.009) {
+        rec.paidAmount = Number(rec.amount) || 0;
+        rec.paid = true;
+        rec.paidAt = new Date().toISOString();
+      } else {
+        rec.paid = false;
+      }
+
+      saveState();
+      closePartialUtangModal();
+      renderAll();
+      showToast(
+        rec.paid
+          ? `Full balance settled for ${rec.customerName} (+${formatPeso(appliedPay)})`
+          : `Partial payment ${formatPeso(appliedPay)} saved (${formatPeso(nextRemaining)} left)`
+      );
+    }
+
     function deleteUtangRecord(utangId) {
       const rec = state.utangRecords.find((u) => u.id === utangId);
       if (!rec) return;
@@ -2371,10 +2823,9 @@
     function renderUtangTab() {
       const unpaidTotal = state.utangRecords
         .filter((u) => !u.paid)
-        .reduce((sum, u) => sum + (Number(u.amount) || 0), 0);
+        .reduce((sum, u) => sum + getUtangRemaining(u), 0);
       const paidTotal = state.utangRecords
-        .filter((u) => !!u.paid)
-        .reduce((sum, u) => sum + (Number(u.amount) || 0), 0);
+        .reduce((sum, u) => sum + (u.paid ? (Number(u.amount) || 0) : (Number(u.paidAmount) || 0)), 0);
       const unpaidCount = state.utangRecords.filter((u) => !u.paid).length;
 
       const unpaidEl = document.getElementById('utang-unpaid-banner');
@@ -2404,30 +2855,43 @@
 
       listEl.innerHTML = filtered.map((u) => {
         const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }) : '';
+        const originalAmt = Number(u.amount) || 0;
+        const remainingAmt = getUtangRemaining(u);
+        const paidAmt = Math.max(0, originalAmt - remainingAmt);
+        const isPartial = !u.paid && paidAmt > 0;
         return `
           <div class="bg-white rounded-3xl p-4 shadow-card border ${u.paid ? 'border-emerald-200/80' : 'border-amber-200'} flex items-center justify-between gap-3">
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <p class="text-sm font-black text-slate-900 truncate">${escapeHtml(u.customerName)}</p>
                 <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                  u.paid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'
-                }">${u.paid ? 'PAID' : 'UNPAID'}</span>
+                  u.paid ? 'bg-emerald-100 text-emerald-700' : isPartial ? 'bg-sky-100 text-sky-800' : 'bg-amber-100 text-amber-800'
+                }">${u.paid ? 'PAID' : isPartial ? 'PARTIAL' : 'UNPAID'}</span>
                 ${dateStr ? `<span class="text-[10px] font-semibold text-slate-400">${escapeHtml(dateStr)}</span>` : ''}
               </div>
               <p class="text-xs font-semibold text-slate-500 truncate mt-0.5">${escapeHtml(u.note || '')}</p>
-              <p class="text-sm font-black ${u.paid ? 'text-emerald-700' : 'text-amber-700'} mt-1">${formatPeso(u.amount)}</p>
+              <p class="text-sm font-black ${u.paid ? 'text-emerald-700' : 'text-amber-700'} mt-1">
+                ${u.paid ? `Paid: ${formatPeso(originalAmt)}` : `Bal: ${formatPeso(remainingAmt)}`}
+              </p>
+              ${paidAmt > 0 && !u.paid ? `<p class="text-[11px] font-bold text-emerald-700">Paid so far: ${formatPeso(paidAmt)} of ${formatPeso(originalAmt)}</p>` : ''}
             </div>
             <div class="flex flex-col gap-1.5 shrink-0">
+              ${!u.paid ? `
+                <button type="button" onclick="openPartialUtangModal('${u.id}')"
+                  class="min-h-[36px] px-3 py-1.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs font-extrabold transition">
+                  Partial Pay
+                </button>
+              ` : ''}
               <button type="button" onclick="toggleUtangPaid('${u.id}')"
-                class="px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition ${
+                class="min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-extrabold transition ${
                   u.paid
                     ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    : 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white'
                 }">
                 ${u.paid ? 'Mark Unpaid' : 'Mark Paid'}
               </button>
               <button type="button" onclick="deleteUtangRecord('${u.id}')"
-                class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-extrabold">
+                class="min-h-[36px] px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-600 text-xs font-extrabold">
                 Delete
               </button>
             </div>
@@ -2789,7 +3253,7 @@
       if (filterBar) {
         filterBar.innerHTML = filters.map((f) => `
           <button type="button" onclick="setReportFilter('${f.key}')"
-            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
+            class="min-h-[36px] px-3.5 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
               selectedReportFilter === f.key
                 ? 'bg-brand-purple text-white'
                 : 'bg-white text-slate-600 border border-slate-200'
@@ -2835,7 +3299,7 @@
             </div>
             ${!tx.voided ? `
               <button type="button" onclick="openVoidModal('${tx.id}')"
-                class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-extrabold shrink-0">
+                class="min-h-[36px] px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-600 text-xs font-extrabold shrink-0">
                 Void
               </button>
             ` : ''}
@@ -2909,7 +3373,7 @@
       chartEl.innerHTML = topTen.map((item, idx) => {
         const pct = Math.max(4, Math.round((item.unitsSold / maxUnits) * 100));
         const badgeClass = item.unitsSold > 0
-          ? 'bg-purple-100 text-brand-purple'
+          ? 'theme-accent-badge'
           : 'bg-slate-200 text-slate-600';
         return `
           <div class="bg-white rounded-2xl p-2.5 border border-slate-100 space-y-1">
@@ -2921,11 +3385,171 @@
               <span class="font-extrabold text-slate-700 shrink-0">${item.unitsSold} sold • ${formatPeso(item.salesTotal)}</span>
             </div>
             <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div class="h-full rounded-full ${item.unitsSold > 0 ? 'bg-brand-purple' : 'bg-slate-300'}" style="width: ${pct}%"></div>
+              <div class="h-full rounded-full ${item.unitsSold > 0 ? 'theme-accent-btn' : 'bg-slate-300'}" style="width: ${pct}%"></div>
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    // Derive a cohesive UI palette from the #1 best-selling product
+    function getBestSellerThemePalette(product) {
+      if (!product) {
+        return {
+          name: 'Pink Default',
+          bg: '#FDF2F8',
+          border: '#FBCFE8',
+          accent: '#DB2777',
+          accentDark: '#BE185D',
+          accentLight: '#EC4899',
+          accentSoft: '#FCE7F3',
+          accentText: '#BE185D',
+          glow: 'rgba(219, 39, 119, 0.48)'
+        };
+      }
+
+      const text = `${product.name || ''} ${product.category || ''} ${product.pos || ''}`.toLowerCase();
+      if (text.includes('coke') || text.includes('cola') || text.includes('red') || text.includes('marlboro') || text.includes('sardinas') || text.includes('tomato')) {
+        return {
+          name: 'Crimson Red',
+          bg: '#FEF2F2',
+          border: '#FECACA',
+          accent: '#DC2626',
+          accentDark: '#B91C1C',
+          accentLight: '#EF4444',
+          accentSoft: '#FEE2E2',
+          accentText: '#B91C1C',
+          glow: 'rgba(220, 38, 38, 0.45)'
+        };
+      }
+      if (text.includes('sprite') || text.includes('mint') || text.includes('menthol') || text.includes('green') || text.includes('rice') || text.includes('bigas') || text.includes('vegetable')) {
+        return {
+          name: 'Emerald Green',
+          bg: '#ECFDF5',
+          border: '#A7F3D0',
+          accent: '#059669',
+          accentDark: '#047857',
+          accentLight: '#10B981',
+          accentSoft: '#D1FAE5',
+          accentText: '#047857',
+          glow: 'rgba(5, 150, 105, 0.45)'
+        };
+      }
+      if (text.includes('royal') || text.includes('orange') || text.includes('mango') || text.includes('cheese') || text.includes('canton') || text.includes('noodle')) {
+        return {
+          name: 'Warm Amber',
+          bg: '#FFFBEB',
+          border: '#FDE68A',
+          accent: '#D97706',
+          accentDark: '#B45309',
+          accentLight: '#F59E0B',
+          accentSoft: '#FEF3C7',
+          accentText: '#B45309',
+          glow: 'rgba(217, 119, 6, 0.45)'
+        };
+      }
+      if (text.includes('water') || text.includes('tubig') || text.includes('blue') || text.includes('soap') || text.includes('safeguard') || text.includes('detergent')) {
+        return {
+          name: 'Ocean Blue',
+          bg: '#F0F9FF',
+          border: '#BAE6FD',
+          accent: '#0284C7',
+          accentDark: '#0369A1',
+          accentLight: '#0EA5E9',
+          accentSoft: '#E0F2FE',
+          accentText: '#0369A1',
+          glow: 'rgba(2, 132, 199, 0.45)'
+        };
+      }
+      if (text.includes('coffee') || text.includes('kape') || text.includes('choco') || text.includes('winston') || text.includes('brown')) {
+        return {
+          name: 'Roasted Mocha',
+          bg: '#FAF5F0',
+          border: '#E7D5C4',
+          accent: '#92400E',
+          accentDark: '#78350F',
+          accentLight: '#B45309',
+          accentSoft: '#F3E8DC',
+          accentText: '#78350F',
+          glow: 'rgba(146, 64, 14, 0.45)'
+        };
+      }
+
+      // Deterministic fallback hue based on product name so any custom product gets a distinct theme
+      let hash = 0;
+      const seed = String(product.name || 'item');
+      for (let i = 0; i < seed.length; i++) {
+        hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const hue = Math.abs(hash) % 360;
+      return {
+        name: `Hue ${hue}°`,
+        bg: `hsl(${hue}, 85%, 97%)`,
+        border: `hsl(${hue}, 78%, 88%)`,
+        accent: `hsl(${hue}, 76%, 46%)`,
+        accentDark: `hsl(${hue}, 80%, 37%)`,
+        accentLight: `hsl(${hue}, 82%, 55%)`,
+        accentSoft: `hsl(${hue}, 88%, 93%)`,
+        accentText: `hsl(${hue}, 78%, 35%)`,
+        glow: `hsla(${hue}, 78%, 45%, 0.45)`
+      };
+    }
+
+    function applyBestSellerUiTheme() {
+      const salesByKey = new Map();
+      for (const tx of state.transactions || []) {
+        if (!tx || tx.voided || tx.kind !== 'sale' || !Array.isArray(tx.items)) continue;
+        for (const item of tx.items) {
+          const qty = Math.max(0, Number(item.qty) || 0);
+          const price = Math.max(0, Number(item.price) || 0);
+          const key = item.productId || item.name;
+          if (!key) continue;
+          const prev = salesByKey.get(key) || {
+            productId: item.productId || '',
+            name: item.name || 'Item',
+            pos: tx.pos || 'store',
+            unitsSold: 0,
+            salesTotal: 0
+          };
+          prev.unitsSold += qty;
+          prev.salesTotal += qty * price;
+          salesByKey.set(key, prev);
+        }
+      }
+
+      const rankedSales = Array.from(salesByKey.values()).sort((a, b) => {
+        if (b.unitsSold !== a.unitsSold) return b.unitsSold - a.unitsSold;
+        return b.salesTotal - a.salesTotal;
+      });
+
+      const topSale = rankedSales[0] || null;
+      const matchedProduct = topSale
+        ? (state.products.find((p) => p.id === topSale.productId) ||
+           state.products.find((p) => p.name.toLowerCase() === String(topSale.name || '').toLowerCase()) ||
+           { name: topSale.name, category: '', pos: topSale.pos })
+        : null;
+
+      const palette = getBestSellerThemePalette(matchedProduct);
+      const rootStyle = document.documentElement.style;
+      rootStyle.setProperty('--ui-bg', palette.bg);
+      rootStyle.setProperty('--ui-border', palette.border);
+      rootStyle.setProperty('--ui-accent', palette.accent);
+      rootStyle.setProperty('--ui-accent-dark', palette.accentDark);
+      rootStyle.setProperty('--ui-accent-light', palette.accentLight);
+      rootStyle.setProperty('--ui-accent-soft', palette.accentSoft);
+      rootStyle.setProperty('--ui-accent-text', palette.accentText);
+      rootStyle.setProperty('--ui-glow', palette.glow);
+
+      const pill = document.getElementById('best-seller-ui-pill');
+      if (pill) {
+        if (topSale && topSale.unitsSold > 0) {
+          pill.textContent = `Best Seller UI: ${topSale.name} (${topSale.unitsSold} sold)`;
+          pill.classList.remove('hidden');
+        } else {
+          pill.textContent = '';
+          pill.classList.add('hidden');
+        }
+      }
     }
 
     // Barcode Scanner (Camera BarcodeDetector + ZXing Fallback + Manual/USB Scanner input)
@@ -3190,6 +3814,7 @@
     }
 
     function renderAll() {
+      applyBestSellerUiTheme();
       renderStoreCatalog();
       renderSoftdrinksCatalog();
       renderCigarettesCatalog();
@@ -3216,6 +3841,17 @@
         startCloudPolling();
       }
     };
+
+    document.addEventListener('pointerdown', (e) => {
+      const target = e.target?.closest?.('button, [role="button"]');
+      if (!target || target.disabled) return;
+      target.classList.remove('btn-bounce-active');
+      void target.offsetWidth;
+      target.classList.add('btn-bounce-active');
+      window.setTimeout(() => {
+        target.classList.remove('btn-bounce-active');
+      }, 420);
+    }, { passive: true });
   </script>
 </body>
 </html>
