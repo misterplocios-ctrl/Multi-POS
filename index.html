@@ -526,10 +526,17 @@
                 class="w-full rounded-2xl border border-slate-200 px-3 py-2.5 font-bold text-slate-900" />
             </div>
           </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Image URL (optional)</label>
-            <input id="editor-image" type="text" placeholder="https://..."
-              class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900" />
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Low Stock Alert At</label>
+              <input id="editor-low-stock" type="number" step="1" min="0" required placeholder="5"
+                class="w-full rounded-2xl border border-amber-200 bg-amber-50/40 px-3.5 py-2.5 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Image URL (optional)</label>
+              <input id="editor-image" type="text" placeholder="https://..."
+                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900" />
+            </div>
           </div>
           <div class="flex items-center gap-2 pt-1">
             <button type="button" id="editor-delete-btn" onclick="deleteProductFromEditor()"
@@ -656,15 +663,15 @@
     const AUTOSYNC_KEY = 'sarisari_pos_autosync_v1';
 
     const DEFAULT_PRODUCTS = [
-      { id: 'p-1', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 15, cost: 11.5, stock: 36, image: 'https://placehold.co/300x200/f3e8ff/5b21b6?text=Pancit+Canton' },
-      { id: 'p-2', pos: 'store', name: 'Argentina Corned Beef 150g', category: 'Canned Goods', price: 38, cost: 31, stock: 20, image: 'https://placehold.co/300x200/ede9fe/4c1d95?text=Corned+Beef' },
-      { id: 'p-3', pos: 'store', name: 'Safeguard White Bar', category: 'Bath & Hygiene', price: 24, cost: 19, stock: 18, image: 'https://placehold.co/300x200/e0e7ff/3730a3?text=Safeguard' },
-      { id: 'p-4', pos: 'store', name: 'Bear Brand Swakpack 33g', category: 'Milk & Coffee', price: 13, cost: 10, stock: 45, image: 'https://placehold.co/300x200/fce7f3/9d174d?text=Bear+Brand' },
-      { id: 'p-5', pos: 'softdrinks', name: 'Coca-Cola Mismo 295ml', category: 'Softdrinks', price: 15, cost: 11, stock: 48, image: 'https://placehold.co/300x200/fee2e2/991b1b?text=Coke+Mismo' },
-      { id: 'p-6', pos: 'softdrinks', name: 'Sprite Mismo 295ml', category: 'Softdrinks', price: 15, cost: 11, stock: 36, image: 'https://placehold.co/300x200/dcfce7/166534?text=Sprite+Mismo' },
-      { id: 'p-7', pos: 'softdrinks', name: 'Royal Tru-Orange Mismo', category: 'Softdrinks', price: 15, cost: 11, stock: 30, image: 'https://placehold.co/300x200/ffedd5/9a3412?text=Royal+Mismo' },
-      { id: 'p-8', pos: 'cigarettes', name: 'Marlboro Red (Stick)', category: 'Sticks', price: 10, cost: 7.5, stock: 100, image: 'https://placehold.co/300x200/fef3c7/92400e?text=Marlboro+Red' },
-      { id: 'p-9', pos: 'cigarettes', name: 'Fortune Red (Stick)', category: 'Sticks', price: 7, cost: 5, stock: 120, image: 'https://placehold.co/300x200/f1f5f9/334155?text=Fortune+Red' }
+      { id: 'p-1', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 15, cost: 11.5, stock: 36, lowStockThreshold: 5, image: 'https://placehold.co/300x200/f3e8ff/5b21b6?text=Pancit+Canton' },
+      { id: 'p-2', pos: 'store', name: 'Argentina Corned Beef 150g', category: 'Canned Goods', price: 38, cost: 31, stock: 20, lowStockThreshold: 5, image: 'https://placehold.co/300x200/ede9fe/4c1d95?text=Corned+Beef' },
+      { id: 'p-3', pos: 'store', name: 'Safeguard White Bar', category: 'Bath & Hygiene', price: 24, cost: 19, stock: 18, lowStockThreshold: 5, image: 'https://placehold.co/300x200/e0e7ff/3730a3?text=Safeguard' },
+      { id: 'p-4', pos: 'store', name: 'Bear Brand Swakpack 33g', category: 'Milk & Coffee', price: 13, cost: 10, stock: 45, lowStockThreshold: 10, image: 'https://placehold.co/300x200/fce7f3/9d174d?text=Bear+Brand' },
+      { id: 'p-5', pos: 'softdrinks', name: 'Coca-Cola Mismo 295ml', category: 'Softdrinks', price: 15, cost: 11, stock: 48, lowStockThreshold: 10, image: 'https://placehold.co/300x200/fee2e2/991b1b?text=Coke+Mismo' },
+      { id: 'p-6', pos: 'softdrinks', name: 'Sprite Mismo 295ml', category: 'Softdrinks', price: 15, cost: 11, stock: 36, lowStockThreshold: 10, image: 'https://placehold.co/300x200/dcfce7/166534?text=Sprite+Mismo' },
+      { id: 'p-7', pos: 'softdrinks', name: 'Royal Tru-Orange Mismo', category: 'Softdrinks', price: 15, cost: 11, stock: 30, lowStockThreshold: 10, image: 'https://placehold.co/300x200/ffedd5/9a3412?text=Royal+Mismo' },
+      { id: 'p-8', pos: 'cigarettes', name: 'Marlboro Red (Stick)', category: 'Sticks', price: 10, cost: 7.5, stock: 100, lowStockThreshold: 20, image: 'https://placehold.co/300x200/fef3c7/92400e?text=Marlboro+Red' },
+      { id: 'p-9', pos: 'cigarettes', name: 'Fortune Red (Stick)', category: 'Sticks', price: 7, cost: 5, stock: 120, lowStockThreshold: 20, image: 'https://placehold.co/300x200/f1f5f9/334155?text=Fortune+Red' }
     ];
 
     let state = {
@@ -855,21 +862,52 @@
       renderProductGrid(grid, items);
     }
 
+    function isProductLowStock(product) {
+      const stock = Number(product.stock) || 0;
+      const threshold = product.lowStockThreshold !== undefined && product.lowStockThreshold !== null
+        ? Number(product.lowStockThreshold)
+        : 5;
+      return stock > 0 && stock <= threshold;
+    }
+
+    function renderLowStockBanner(items) {
+      const lowItems = items.filter((p) => (Number(p.stock) || 0) <= (p.lowStockThreshold !== undefined ? Number(p.lowStockThreshold) : 5));
+      if (!lowItems.length) return '';
+      const names = lowItems.slice(0, 4).map((p) => `${p.name} (${p.stock})`).join(', ');
+      const extra = lowItems.length > 4 ? ` +${lowItems.length - 4} more` : '';
+      return `
+        <div class="col-span-full bg-amber-50 border border-amber-200 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase shrink-0">Low Stock (${lowItems.length})</span>
+            <p class="text-xs font-extrabold text-amber-900 truncate">${names}${extra}</p>
+          </div>
+        </div>
+      `;
+    }
+
     function renderProductGrid(container, items) {
       if (!items.length) {
         container.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No products found.</div>`;
         return;
       }
 
-      container.innerHTML = items.map((p) => {
+      const alertBannerHtml = renderLowStockBanner(items);
+
+      container.innerHTML = alertBannerHtml + items.map((p) => {
         const outOfStock = Number(p.stock) <= 0;
+        const lowStock = isProductLowStock(p);
+        const threshold = p.lowStockThreshold !== undefined ? Number(p.lowStockThreshold) : 5;
         return `
-          <div class="bg-white rounded-3xl p-3 shadow-card border border-slate-100 flex flex-col justify-between gap-2">
+          <div class="bg-white rounded-3xl p-3 shadow-card border ${
+            outOfStock ? 'border-rose-200' : lowStock ? 'border-amber-300 bg-amber-50/20' : 'border-slate-100'
+          } flex flex-col justify-between gap-2">
             <div onclick="openDetailModal('${p.id}')" class="cursor-pointer space-y-1.5">
               ${renderProductMedia(p)}
               <div class="flex items-center justify-between gap-1">
                 <span class="text-[10px] font-bold text-slate-400 truncate">${p.category || 'Item'}</span>
-                <span class="text-[10px] font-extrabold ${outOfStock ? 'text-rose-600' : 'text-slate-500'}">Stk: ${p.stock}</span>
+                <span class="text-[10px] font-extrabold ${
+                  outOfStock ? 'text-rose-600' : lowStock ? 'text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full' : 'text-slate-500'
+                }">${outOfStock ? 'Out of Stock' : lowStock ? `Low: ${p.stock}/${threshold}` : `Stk: ${p.stock}`}</span>
               </div>
               <h3 class="text-xs font-extrabold text-slate-900 line-clamp-2 leading-snug">${p.name}</h3>
             </div>
@@ -899,6 +937,8 @@
       const modal = document.getElementById('detail-modal');
       const box = document.getElementById('detail-content');
       const profitPerUnit = Math.max(0, (Number(p.price) || 0) - (Number(p.cost) || 0));
+      const threshold = p.lowStockThreshold !== undefined ? Number(p.lowStockThreshold) : 5;
+      const isLow = (Number(p.stock) || 0) <= threshold;
       box.innerHTML = `
         <div class="flex items-center justify-between">
           <span class="text-xs font-extrabold uppercase text-brand-purple">${p.pos} • ${p.category || 'Item'}</span>
@@ -906,8 +946,11 @@
         </div>
         ${renderProductMedia(p)}
         <div>
-          <h3 class="text-base font-black text-slate-900">${p.name}</h3>
-          <p class="text-xs font-semibold text-slate-500 mt-0.5">Stock: ${p.stock} • Cost: ${formatPeso(p.cost)} • Kita/unit: ${formatPeso(profitPerUnit)}</p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-base font-black text-slate-900">${p.name}</h3>
+            ${isLow ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase">Low Stock Alert (&le;${threshold})</span>` : ''}
+          </div>
+          <p class="text-xs font-semibold text-slate-500 mt-0.5">Stock: ${p.stock} (Alert at: ${threshold}) • Cost: ${formatPeso(p.cost)} • Kita/unit: ${formatPeso(profitPerUnit)}</p>
         </div>
         <div class="flex items-center justify-between pt-2">
           <span class="text-xl font-black text-brand-purple">${formatPeso(p.price)}</span>
@@ -947,6 +990,7 @@
         document.getElementById('editor-price').value = p.price ?? 0;
         document.getElementById('editor-cost').value = p.cost ?? 0;
         document.getElementById('editor-stock').value = p.stock ?? 0;
+        document.getElementById('editor-low-stock').value = p.lowStockThreshold ?? 5;
         document.getElementById('editor-image').value = p.image || '';
       } else {
         title.textContent = 'Add Product';
@@ -957,6 +1001,7 @@
         document.getElementById('editor-price').value = '';
         document.getElementById('editor-cost').value = '';
         document.getElementById('editor-stock').value = '10';
+        document.getElementById('editor-low-stock').value = '5';
         document.getElementById('editor-image').value = '';
       }
       modal.classList.remove('hidden');
@@ -1015,6 +1060,7 @@
         const price = Math.max(0, parseFloat(document.getElementById('editor-price').value) || 0);
         const cost = Math.max(0, parseFloat(document.getElementById('editor-cost').value) || 0);
         const stock = Math.max(0, parseInt(document.getElementById('editor-stock').value, 10) || 0);
+        const lowStockThreshold = Math.max(0, parseInt(document.getElementById('editor-low-stock').value, 10) || 0);
         const image = document.getElementById('editor-image').value.trim();
 
         if (!name) return showToast('Enter product name', true);
@@ -1022,7 +1068,7 @@
         if (id) {
           const idx = state.products.findIndex((p) => p.id === id);
           if (idx !== -1) {
-            state.products[idx] = { ...state.products[idx], pos, name, category, price, cost, stock, image };
+            state.products[idx] = { ...state.products[idx], pos, name, category, price, cost, stock, lowStockThreshold, image };
           }
           showToast('Product updated');
         } else {
@@ -1034,6 +1080,7 @@
             price,
             cost,
             stock,
+            lowStockThreshold,
             image
           });
           showToast('Product added');
@@ -1249,6 +1296,7 @@
 
         const method = document.getElementById('cart-payment-method')?.value || 'Cash';
         const nowIso = new Date().toISOString();
+        const lowStockTriggered = [];
 
         // Group sales by counter so each counter gets a clean transaction entry
         const grouped = {};
@@ -1263,28 +1311,32 @@
           const prod = state.products.find((p) => p.id === item.productId);
           if (prod) {
             prod.stock = Math.max(0, (Number(prod.stock) || 0) - qty);
+            const threshold = prod.lowStockThreshold !== undefined ? Number(prod.lowStockThreshold) : 5;
+            if (prod.stock <= threshold) {
+              lowStockTriggered.push(`${prod.name} (${prod.stock} left)`);
+            }
           }
 
           if (!grouped[pos]) {
-            grouped[pos] = { amount: 0, profit: 0, items: [] };
+            grouped[pos] = {
+              pos,
+              items: [],
+              amount: 0,
+              profit: 0
+            };
           }
+          grouped[pos].items.push({ productId: item.productId, name: item.name, qty, price, cost });
           grouped[pos].amount += amount;
           grouped[pos].profit += profit;
-          grouped[pos].items.push({
-            productId: item.productId,
-            name: item.name,
-            qty,
-            price
-          });
         }
 
-        Object.entries(grouped).forEach(([pos, grp]) => {
-          const summaryText = grp.items.map((i) => `${i.name} x${i.qty}`).join(', ');
+        Object.values(grouped).forEach((grp, idx) => {
+          const summaryTitle = grp.items.map((i) => `${i.name} x${i.qty}`).join(', ');
           state.transactions.unshift({
-            id: 'tx-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+            id: `tx-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
             kind: 'sale',
-            pos,
-            title: summaryText,
+            pos: grp.pos,
+            title: summaryTitle,
             amount: grp.amount,
             profit: grp.profit,
             paymentMethod: method,
@@ -1301,7 +1353,12 @@
         saveState();
         closeCartDrawer();
         renderAll();
-        showToast('Sale completed!');
+
+        if (lowStockTriggered.length > 0) {
+          showToast(`Sale completed! Low stock: ${lowStockTriggered.join(', ')}`, true);
+        } else {
+          showToast('Sale completed!');
+        }
       } catch (err) {
         console.error('Checkout error:', err);
         showToast('Checkout failed', true);
@@ -1313,31 +1370,34 @@
       currentGcashType = type;
       ['cash_in', 'cash_out', 'eload'].forEach((t) => {
         const btn = document.getElementById(`gcash-type-${t}`);
-        if (btn) {
-          btn.className = t === type
-            ? 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition'
-            : 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
-        }
+        if (!btn) return;
+        btn.className = t === type
+          ? 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition'
+          : 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
       });
-      autoSuggestGcashFee();
     }
 
     function setGcashAmount(val) {
-      const input = document.getElementById('gcash-amount');
-      if (input) {
-        input.value = String(val);
+      const inp = document.getElementById('gcash-amount');
+      if (inp) {
+        inp.value = val;
         autoSuggestGcashFee();
       }
     }
 
     function autoSuggestGcashFee() {
       const amt = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
-      const feeInput = document.getElementById('gcash-fee');
-      if (!feeInput || amt <= 0) return;
-      const suggested = amt <= 500 ? 10 : Math.ceil(amt / 500) * 10;
-      if (feeInput.value === '' || feeInput.dataset.auto === 'true') {
-        feeInput.value = String(suggested);
-        feeInput.dataset.auto = 'true';
+      const feeInp = document.getElementById('gcash-fee');
+      if (!feeInp) return;
+      if (amt <= 0) {
+        feeInp.value = '';
+        return;
+      }
+      if (currentGcashType === 'eload') {
+        feeInp.value = amt >= 50 ? '5' : '3';
+      } else {
+        const suggested = Math.max(10, Math.ceil(amt / 500) * 10);
+        feeInp.value = String(suggested);
       }
     }
 
@@ -1346,32 +1406,34 @@
       const fee = document.getElementById('gcash-fee');
       const note = document.getElementById('gcash-note');
       if (amt) amt.value = '';
-      if (fee) {
-        fee.value = '';
-        fee.dataset.auto = 'true';
-      }
+      if (fee) fee.value = '';
       if (note) note.value = '';
     }
 
     function recordGcashTransaction() {
       try {
-        const amount = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
+        const amount = Math.max(0, parseFloat(document.getElementById('gcash-amount')?.value) || 0);
         const fee = Math.max(0, parseFloat(document.getElementById('gcash-fee')?.value) || 0);
         const note = (document.getElementById('gcash-note')?.value || '').trim();
-        if (amount <= 0) return showToast('Enter valid GCash / E-Load amount', true);
 
-        const labelMap = {
+        if (amount <= 0) {
+          return showToast('Enter a valid GCash amount', true);
+        }
+
+        const typeLabels = {
           cash_in: 'GCash Cash In',
           cash_out: 'GCash Cash Out',
           eload: 'E-Load'
         };
+        const baseTitle = `${typeLabels[currentGcashType] || 'GCash'} (${formatPeso(amount)})`;
+        const fullTitle = note ? `${baseTitle} - ${note}` : baseTitle;
 
         state.transactions.unshift({
-          id: 'tx-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-          kind: 'gcash',
+          id: `tx-gcash-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          kind: 'sale',
           pos: 'gcash',
-          title: `${labelMap[currentGcashType] || 'GCash'}${note ? ` (${note})` : ''}`,
-          amount,
+          title: fullTitle,
+          amount: amount,
           profit: fee,
           paymentMethod: 'GCash',
           voided: false,
@@ -1381,15 +1443,19 @@
         saveState();
         clearGcashForm();
         renderAll();
-        showToast('GCash entry recorded');
+        showToast('GCash entry recorded!');
       } catch (err) {
-        console.error('GCash error:', err);
-        showToast('Failed to record GCash entry', true);
+        console.error('GCash record error:', err);
+        showToast('Failed to record GCash', true);
       }
     }
 
-    // Expense Modal & Recording (deducts from Total Amount only)
+    // Expense Modal & Recording
     function openExpenseModal() {
+      const counterSel = document.getElementById('expense-counter');
+      if (counterSel && ['store', 'softdrinks', 'cigarettes', 'gcash'].includes(currentTab)) {
+        counterSel.value = currentTab;
+      }
       document.getElementById('expense-modal')?.classList.remove('hidden');
     }
 
@@ -1402,11 +1468,14 @@
       try {
         const pos = document.getElementById('expense-counter')?.value || 'general';
         const desc = (document.getElementById('expense-desc')?.value || '').trim();
-        const amount = parseFloat(document.getElementById('expense-amount')?.value) || 0;
-        if (!desc || amount <= 0) return showToast('Enter expense description and amount', true);
+        const amount = Math.max(0, parseFloat(document.getElementById('expense-amount')?.value) || 0);
+
+        if (!desc || amount <= 0) {
+          return showToast('Enter valid expense details', true);
+        }
 
         state.transactions.unshift({
-          id: 'tx-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          id: `tx-exp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
           kind: 'expense',
           pos,
           title: desc,
@@ -1424,29 +1493,29 @@
         renderAll();
         showToast('Expense recorded');
       } catch (err) {
-        console.error('Expense error:', err);
-        showToast('Failed to record expense', true);
+        console.error('Record expense error:', err);
+        showToast('Failed to save expense', true);
       }
     }
 
-    // Void Transaction with Confirmation Modal
+    // Void Transaction Modal
     function openVoidModal(txId) {
       const tx = state.transactions.find((t) => t.id === txId);
       if (!tx || tx.voided) return;
       pendingVoidId = txId;
+
       const modal = document.getElementById('void-modal');
       const titleEl = modal?.querySelector('h3');
       const descEl = document.getElementById('void-modal-desc');
       const btn = document.getElementById('void-confirm-btn');
+
       if (titleEl) titleEl.textContent = 'Confirm Void Transaction';
-      if (descEl) {
-        descEl.textContent = `Void "${tx.title}" (${formatPeso(tx.amount)})? ${tx.kind === 'sale' ? 'Stock will be restored.' : ''}`;
-      }
+      if (descEl) descEl.textContent = `Void "${tx.title}" (${formatPeso(tx.amount)})? Ibabalik nito ang stock kung product sale.`;
       if (btn) {
         btn.textContent = 'Void Transaction';
-        btn.onclick = () => confirmVoidTransaction(txId);
+        btn.onclick = confirmVoidTransaction;
       }
-      document.getElementById('void-modal')?.classList.remove('hidden');
+      modal?.classList.remove('hidden');
     }
 
     function closeVoidModal() {
@@ -1454,22 +1523,21 @@
       document.getElementById('void-modal')?.classList.add('hidden');
     }
 
-    function confirmVoidTransaction(txId) {
+    function confirmVoidTransaction() {
+      if (!pendingVoidId) return;
       try {
-        const tx = state.transactions.find((t) => t.id === txId);
-        if (!tx || tx.voided) return;
-        tx.voided = true;
-        tx.voidedAt = new Date().toISOString();
-
-        if (tx.kind === 'sale' && Array.isArray(tx.items)) {
-          tx.items.forEach((it) => {
-            const prod = state.products.find((p) => p.id === it.productId);
-            if (prod) {
-              prod.stock = (Number(prod.stock) || 0) + (Number(it.qty) || 0);
+        const tx = state.transactions.find((t) => t.id === pendingVoidId);
+        if (tx && !tx.voided) {
+          tx.voided = true;
+          if (tx.kind === 'sale' && Array.isArray(tx.items)) {
+            for (const item of tx.items) {
+              const prod = state.products.find((p) => p.id === item.productId);
+              if (prod) {
+                prod.stock = (Number(prod.stock) || 0) + (Number(item.qty) || 0);
+              }
             }
-          });
+          }
         }
-
         saveState();
         closeVoidModal();
         renderAll();
@@ -1480,12 +1548,8 @@
       }
     }
 
-    // Metrics & KPIs (Expenses deduct from Total Amount only, never from Sales)
+    // Metrics Computation (GCash sales & fees excluded from overall Total Benta & Total Kita)
     function computeMetrics() {
-      const now = Date.now();
-      const weekMs = 7 * 24 * 60 * 60 * 1000;
-      const monthMs = 30 * 24 * 60 * 60 * 1000;
-
       const counters = {
         store: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
         softdrinks: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
@@ -1501,53 +1565,54 @@
       let monthlySales = 0;
       let monthlyProfit = 0;
 
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
       for (const tx of state.transactions) {
         if (tx.voided) continue;
         const amt = Number(tx.amount) || 0;
         const prof = Number(tx.profit) || 0;
-        const ts = new Date(tx.createdAt || now).getTime();
-        const isWeekly = (now - ts) <= weekMs;
-        const isMonthly = (now - ts) <= monthMs;
+        const txDate = new Date(tx.createdAt || now);
+        const isWeekly = txDate >= sevenDaysAgo;
+        const isMonthly = txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
 
         if (tx.kind === 'expense') {
           totalExpenses += amt;
-        } else if (tx.kind === 'gcash' || tx.pos === 'gcash') {
-          // GCash fees remain in GCash counter totals and are excluded from overall Total Kita
-          const g = counters.gcash;
-          g.sales += prof;
-          g.profit += prof;
+          continue;
+        }
+
+        const pos = counters[tx.pos] ? tx.pos : 'store';
+        if (pos === 'gcash') {
+          // GCash counter tracks service fees (kita) separately without adding to overall Total Benta/Kita
+          counters.gcash.sales += prof;
+          counters.gcash.profit += prof;
           if (isWeekly) {
-            g.weeklySales += prof;
-            g.weeklyProfit += prof;
+            counters.gcash.weeklySales += prof;
+            counters.gcash.weeklyProfit += prof;
           }
           if (isMonthly) {
-            g.monthlySales += prof;
-            g.monthlyProfit += prof;
+            counters.gcash.monthlySales += prof;
+            counters.gcash.monthlyProfit += prof;
           }
         } else {
+          counters[pos].sales += amt;
+          counters[pos].profit += prof;
           grossSales += amt;
           grossProfit += prof;
+
           if (isWeekly) {
+            counters[pos].weeklySales += amt;
+            counters[pos].weeklyProfit += prof;
             weeklySales += amt;
             weeklyProfit += prof;
           }
           if (isMonthly) {
+            counters[pos].monthlySales += amt;
+            counters[pos].monthlyProfit += prof;
             monthlySales += amt;
             monthlyProfit += prof;
-          }
-
-          const c = counters[tx.pos];
-          if (c) {
-            c.sales += amt;
-            c.profit += prof;
-            if (isWeekly) {
-              c.weeklySales += amt;
-              c.weeklyProfit += prof;
-            }
-            if (isMonthly) {
-              c.monthlySales += amt;
-              c.monthlyProfit += prof;
-            }
           }
         }
       }
