@@ -256,10 +256,10 @@
               </span>
               <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
                 <span id="gcash-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
-                <span class="text-xs font-semibold text-slate-300">Total Benta</span>
+                <span class="text-xs font-semibold text-slate-300">Total Kita</span>
               </div>
               <p class="text-xs font-semibold text-emerald-300 mt-0.5">
-                Kita (Service Fee): <span id="gcash-profit-banner">₱0.00</span>
+                Service Fee Earned: <span id="gcash-profit-banner">₱0.00</span>
               </p>
             </div>
             <div class="text-right">
@@ -270,12 +270,12 @@
 
           <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Weekly Benta / Kita</p>
-              <p class="font-extrabold text-white mt-0.5"><span id="gcash-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="gcash-weekly-profit">₱0.00</span></span></p>
+              <p class="text-slate-400 font-semibold">Weekly Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="gcash-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ Fee <span id="gcash-weekly-profit">₱0.00</span></span></p>
             </div>
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Monthly Benta / Kita</p>
-              <p class="font-extrabold text-white mt-0.5"><span id="gcash-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="gcash-monthly-profit">₱0.00</span></span></p>
+              <p class="text-slate-400 font-semibold">Monthly Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="gcash-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ Fee <span id="gcash-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
         </div>
@@ -1511,6 +1511,23 @@
 
         if (tx.kind === 'expense') {
           totalExpenses += amt;
+        } else if (tx.kind === 'gcash' || tx.pos === 'gcash') {
+          // GCash entries contribute to Kita (service fee), not Total Benta
+          grossProfit += prof;
+          if (isWeekly) weeklyProfit += prof;
+          if (isMonthly) monthlyProfit += prof;
+
+          const g = counters.gcash;
+          g.sales += prof;
+          g.profit += prof;
+          if (isWeekly) {
+            g.weeklySales += prof;
+            g.weeklyProfit += prof;
+          }
+          if (isMonthly) {
+            g.monthlySales += prof;
+            g.monthlyProfit += prof;
+          }
         } else {
           grossSales += amt;
           grossProfit += prof;
@@ -1539,7 +1556,7 @@
         }
       }
 
-      const totalAmount = grossSales - totalExpenses;
+      const totalAmount = (grossSales + grossProfit) - totalExpenses;
       return {
         counters,
         grossSales,
@@ -1608,6 +1625,15 @@
       if (cardsEl) {
         cardsEl.innerHTML = ['store', 'softdrinks', 'cigarettes', 'gcash'].map((pos) => {
           const c = m.counters[pos];
+          if (pos === 'gcash') {
+            return `
+              <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1">
+                <p class="text-[11px] font-black text-slate-800">${labels[pos]}</p>
+                <p class="text-xs font-extrabold text-emerald-700">Kita: ${formatPeso(c.profit)}</p>
+                <p class="text-[10px] font-semibold text-slate-500">Wk Kita: ${formatPeso(c.weeklyProfit)} • Mo Kita: ${formatPeso(c.monthlyProfit)}</p>
+              </div>
+            `;
+          }
           return `
             <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1">
               <p class="text-[11px] font-black text-slate-800">${labels[pos]}</p>
@@ -1780,6 +1806,31 @@
       if (e.key === STORAGE_KEY && e.newValue) {
         loadState();
         renderAll();
+      }
+    });
+
+    // Move focus to the next visible field when pressing Enter inside forms/modals
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+      const target = e.target;
+      if (!target || !['INPUT', 'SELECT'].includes(target.tagName)) return;
+      if (target.type === 'submit' || target.type === 'button' || target.type === 'search') return;
+
+      const container = target.closest('form, #tab-gcash, #detail-modal, #cart-modal, #expense-modal, #editor-modal, #void-modal') || document;
+      const fields = Array.from(container.querySelectorAll('input, select, textarea, button[type="submit"]')).filter((el) => {
+        if (el.disabled || el.type === 'hidden' || el.type === 'file') return false;
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && getComputedStyle(el).visibility !== 'hidden';
+      });
+
+      const idx = fields.indexOf(target);
+      if (idx !== -1 && idx < fields.length - 1) {
+        const nextEl = fields[idx + 1];
+        if (nextEl.tagName === 'BUTTON' && nextEl.type === 'submit') {
+          return;
+        }
+        e.preventDefault();
+        nextEl.focus();
       }
     });
 
