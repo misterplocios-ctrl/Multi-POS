@@ -160,7 +160,13 @@
           </div>
         </div>
 
-        <div id="store-low-stock-alert" onclick="openLowStockModal('store')" role="button" tabindex="0"
+        <div id="store-out-of-stock-alert" onclick="openLowStockModal('store', 'out')" role="button" tabindex="0"
+          class="hidden cursor-pointer bg-rose-50 hover:bg-rose-100/80 active:scale-99 border border-rose-300 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 transition">
+          <p id="store-out-of-stock-text" class="text-xs font-extrabold text-rose-900"></p>
+          <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-200 text-rose-900 shrink-0">View All</span>
+        </div>
+
+        <div id="store-low-stock-alert" onclick="openLowStockModal('store', 'low')" role="button" tabindex="0"
           class="hidden cursor-pointer bg-amber-50 hover:bg-amber-100/80 active:scale-99 border border-amber-300 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 transition">
           <p id="store-low-stock-text" class="text-xs font-extrabold text-amber-900"></p>
           <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 shrink-0">View All</span>
@@ -215,7 +221,13 @@
           </div>
         </div>
 
-        <div id="softdrinks-low-stock-alert" onclick="openLowStockModal('softdrinks')" role="button" tabindex="0"
+        <div id="softdrinks-out-of-stock-alert" onclick="openLowStockModal('softdrinks', 'out')" role="button" tabindex="0"
+          class="hidden cursor-pointer bg-rose-50 hover:bg-rose-100/80 active:scale-99 border border-rose-300 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 transition">
+          <p id="softdrinks-out-of-stock-text" class="text-xs font-extrabold text-rose-900"></p>
+          <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-200 text-rose-900 shrink-0">View All</span>
+        </div>
+
+        <div id="softdrinks-low-stock-alert" onclick="openLowStockModal('softdrinks', 'low')" role="button" tabindex="0"
           class="hidden cursor-pointer bg-amber-50 hover:bg-amber-100/80 active:scale-99 border border-amber-300 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 transition">
           <p id="softdrinks-low-stock-text" class="text-xs font-extrabold text-amber-900"></p>
           <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 shrink-0">View All</span>
@@ -267,7 +279,13 @@
           </div>
         </div>
 
-        <div id="cigarettes-low-stock-alert" onclick="openLowStockModal('cigarettes')" role="button" tabindex="0"
+        <div id="cigarettes-out-of-stock-alert" onclick="openLowStockModal('cigarettes', 'out')" role="button" tabindex="0"
+          class="hidden cursor-pointer bg-rose-50 hover:bg-rose-100/80 active:scale-99 border border-rose-300 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 transition">
+          <p id="cigarettes-out-of-stock-text" class="text-xs font-extrabold text-rose-900"></p>
+          <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-200 text-rose-900 shrink-0">View All</span>
+        </div>
+
+        <div id="cigarettes-low-stock-alert" onclick="openLowStockModal('cigarettes', 'low')" role="button" tabindex="0"
           class="hidden cursor-pointer bg-amber-50 hover:bg-amber-100/80 active:scale-99 border border-amber-300 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 transition">
           <p id="cigarettes-low-stock-text" class="text-xs font-extrabold text-amber-900"></p>
           <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 shrink-0">View All</span>
@@ -849,20 +867,25 @@
       </div>
     </div>
 
-    <!-- LOW STOCK PRODUCTS MODAL -->
+    <!-- LOW STOCK & OUT OF STOCK PRODUCTS MODAL -->
     <div id="low-stock-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[88vh] overflow-y-auto">
         <div class="flex items-center justify-between gap-2">
           <div>
-            <h3 id="low-stock-modal-title" class="text-base font-black text-slate-900">Low Stock Products</h3>
-            <p id="low-stock-modal-subtitle" class="text-[11px] font-semibold text-slate-500">Items at or below alert threshold</p>
+            <h3 id="low-stock-modal-title" class="text-base font-black text-slate-900">Stock Alerts</h3>
+            <p id="low-stock-modal-subtitle" class="text-[11px] font-semibold text-slate-500">Out of stock and low stock items</p>
           </div>
           <button type="button" onclick="closeLowStockModal()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button type="button" id="low-stock-scope-counter" onclick="renderLowStockModal(lowStockModalPos, false)"
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button type="button" id="low-stock-type-out" onclick="renderLowStockModal(lowStockModalPos, lowStockModalAllCounters, 'out')"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">Out of Stock</button>
+          <button type="button" id="low-stock-type-low" onclick="renderLowStockModal(lowStockModalPos, lowStockModalAllCounters, 'low')"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition">Low Stock</button>
+          <span class="text-slate-300 mx-0.5">|</span>
+          <button type="button" id="low-stock-scope-counter" onclick="renderLowStockModal(lowStockModalPos, false, lowStockModalType)"
             class="px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition">This Counter</button>
-          <button type="button" id="low-stock-scope-all" onclick="renderLowStockModal(lowStockModalPos, true)"
+          <button type="button" id="low-stock-scope-all" onclick="renderLowStockModal(lowStockModalPos, true, lowStockModalType)"
             class="px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">All Counters</button>
         </div>
         <div id="low-stock-modal-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
@@ -1002,16 +1025,18 @@
     let activeGcashType = 'cash_in';
     let pendingVoidId = null;
     let lowStockModalPos = 'store';
+    let lowStockModalAllCounters = false;
+    let lowStockModalType = 'low';
     let barcodeScannerMode = 'pos';
     let barcodeStream = null;
     let barcodeScanFrame = null;
     let zxingReader = null;
     let lastScannedBarcode = '';
+    let toastTimer = null;
     let autoSyncEnabled = localStorage.getItem(AUTOSYNC_KEY) !== 'false';
     let cloudSyncTimer = null;
     let cloudPollInterval = null;
     let isSyncingCloud = false;
-    let toastTimer = null;
 
     function escapeHtml(str) {
       return String(str ?? '')
@@ -1020,6 +1045,17 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    function isOutOfStock(product) {
+      const stock = Number(product.stock) || 0;
+      return stock <= 0;
+    }
+
+    function isLowStock(product) {
+      const stock = Number(product.stock) || 0;
+      const threshold = Number(product.lowStockThreshold ?? 5);
+      return stock > 0 && stock <= threshold;
     }
 
     function formatPeso(num) {
@@ -1498,12 +1534,6 @@
       bar.classList.remove('hidden');
     }
 
-    function isLowStock(product) {
-      const stock = Number(product.stock) || 0;
-      const threshold = Number(product.lowStockThreshold ?? 5);
-      return stock <= threshold;
-    }
-
     function getExpiryStatus(expiryStr) {
       const clean = String(expiryStr || '').trim();
       if (!clean) return null;
@@ -1527,25 +1557,41 @@
     }
 
     function renderLowStockBanner(pos = 'store') {
-      const alertEl = document.getElementById(`${pos}-low-stock-alert`);
-      const textEl = document.getElementById(`${pos}-low-stock-text`);
-      if (!alertEl || !textEl) return;
+      const outAlertEl = document.getElementById(`${pos}-out-of-stock-alert`);
+      const outTextEl = document.getElementById(`${pos}-out-of-stock-text`);
+      const lowAlertEl = document.getElementById(`${pos}-low-stock-alert`);
+      const lowTextEl = document.getElementById(`${pos}-low-stock-text`);
 
-      const lowItems = state.products.filter((p) => p.pos === pos && isLowStock(p));
-      if (!lowItems.length) {
-        alertEl.classList.add('hidden');
-        return;
+      const outItems = state.products.filter((p) => p.pos === pos && isOutOfStock(p));
+      if (outAlertEl && outTextEl) {
+        if (!outItems.length) {
+          outAlertEl.classList.add('hidden');
+        } else {
+          const sample = outItems.slice(0, 2).map((p) => p.name).join(', ');
+          const extra = outItems.length > 2 ? ` +${outItems.length - 2} more` : '';
+          outTextEl.textContent = `Out of Stock (${outItems.length}): ${sample}${extra}`;
+          outAlertEl.classList.remove('hidden');
+        }
       }
 
-      const sample = lowItems.slice(0, 2).map((p) => `${p.name} (${p.stock})`).join(', ');
-      const extra = lowItems.length > 2 ? ` +${lowItems.length - 2} more` : '';
-      textEl.textContent = `Low Stock Alert (${lowItems.length}): ${sample}${extra}`;
-      alertEl.classList.remove('hidden');
+      const lowItems = state.products.filter((p) => p.pos === pos && isLowStock(p));
+      if (lowAlertEl && lowTextEl) {
+        if (!lowItems.length) {
+          lowAlertEl.classList.add('hidden');
+        } else {
+          const sample = lowItems.slice(0, 2).map((p) => `${p.name} (${p.stock})`).join(', ');
+          const extra = lowItems.length > 2 ? ` +${lowItems.length - 2} more` : '';
+          lowTextEl.textContent = `Low Stock Alert (${lowItems.length}): ${sample}${extra}`;
+          lowAlertEl.classList.remove('hidden');
+        }
+      }
     }
 
-    function openLowStockModal(pos = 'store') {
+    function openLowStockModal(pos = 'store', type = 'low') {
       lowStockModalPos = pos;
-      renderLowStockModal(pos, false);
+      lowStockModalAllCounters = false;
+      lowStockModalType = type === 'out' ? 'out' : 'low';
+      renderLowStockModal(pos, false, lowStockModalType);
       document.getElementById('low-stock-modal')?.classList.remove('hidden');
     }
 
@@ -1553,37 +1599,60 @@
       document.getElementById('low-stock-modal')?.classList.add('hidden');
     }
 
-    function renderLowStockModal(pos = 'store', allCounters = false) {
+    function renderLowStockModal(pos = 'store', allCounters = false, type = lowStockModalType) {
       lowStockModalPos = pos;
+      lowStockModalAllCounters = !!allCounters;
+      lowStockModalType = type === 'out' ? 'out' : 'low';
+
+      const typeOutBtn = document.getElementById('low-stock-type-out');
+      const typeLowBtn = document.getElementById('low-stock-type-low');
+      if (typeOutBtn && typeLowBtn) {
+        typeOutBtn.className = lowStockModalType === 'out'
+          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-rose-600 text-white transition'
+          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
+        typeLowBtn.className = lowStockModalType === 'low'
+          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-amber-600 text-white transition'
+          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
+      }
+
       const scopeCounterBtn = document.getElementById('low-stock-scope-counter');
       const scopeAllBtn = document.getElementById('low-stock-scope-all');
       if (scopeCounterBtn && scopeAllBtn) {
-        scopeCounterBtn.className = !allCounters
+        scopeCounterBtn.className = !lowStockModalAllCounters
           ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
           : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
-        scopeAllBtn.className = allCounters
+        scopeAllBtn.className = lowStockModalAllCounters
           ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
           : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
       }
 
       const titleEl = document.getElementById('low-stock-modal-title');
+      const subEl = document.getElementById('low-stock-modal-subtitle');
+      const isOutMode = lowStockModalType === 'out';
       if (titleEl) {
-        titleEl.textContent = allCounters ? 'All Low Stock Products' : `Low Stock — ${pos.toUpperCase()}`;
+        const label = isOutMode ? 'Out of Stock' : 'Low Stock';
+        titleEl.textContent = lowStockModalAllCounters ? `All ${label} Products` : `${label} — ${pos.toUpperCase()}`;
+      }
+      if (subEl) {
+        subEl.textContent = isOutMode ? 'Products with 0 stock remaining' : 'Products running low (above 0, at or below alert threshold)';
       }
 
       const listEl = document.getElementById('low-stock-modal-list');
       if (!listEl) return;
-      const items = state.products.filter((p) => (allCounters ? true : p.pos === pos) && isLowStock(p));
+      const matcher = isOutMode ? isOutOfStock : isLowStock;
+      const items = state.products.filter((p) => (lowStockModalAllCounters ? true : p.pos === pos) && matcher(p));
       if (!items.length) {
-        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-5 text-center text-xs font-bold text-slate-500">No low-stock items found.</div>`;
+        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-5 text-center text-xs font-bold text-slate-500">No ${isOutMode ? 'out-of-stock' : 'low-stock'} items found.</div>`;
         return;
       }
 
       listEl.innerHTML = items.map((p) => `
-        <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3 flex items-center justify-between gap-2">
+        <div class="${isOutMode ? 'bg-rose-50/70 border-rose-200' : 'bg-amber-50/70 border-amber-200'} border rounded-2xl p-3 flex items-center justify-between gap-2">
           <div class="min-w-0">
             <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(p.name)}</p>
-            <p class="text-[11px] font-bold text-amber-800">Stock: ${p.stock} (Alert ≤ ${p.lowStockThreshold}) • ${formatPeso(p.price)}</p>
+            <p class="text-[11px] font-bold ${isOutMode ? 'text-rose-800' : 'text-amber-800'}">
+              ${isOutMode ? 'Stock: 0 (Out of Stock)' : `Stock: ${p.stock} (Alert ≤ ${p.lowStockThreshold})`} • ${formatPeso(p.price)}
+            </p>
           </div>
           <button type="button" onclick="closeLowStockModal(); openEditorModal('${p.pos}', '${p.id}')"
             class="px-3 py-1.5 rounded-xl bg-brand-purple text-white text-[11px] font-extrabold shrink-0">
@@ -2005,6 +2074,7 @@
 
       let subtotalAmount = 0;
       let rawProfit = 0;
+      const outAlertNames = [];
       const lowAlertNames = [];
 
       for (const item of cart) {
@@ -2018,7 +2088,9 @@
             return showToast(`Insufficient stock for ${prod.name}`, true);
           }
           prod.stock = Math.max(0, (Number(prod.stock) || 0) - qty);
-          if (isLowStock(prod)) {
+          if (isOutOfStock(prod)) {
+            outAlertNames.push(prod.name);
+          } else if (isLowStock(prod)) {
             lowAlertNames.push(`${prod.name} (${prod.stock})`);
           }
         }
@@ -2080,7 +2152,11 @@
       closeCartDrawer();
       renderAll();
 
-      if (lowAlertNames.length) {
+      if (outAlertNames.length && lowAlertNames.length) {
+        showToast(`Sale saved! Out of stock: ${outAlertNames.join(', ')} | Low stock: ${lowAlertNames.join(', ')}`);
+      } else if (outAlertNames.length) {
+        showToast(`Sale saved! Out of stock: ${outAlertNames.join(', ')}`, true);
+      } else if (lowAlertNames.length) {
         showToast(`Sale saved! Low stock: ${lowAlertNames.join(', ')}`);
       } else {
         showToast(`Sale completed (${formatPeso(totalAmount)})`);
