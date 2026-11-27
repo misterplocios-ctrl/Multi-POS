@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Sari-Sari Store POS &amp; Ledger</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -999,6 +1000,7 @@
     let barcodeScannerMode = 'pos';
     let barcodeStream = null;
     let barcodeScanFrame = null;
+    let zxingReader = null;
     let lastScannedBarcode = '';
     let autoSyncEnabled = localStorage.getItem(AUTOSYNC_KEY) !== 'false';
     let cloudSyncTimer = null;
@@ -2780,50 +2782,51 @@
       }
 
       const maxUnits = Math.max(1, ...ranked.map((r) => r.unitsSold));
-      chartEl.innerHTML = ranked.map((r, idx) => {
-        const pct = Math.max(0, Math.min(100, Math.round((r.unitsSold / maxUnits) * 100)));
-        const isTop = r.unitsSold > 0 && idx < 3;
-        const barColor = r.unitsSold === 0
-          ? 'bg-slate-300'
-          : isTop
-            ? 'bg-brand-purple'
-            : 'bg-teal-500';
-
+      chartEl.innerHTML = ranked.map((item, idx) => {
+        const pct = Math.max(4, Math.round((item.unitsSold / maxUnits) * 100));
+        const badgeClass = item.unitsSold > 0
+          ? 'bg-purple-100 text-brand-purple'
+          : 'bg-slate-200 text-slate-600';
         return `
-          <div class="bg-white rounded-2xl p-2.5 border border-slate-100 space-y-1.5">
+          <div class="bg-white rounded-2xl p-2.5 border border-slate-100 space-y-1">
             <div class="flex items-center justify-between gap-2 text-xs">
               <div class="flex items-center gap-1.5 min-w-0">
-                <span class="text-[10px] font-black px-1.5 py-0.5 rounded-md ${
-                  r.unitsSold === 0 ? 'bg-slate-100 text-slate-500' : 'bg-purple-100 text-brand-purple'
-                }">#${idx + 1}</span>
-                <p class="font-extrabold text-slate-900 truncate">${escapeHtml(r.name)}</p>
-                <span class="text-[10px] font-bold uppercase text-slate-400 shrink-0">${escapeHtml(r.pos)}</span>
+                <span class="text-[10px] font-black px-1.5 py-0.5 rounded-md ${badgeClass} shrink-0">#${idx + 1}</span>
+                <span class="font-black text-slate-900 truncate">${escapeHtml(item.name)}</span>
               </div>
-              <div class="text-right shrink-0">
-                <span class="font-black text-slate-900">${r.unitsSold} sold</span>
-                <span class="text-[11px] font-bold text-emerald-700 ml-1">(${formatPeso(r.salesTotal)})</span>
-              </div>
+              <span class="font-extrabold text-slate-700 shrink-0">${item.unitsSold} sold • ${formatPeso(item.salesTotal)}</span>
             </div>
-            <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-              <div class="h-full rounded-full ${barColor} transition-all duration-300" style="width: ${pct}%;"></div>
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full rounded-full ${item.unitsSold > 0 ? 'bg-brand-purple' : 'bg-slate-300'}" style="width: ${pct}%"></div>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    // Barcode Scanner (Camera BarcodeDetector + Manual/USB Scanner input)
+    // Barcode Scanner (Camera BarcodeDetector + ZXing Fallback + Manual/USB Scanner input)
     function stopBarcodeCamera() {
       if (barcodeScanFrame) {
         cancelAnimationFrame(barcodeScanFrame);
         barcodeScanFrame = null;
+      }
+      if (zxingReader) {
+        try {
+          zxingReader.reset();
+        } catch (_) {
+          // Ignore ZXing reset errors
+        }
+        zxingReader = null;
       }
       if (barcodeStream) {
         barcodeStream.getTracks().forEach((track) => track.stop());
         barcodeStream = null;
       }
       const video = document.getElementById('barcode-video');
-      if (video) video.srcObject = null;
+      if (video) {
+        video.pause();
+        video.srcObject = null;
+      }
     }
 
     async function startBarcodeCamera() {
@@ -2875,6 +2878,30 @@
           };
 
           barcodeScanFrame = requestAnimationFrame(scanLoop);
+        } else if (window.ZXing && typeof window.ZXing.BrowserMultiFormatReader === 'function') {
+          const hints = new Map();
+          if (window.ZXing.DecodeHintType && window.ZXing.BarcodeFormat) {
+            hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+              window.ZXing.BarcodeFormat.EAN_13,
+              window.ZXing.BarcodeFormat.EAN_8,
+              window.ZXing.BarcodeFormat.UPC_A,
+              window.ZXing.BarcodeFormat.UPC_E,
+              window.ZXing.BarcodeFormat.CODE_128,
+              window.ZXing.BarcodeFormat.CODE_39,
+              window.ZXing.BarcodeFormat.CODABAR,
+              window.ZXing.BarcodeFormat.ITF,
+              window.ZXing.BarcodeFormat.QR_CODE
+            ]);
+          }
+          zxingReader = new window.ZXing.BrowserMultiFormatReader(hints);
+          zxingReader.decodeFromStream(barcodeStream, video, (result) => {
+            if (result && result.getText) {
+              const rawVal = String(result.getText() || '').trim();
+              if (rawVal) {
+                handleDetectedBarcode(rawVal);
+              }
+            }
+          });
         } else {
           if (statusEl) statusEl.textContent = 'Auto-camera scan not supported; use manual/USB input below.';
           if (fallback) fallback.classList.remove('hidden');
@@ -2935,14 +2962,11 @@
       const matched = state.products.find((p) => String(p.barcode || '').trim().toLowerCase() === cleanCode.toLowerCase());
       if (matched) {
         closeBarcodeScanner();
-        if ((Number(matched.stock) || 0) <= 0) {
-          showToast(`${matched.name} is out of stock`, true);
-          return;
-        }
-        addToCart(matched.id);
         if (['store', 'softdrinks', 'cigarettes'].includes(matched.pos) && currentTab !== matched.pos) {
           switchTab(matched.pos);
         }
+        openProductDetail(matched.id);
+        showToast(`Found: ${matched.name}`);
       } else {
         const unmatchedBox = document.getElementById('barcode-unmatched-box');
         const codeSpan = document.getElementById('barcode-unmatched-code');
