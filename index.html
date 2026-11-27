@@ -1749,7 +1749,7 @@
         : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Stock: ${stock}</span>`;
 
       const imgHtml = product.image
-        ? `<img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none'" class="w-full h-24 object-cover rounded-2xl mb-2 bg-slate-100" />`
+        ? `<img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none'" class="w-full max-h-28 object-contain rounded-2xl mb-2 bg-slate-50" />`
         : '';
 
       return `
