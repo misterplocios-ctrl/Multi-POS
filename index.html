@@ -68,6 +68,18 @@
       transform: translateY(-4px) scale(1.03);
       box-shadow: 0 8px 18px -6px rgba(109, 40, 217, 0.35);
     }
+    .nav-btn-active-highlight {
+      background: linear-gradient(135deg, rgba(109, 40, 217, 0.92) 0%, rgba(91, 33, 182, 0.95) 100%);
+      color: #FFFFFF !important;
+      box-shadow: 0 8px 20px -5px rgba(109, 40, 217, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.45), 0 0 0 1.5px rgba(255, 255, 255, 0.65);
+    }
+    .liquid-glass-dock {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(248, 250, 252, 0.56) 100%);
+      backdrop-filter: blur(22px) saturate(185%) contrast(106%);
+      -webkit-backdrop-filter: blur(22px) saturate(185%) contrast(106%);
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      box-shadow: 0 14px 34px -10px rgba(15, 23, 42, 0.22), 0 2px 8px -2px rgba(109, 40, 217, 0.12), inset 0 1.5px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.4);
+    }
   </style>
 </head>
 <body class="min-h-screen flex justify-center selection:bg-purple-200 selection:text-brand-dark">
@@ -423,32 +435,32 @@
     </div>
 
     <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md md:max-w-2xl bg-white/95 backdrop-blur border-t md:border md:bottom-3 md:rounded-2xl border-slate-200/80 px-2 py-1.5 z-30 grid grid-cols-5 gap-1 md:shadow-card">
-      <button type="button" id="nav-store" onclick="switchTab('store')" class="flex flex-col items-center py-1.5 rounded-xl text-brand-purple font-extrabold transition nav-btn-float">
+    <nav class="liquid-glass-dock fixed bottom-2 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-md md:max-w-2xl rounded-3xl md:bottom-3 px-2 py-1.5 z-30 grid grid-cols-5 gap-1">
+      <button type="button" id="nav-store" onclick="switchTab('store')" class="flex flex-col items-center py-1.5 rounded-2xl text-brand-purple font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 10l1-5h16l1 5M5 10v10h14V10M9 20v-6h6v6" />
         </svg>
         <span class="text-xs font-black">Store</span>
       </button>
-      <button type="button" id="nav-softdrinks" onclick="switchTab('softdrinks')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition">
+      <button type="button" id="nav-softdrinks" onclick="switchTab('softdrinks')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 3h8l-1 4H9L8 3zm1 4h6l-1 13a2 2 0 01-2 1.8h0A2 2 0 0110 20L9 7z" />
         </svg>
         <span class="text-xs font-black">Drinks</span>
       </button>
-      <button type="button" id="nav-cigarettes" onclick="switchTab('cigarettes')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition">
+      <button type="button" id="nav-cigarettes" onclick="switchTab('cigarettes')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 17h14v3H3v-3zm17 0h1v3h-1v-3zM18 13c0-1.5 2-2 2-3.5S18 7 18 5.5" />
         </svg>
         <span class="text-xs font-black">Yosi</span>
       </button>
-      <button type="button" id="nav-gcash" onclick="switchTab('gcash')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition">
+      <button type="button" id="nav-gcash" onclick="switchTab('gcash')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2m-3-3h7m0 0l-2.5-2.5M21 12l-2.5 2.5" />
         </svg>
         <span class="text-xs font-black">GCash</span>
       </button>
-      <button type="button" id="nav-reports" onclick="switchTab('reports')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition">
+      <button type="button" id="nav-reports" onclick="switchTab('reports')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9m6 10V5m6 14v-7m4 7H2" />
         </svg>
@@ -771,8 +783,8 @@
           nav.classList.remove('nav-btn-float');
           void nav.offsetWidth;
           nav.className = t === tabName
-            ? 'flex flex-col items-center py-1.5 rounded-xl bg-purple-50 text-brand-purple font-extrabold transition nav-btn-float'
-            : 'flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition';
+            ? 'flex flex-col items-center py-1.5 rounded-xl text-white font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight'
+            : 'flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90';
         }
       });
 
