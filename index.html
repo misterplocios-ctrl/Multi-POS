@@ -435,6 +435,22 @@
               <p class="text-[11px] font-semibold text-slate-500">Expenses deduct from Total Amount only</p>
             </div>
             <div class="flex items-center gap-1.5 flex-wrap">
+            <button type="button" onclick="openCloudSyncModal()"
+              class="px-2.5 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-brand-purple text-[11px] font-extrabold transition">
+              Device Sync
+            </button>
+            <button type="button" onclick="copyJsonBackup()"
+              class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
+              Copy JSON
+            </button>
+            <button type="button" onclick="openJsonRestoreModal()"
+              class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
+              Restore JSON
+            </button>
+            <button type="button" onclick="exportTransactionsCSV()"
+              class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
+              Export CSV
+            </button>
               <button type="button" onclick="exportTransactionsCSV()"
                 class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
                 Export CSV
@@ -792,6 +808,66 @@
       </div>
     </div>
 
+    <!-- CROSS-DEVICE CLOUD SYNC MODAL -->
+    <div id="cloud-sync-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-black text-slate-900">Cross-Device Auto Sync</h3>
+            <p class="text-[11px] font-semibold text-slate-500">Use the same Sync Code on all devices to sync products, transactions, utang &amp; settings</p>
+          </div>
+          <button type="button" onclick="closeCloudSyncModal()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
+        </div>
+
+        <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200/80 space-y-2">
+          <label class="block text-[11px] font-extrabold text-slate-700">Store Sync Code / Room ID</label>
+          <div class="flex items-center gap-2">
+            <input id="cloud-sync-code-input" type="text" placeholder="e.g. sari-store-naic-2026"
+              class="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            <button type="button" onclick="generateSyncCode()"
+              class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-[11px] font-extrabold shrink-0">
+              New Code
+            </button>
+          </div>
+          <p id="cloud-sync-status-detail" class="text-[11px] font-semibold text-slate-500">Status: Ready</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="saveSyncCodeAndPull()"
+            class="py-2.5 px-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-black transition">
+            Connect &amp; Pull Now
+          </button>
+          <button type="button" onclick="pushAllToCloud(true)"
+            class="py-2.5 px-3 rounded-2xl bg-brand-dark hover:bg-slate-800 text-white text-xs font-black transition">
+            Push Local Now
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANUAL JSON BACKUP / RESTORE MODAL -->
+    <div id="json-restore-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-black text-slate-900">Restore / Merge JSON Backup</h3>
+            <p class="text-[11px] font-semibold text-slate-500">Paste backup JSON from another device to merge or restore all store data</p>
+          </div>
+          <button type="button" onclick="closeJsonRestoreModal()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
+        </div>
+        <textarea id="json-restore-textarea" rows="6" placeholder='Paste JSON backup here...'
+          class="w-full rounded-2xl border border-slate-200 p-3 text-xs font-mono text-slate-800 focus:outline-none focus:border-brand-purple"></textarea>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeJsonRestoreModal()" class="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold">
+            Cancel
+          </button>
+          <button type="button" onclick="applyJsonBackupFromModal()" class="flex-1 py-2.5 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-black">
+            Merge &amp; Apply JSON
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -799,7 +875,19 @@
     const BACKUP_KEY = 'sarisari_pos_backup_v1';
     const AUTOSYNC_KEY = 'sarisari_pos_autosync_v1';
     const VOID_PASSWORD_KEY = 'sarisari_pos_void_password_v1';
+    const SYNC_CODE_KEY = 'sarisari_pos_sync_code_v1';
+    const UPDATED_AT_KEY = 'sarisari_pos_updated_at_v1';
+    const CLOUD_SYNC_ENDPOINTS = [
+      'https://kvdb.io/api/v1/sarisari_pos_sync_2026_',
+      'https://keyvalue.immanuel.co/api/KeyVal/sarisari_pos_sync_2026_'
+    ];
 
+    let state = {
+      products: [],
+      carts: { store: [], softdrinks: [], cigarettes: [] },
+      transactions: [],
+      utangRecords: []
+    };
     let currentTab = 'store';
     let selectedStoreCategory = 'All';
     let selectedReportFilter = 'all';
@@ -808,17 +896,10 @@
     let pendingVoidId = null;
     let lowStockModalPos = 'store';
     let autoSyncEnabled = localStorage.getItem(AUTOSYNC_KEY) !== 'false';
-
-    let state = {
-      products: [],
-      carts: {
-        store: [],
-        softdrinks: [],
-        cigarettes: []
-      },
-      transactions: [],
-      utangRecords: []
-    };
+    let cloudSyncTimer = null;
+    let cloudPollInterval = null;
+    let isSyncingCloud = false;
+    let toastTimer = null;
 
     function escapeHtml(str) {
       return String(str ?? '')
@@ -829,23 +910,19 @@
         .replace(/'/g, '&#39;');
     }
 
-    function formatPeso(val) {
-      const num = Number(val) || 0;
-      return '₱' + num.toLocaleString('en-PH', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
+    function formatPeso(num) {
+      const val = Number(num) || 0;
+      return `₱${val.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
-    let toastTimer = null;
     function showToast(msg, isError = false) {
       const banner = document.getElementById('toast-banner');
       const inner = document.getElementById('toast-inner');
       if (!banner || !inner) return;
       inner.textContent = msg;
-      inner.className = isError
-        ? 'rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center bg-rose-600 text-white'
-        : 'rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center bg-slate-900 text-white';
+      inner.className = `rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center ${
+        isError ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'
+      }`;
       banner.classList.remove('hidden');
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => {
@@ -855,16 +932,44 @@
 
     function getDefaultProducts() {
       return [
-        { id: 'st-1', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 15, cost: 11.5, stock: 24, lowStockThreshold: 6, image: '' },
-        { id: 'st-2', pos: 'store', name: 'Well-Milled Rice (1kg)', category: 'Rice & Pantry', price: 54, cost: 47, stock: 15, lowStockThreshold: 5, image: '' },
-        { id: 'st-3', pos: 'store', name: 'Safeguard White (60g)', category: 'Bath & Soap', price: 24, cost: 19, stock: 12, lowStockThreshold: 4, image: '' },
-        { id: 'st-4', pos: 'store', name: 'Bear Brand Swak (33g)', category: 'Milk & Coffee', price: 13, cost: 10, stock: 18, lowStockThreshold: 5, image: '' },
-        { id: 'sd-1', pos: 'softdrinks', name: 'Coca-Cola Mismo (295ml)', category: 'Cola', price: 15, cost: 11, stock: 24, lowStockThreshold: 6, image: '' },
-        { id: 'sd-2', pos: 'softdrinks', name: 'Sprite Mismo (295ml)', category: 'Lemon-Lime', price: 15, cost: 11, stock: 18, lowStockThreshold: 6, image: '' },
-        { id: 'sd-3', pos: 'softdrinks', name: 'Royal Tru-Orange (295ml)', category: 'Citrus', price: 15, cost: 11, stock: 14, lowStockThreshold: 5, image: '' },
-        { id: 'cg-1', pos: 'cigarettes', name: 'Marlboro Red (1 Stick)', category: 'Sticks', price: 10, cost: 7.5, stock: 40, lowStockThreshold: 10, image: '' },
-        { id: 'cg-2', pos: 'cigarettes', name: 'Fortune Red (1 Stick)', category: 'Sticks', price: 8, cost: 6, stock: 35, lowStockThreshold: 10, image: '' }
+        { id: 'prod-1', pos: 'store', name: 'Bigas Regular (1kg)', category: 'Rice & Pantry', price: 48, cost: 42, stock: 25, lowStockThreshold: 5, image: '' },
+        { id: 'prod-2', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 15, cost: 12.5, stock: 30, lowStockThreshold: 8, image: '' },
+        { id: 'prod-3', pos: 'store', name: 'Safeguard White (60g)', category: 'Bath & Soap', price: 24, cost: 19, stock: 12, lowStockThreshold: 4, image: '' },
+        { id: 'prod-4', pos: 'softdrinks', name: 'Coca-Cola Mismo (295ml)', category: 'Softdrinks', price: 18, cost: 14, stock: 24, lowStockThreshold: 6, image: '' },
+        { id: 'prod-5', pos: 'softdrinks', name: 'Sprite Mismo (295ml)', category: 'Softdrinks', price: 18, cost: 14, stock: 20, lowStockThreshold: 6, image: '' },
+        { id: 'prod-6', pos: 'cigarettes', name: 'Marlboro Red (Stick)', category: 'Sticks', price: 10, cost: 7.5, stock: 40, lowStockThreshold: 10, image: '' },
+        { id: 'prod-7', pos: 'cigarettes', name: 'Winston Red (Stick)', category: 'Sticks', price: 9, cost: 6.5, stock: 35, lowStockThreshold: 10, image: '' }
       ];
+    }
+
+    function getSyncCode() {
+      return (localStorage.getItem(SYNC_CODE_KEY) || '').trim();
+    }
+
+    function updateCloudSyncDetail(msg) {
+      const el = document.getElementById('cloud-sync-status-detail');
+      if (el) el.textContent = msg;
+    }
+
+    function openCloudSyncModal() {
+      const input = document.getElementById('cloud-sync-code-input');
+      if (input) input.value = getSyncCode();
+      const code = getSyncCode();
+      updateCloudSyncDetail(code ? `Status: Active code "${code}"` : 'Status: No Sync Code set yet');
+      document.getElementById('cloud-sync-modal')?.classList.remove('hidden');
+      setTimeout(() => input?.focus(), 40);
+    }
+
+    function closeCloudSyncModal() {
+      document.getElementById('cloud-sync-modal')?.classList.add('hidden');
+    }
+
+    function generateSyncCode() {
+      const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
+      const code = `STORE-${rand}`;
+      const input = document.getElementById('cloud-sync-code-input');
+      if (input) input.value = code;
+      updateCloudSyncDetail(`Generated "${code}" — click Connect & Pull Now`);
     }
 
     function normalizeState(raw) {
@@ -894,10 +999,14 @@
 
     function saveState() {
       try {
-        const serialized = JSON.stringify(state);
+        const nowIso = new Date().toISOString();
+        localStorage.setItem(UPDATED_AT_KEY, nowIso);
+        const payload = buildSyncEnvelope(nowIso);
+        const serialized = JSON.stringify(payload);
         localStorage.setItem(STORAGE_KEY, serialized);
         if (autoSyncEnabled) {
           localStorage.setItem(BACKUP_KEY, serialized);
+          scheduleCloudPush();
         }
       } catch (err) {
         console.error('Failed to save state:', err);
@@ -912,11 +1021,297 @@
           saveState();
           return;
         }
-        state = normalizeState(JSON.parse(rawStr));
+        const parsed = JSON.parse(rawStr);
+        state = normalizeState(parsed);
+        if (parsed && typeof parsed.voidPassword === 'string' && parsed.voidPassword.trim()) {
+          localStorage.setItem(VOID_PASSWORD_KEY, parsed.voidPassword.trim());
+        }
+        if (parsed && parsed.updatedAt) {
+          localStorage.setItem(UPDATED_AT_KEY, parsed.updatedAt);
+        }
       } catch (err) {
         console.error('Failed to load state:', err);
         state = normalizeState(null);
       }
+    }
+
+    function buildSyncEnvelope(updatedAt = null) {
+      const ts = updatedAt || localStorage.getItem(UPDATED_AT_KEY) || new Date().toISOString();
+      return {
+        version: 1,
+        updatedAt: ts,
+        voidPassword: getVoidPassword(),
+        products: state.products,
+        carts: state.carts,
+        transactions: state.transactions,
+        utangRecords: state.utangRecords
+      };
+    }
+
+    // Merge array records by ID so edits/new items from both devices are preserved cleanly
+    function mergeRecordsById(localArr, remoteArr, getStampFn = null) {
+      const map = new Map();
+      for (const item of (Array.isArray(localArr) ? localArr : [])) {
+        if (!item || !item.id) continue;
+        map.set(item.id, { ...item });
+      }
+      for (const rem of (Array.isArray(remoteArr) ? remoteArr : [])) {
+        if (!rem || !rem.id) continue;
+        const loc = map.get(rem.id);
+        if (!loc) {
+          map.set(rem.id, { ...rem });
+          continue;
+        }
+        if (getStampFn) {
+          const rTs = getStampFn(rem);
+          const lTs = getStampFn(loc);
+          if (rTs >= lTs) {
+            map.set(rem.id, { ...loc, ...rem });
+          }
+        } else {
+          map.set(rem.id, { ...loc, ...rem });
+        }
+      }
+      return Array.from(map.values());
+    }
+
+    function mergeIncomingState(payload) {
+      const incoming = normalizeState(payload);
+      const mergedProducts = mergeRecordsById(state.products, incoming.products);
+      const mergedTransactions = mergeRecordsById(
+        state.transactions,
+        incoming.transactions,
+        (t) => Date.parse(t.createdAt || '') || 0
+      ).sort((a, b) => (Date.parse(b.createdAt || '') || 0) - (Date.parse(a.createdAt || '') || 0));
+      const mergedUtang = mergeRecordsById(
+        state.utangRecords,
+        incoming.utangRecords,
+        (u) => Date.parse(u.createdAt || '') || 0
+      ).sort((a, b) => (Date.parse(b.createdAt || '') || 0) - (Date.parse(a.createdAt || '') || 0));
+
+      return normalizeState({
+        products: mergedProducts,
+        carts: incoming.carts.store.length || incoming.carts.softdrinks.length || incoming.carts.cigarettes.length
+          ? incoming.carts
+          : state.carts,
+        transactions: mergedTransactions,
+        utangRecords: mergedUtang
+      });
+    }
+
+    function applyCloudPayload(payload, showNotice = false) {
+      if (!payload || typeof payload !== 'object') return false;
+      const remoteTs = Date.parse(payload.updatedAt || '') || 0;
+      const localTs = Date.parse(localStorage.getItem(UPDATED_AT_KEY) || '') || 0;
+      if (!showNotice && remoteTs <= localTs) return false;
+
+      const effectiveTs = new Date(Math.max(Date.now(), remoteTs, localTs)).toISOString();
+      state = mergeIncomingState(payload);
+      if (typeof payload.voidPassword === 'string' && payload.voidPassword.trim()) {
+        localStorage.setItem(VOID_PASSWORD_KEY, payload.voidPassword.trim());
+      }
+      localStorage.setItem(UPDATED_AT_KEY, effectiveTs);
+      const serialized = JSON.stringify(buildSyncEnvelope(effectiveTs));
+      localStorage.setItem(STORAGE_KEY, serialized);
+      if (autoSyncEnabled) {
+        localStorage.setItem(BACKUP_KEY, serialized);
+      }
+      renderAll();
+      if (showNotice) {
+        showToast('Synced & merged latest data');
+      }
+      return true;
+    }
+
+    function copyJsonBackup() {
+      try {
+        const jsonStr = JSON.stringify(buildSyncEnvelope(), null, 2);
+        const ta = document.createElement('textarea');
+        ta.value = jsonStr;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('JSON backup copied to clipboard');
+      } catch (err) {
+        console.error('Copy JSON error:', err);
+        showToast('Failed to copy JSON', true);
+      }
+    }
+
+    function openJsonRestoreModal() {
+      const ta = document.getElementById('json-restore-textarea');
+      if (ta) ta.value = '';
+      document.getElementById('json-restore-modal')?.classList.remove('hidden');
+      setTimeout(() => ta?.focus(), 40);
+    }
+
+    function closeJsonRestoreModal() {
+      document.getElementById('json-restore-modal')?.classList.add('hidden');
+    }
+
+    function applyJsonBackupFromModal() {
+      const raw = (document.getElementById('json-restore-textarea')?.value || '').trim();
+      if (!raw) return showToast('Paste JSON backup first', true);
+      try {
+        const parsed = JSON.parse(raw);
+        const nowIso = new Date().toISOString();
+        state = mergeIncomingState(parsed);
+        if (typeof parsed.voidPassword === 'string' && parsed.voidPassword.trim()) {
+          localStorage.setItem(VOID_PASSWORD_KEY, parsed.voidPassword.trim());
+        }
+        localStorage.setItem(UPDATED_AT_KEY, nowIso);
+        const serialized = JSON.stringify(buildSyncEnvelope(nowIso));
+        localStorage.setItem(STORAGE_KEY, serialized);
+        if (autoSyncEnabled) {
+          localStorage.setItem(BACKUP_KEY, serialized);
+          scheduleCloudPush();
+        }
+        closeJsonRestoreModal();
+        renderAll();
+        showToast('JSON backup merged & applied');
+      } catch (err) {
+        console.error('JSON parse error:', err);
+        showToast('Invalid JSON format', true);
+      }
+    }
+
+    function scheduleCloudPush() {
+      if (!autoSyncEnabled || !getSyncCode()) return;
+      clearTimeout(cloudSyncTimer);
+      cloudSyncTimer = setTimeout(() => {
+        pushAllToCloud(false);
+      }, 600);
+    }
+
+    async function pushAllToCloud(showToastOnSuccess = false) {
+      const code = getSyncCode();
+      if (!code) {
+        if (showToastOnSuccess) showToast('Set a Sync Code first', true);
+        return;
+      }
+      if (isSyncingCloud) return;
+      isSyncingCloud = true;
+      const statusEl = document.getElementById('autosync-status-text');
+      if (statusEl) statusEl.textContent = 'Syncing...';
+      try {
+        const nowIso = new Date().toISOString();
+        localStorage.setItem(UPDATED_AT_KEY, nowIso);
+        const envelope = buildSyncEnvelope(nowIso);
+        let pushed = false;
+        for (const baseUrl of CLOUD_SYNC_ENDPOINTS) {
+          try {
+            const res = await fetch(`${baseUrl}${encodeURIComponent(code)}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(envelope)
+            });
+            if (res.ok) {
+              pushed = true;
+              break;
+            }
+          } catch (_) {
+            // Try next fallback endpoint
+          }
+        }
+        if (!pushed) throw new Error('All sync endpoints failed');
+        if (statusEl) statusEl.textContent = `Synced (${code})`;
+        updateCloudSyncDetail(`Status: Pushed to "${code}" just now`);
+        if (showToastOnSuccess) showToast('Synced all data to cloud');
+      } catch (err) {
+        console.error('Cloud push error:', err);
+        if (statusEl) statusEl.textContent = 'Offline / Retry';
+        updateCloudSyncDetail('Status: Cloud unreachable. Local backup saved & will retry.');
+        if (showToastOnSuccess) showToast('Cloud sync failed (local saved)', true);
+      } finally {
+        isSyncingCloud = false;
+      }
+    }
+
+    async function pullFromCloud(forceApply = false) {
+      const code = getSyncCode();
+      if (!code || isSyncingCloud) return;
+      isSyncingCloud = true;
+      const statusEl = document.getElementById('autosync-status-text');
+      try {
+        let data = null;
+        let sawNotFound = false;
+        for (const baseUrl of CLOUD_SYNC_ENDPOINTS) {
+          try {
+            const res = await fetch(`${baseUrl}${encodeURIComponent(code)}`, {
+              method: 'GET',
+              cache: 'no-store'
+            });
+            if (res.status === 404) {
+              sawNotFound = true;
+              continue;
+            }
+            if (!res.ok) continue;
+            data = await res.json();
+            if (data && typeof data === 'object') break;
+          } catch (_) {
+            // Try next endpoint
+          }
+        }
+
+        if (!data) {
+          if (sawNotFound && forceApply) {
+            isSyncingCloud = false;
+            await pushAllToCloud(true);
+          }
+          return;
+        }
+
+        const localTs = Date.parse(localStorage.getItem(UPDATED_AT_KEY) || '') || 0;
+        const remoteTs = Date.parse(data?.updatedAt || '') || 0;
+
+        if (forceApply && localTs > remoteTs) {
+          isSyncingCloud = false;
+          await pushAllToCloud(true);
+          return;
+        }
+
+        const applied = applyCloudPayload(data, forceApply);
+        if (statusEl) statusEl.textContent = `Synced (${code})`;
+        updateCloudSyncDetail(`Status: Connected to "${code}"${applied ? ' • Merged' : ' • Up to date'}`);
+      } catch (err) {
+        console.error('Cloud pull error:', err);
+        if (statusEl) statusEl.textContent = 'Offline / Local';
+      } finally {
+        isSyncingCloud = false;
+      }
+    }
+
+    async function saveSyncCodeAndPull() {
+      const input = document.getElementById('cloud-sync-code-input');
+      const code = (input?.value || '').trim();
+      if (!code) {
+        showToast('Enter a Sync Code', true);
+        return;
+      }
+      localStorage.setItem(SYNC_CODE_KEY, code);
+      localStorage.setItem(AUTOSYNC_KEY, 'true');
+      autoSyncEnabled = true;
+      const syncBtn = document.getElementById('autosync-toggle-btn');
+      if (syncBtn) {
+        syncBtn.textContent = 'Auto Sync: ON';
+        syncBtn.className = 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition';
+      }
+      updateCloudSyncDetail(`Status: Connecting to "${code}"...`);
+      await pullFromCloud(true);
+      startCloudPolling();
+    }
+
+    function startCloudPolling() {
+      clearInterval(cloudPollInterval);
+      if (!getSyncCode()) return;
+      cloudPollInterval = setInterval(() => {
+        if (autoSyncEnabled && document.visibilityState === 'visible') {
+          pullFromCloud(false);
+        }
+      }, 8000);
     }
 
     function switchTab(tab) {
@@ -1762,6 +2157,7 @@
       localStorage.setItem(VOID_PASSWORD_KEY, nextPass);
       const hintEl = document.getElementById('void-password-hint');
       if (hintEl) hintEl.textContent = 'Custom';
+      saveState();
       toggleChangeVoidPasswordBox(false);
       showToast('Void password updated');
     }
@@ -2249,10 +2645,28 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadState();
       const syncBtn = document.getElementById('autosync-toggle-btn');
+      const statusEl = document.getElementById('autosync-status-text');
+      const code = getSyncCode();
       if (syncBtn) {
         syncBtn.textContent = autoSyncEnabled ? 'Auto Sync: ON' : 'Auto Sync: OFF';
+        syncBtn.className = autoSyncEnabled
+          ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
+          : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
+      }
+      if (statusEl) {
+        statusEl.textContent = code ? `Synced (${code})` : (autoSyncEnabled ? 'Synced' : 'Manual Only');
       }
       renderAll();
+      if (code && autoSyncEnabled) {
+        pullFromCloud(false);
+        startCloudPolling();
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && autoSyncEnabled && getSyncCode()) {
+        pullFromCloud(false);
+      }
     });
   </script>
 </body>
