@@ -1512,11 +1512,7 @@
         if (tx.kind === 'expense') {
           totalExpenses += amt;
         } else if (tx.kind === 'gcash' || tx.pos === 'gcash') {
-          // GCash entries contribute to Kita (service fee), not Total Benta
-          grossProfit += prof;
-          if (isWeekly) weeklyProfit += prof;
-          if (isMonthly) monthlyProfit += prof;
-
+          // GCash fees remain in GCash counter totals and are excluded from overall Total Kita
           const g = counters.gcash;
           g.sales += prof;
           g.profit += prof;
@@ -1556,7 +1552,7 @@
         }
       }
 
-      const totalAmount = (grossSales + grossProfit) - totalExpenses;
+      const totalAmount = (grossSales + grossProfit + counters.gcash.profit) - totalExpenses;
       return {
         counters,
         grossSales,
