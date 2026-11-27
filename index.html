@@ -1626,6 +1626,7 @@
 
     function computeTimeMetrics(filterFn) {
       const now = new Date();
+      const todayKey = getLocalDayKey(now);
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
       const dayOfWeek = now.getDay();
       const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -1643,22 +1644,31 @@
       state.transactions.forEach((tx) => {
         if (!tx || tx.voided) return;
         if (filterFn && !filterFn(tx)) return;
-        const parsedMs = tx.createdAt ? Date.parse(tx.createdAt) : NaN;
-        const createdMs = Number.isFinite(parsedMs) ? parsedMs : now.getTime();
-        const sales = Number(tx.sales) || 0;
+
+        const parsedDate = tx.createdAt ? new Date(tx.createdAt) : now;
+        const isValidDate = !Number.isNaN(parsedDate.getTime());
+        const effectiveDate = isValidDate ? parsedDate : now;
+        const createdMs = effectiveDate.getTime();
+        const isToday = !tx.createdAt || getLocalDayKey(effectiveDate) === todayKey || createdMs >= startOfDay;
+
+        const rawSales = Number(tx.sales);
+        const fallbackAmt = Number(tx.amount) || 0;
+        const sales = Number.isFinite(rawSales) && rawSales > 0
+          ? rawSales
+          : (tx.kind === 'sale' ? fallbackAmt : 0);
         const profit = Number(tx.profit) || 0;
         const expense = tx.kind === 'expense' ? (Number(tx.amount) || 0) : 0;
 
-        if (createdMs >= startOfDay) {
+        if (isToday) {
           dailySales += sales;
           dailyProfit += profit;
           dailyExpenses += expense;
         }
-        if (createdMs >= startOfWeek) {
+        if (createdMs >= startOfWeek || isToday) {
           weeklySales += sales;
           weeklyProfit += profit;
         }
-        if (createdMs >= startOfMonth) {
+        if (createdMs >= startOfMonth || isToday) {
           monthlySales += sales;
           monthlyProfit += profit;
         }
@@ -2629,15 +2639,21 @@
       }
 
       const now = new Date();
+      const todayKey = getLocalDayKey(now);
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      const isTxToday = (tx) => {
+        if (!tx || !tx.createdAt) return true;
+        const d = new Date(tx.createdAt);
+        if (Number.isNaN(d.getTime())) return true;
+        return getLocalDayKey(d) === todayKey || d >= startOfDay;
+      };
 
       // Daily Top 10 Sales (resets every day)
       const dailySalesMap = {};
       let dailyTotalUnits = 0;
       state.transactions.forEach((tx) => {
         if (!tx || tx.voided || tx.kind !== 'sale') return;
-        const created = tx.createdAt ? new Date(tx.createdAt) : now;
-        if (created < startOfDay) return;
+        if (!isTxToday(tx)) return;
         (tx.items || []).forEach((it) => {
           const key = it.productId || it.name;
           if (!key) return;
@@ -2766,9 +2782,8 @@
       if (ledgerEl) {
         const filteredTx = state.transactions.filter((tx) => {
           if (!tx) return false;
-          if (!showPastLedger) {
-            const created = tx.createdAt ? new Date(tx.createdAt) : now;
-            if (created < startOfDay) return false;
+          if (!showPastLedger && !isTxToday(tx)) {
+            return false;
           }
           if (selectedReportFilter === 'all') return true;
           if (selectedReportFilter === 'expense') return tx.kind === 'expense';
