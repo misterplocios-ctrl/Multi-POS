@@ -693,10 +693,15 @@
                 class="w-full rounded-2xl border border-amber-200 bg-amber-50/40 px-3.5 py-2.5 font-bold text-slate-900" />
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">Image URL (optional)</label>
-              <input id="editor-image" type="text" placeholder="https://..."
-                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900" />
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Expiry Date (optional)</label>
+              <input id="editor-expiry" type="date"
+                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 bg-white" />
             </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Image URL (optional)</label>
+            <input id="editor-image" type="text" placeholder="https://..."
+              class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900" />
           </div>
           <div class="flex items-center gap-2 pt-1">
             <button type="button" id="editor-delete-btn" onclick="deleteProductFromEditor()"
@@ -1097,6 +1102,7 @@
         name: String(p.name || 'Unnamed Item'),
         category: String(p.category || 'General'),
         barcode: String(p.barcode || '').trim(),
+        expiry: String(p.expiry || '').trim(),
         price: Number(p.price) || 0,
         cost: Number(p.cost) || 0,
         stock: Math.max(0, parseInt(p.stock, 10) || 0),
@@ -1498,15 +1504,39 @@
       return stock <= threshold;
     }
 
-    function renderLowStockBanner(pos) {
+    function getExpiryStatus(expiryStr) {
+      const clean = String(expiryStr || '').trim();
+      if (!clean) return null;
+      const parts = clean.split('-').map((n) => parseInt(n, 10));
+      if (parts.length !== 3 || parts.some(Number.isNaN)) {
+        return { label: `Exp: ${clean}`, tone: 'neutral', dateStr: clean };
+      }
+      const expDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const diffDays = Math.round((expDate.getTime() - today.getTime()) / 86400000);
+      const formatted = expDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+
+      if (diffDays < 0) {
+        return { label: `Expired (${formatted})`, tone: 'expired', dateStr: formatted };
+      }
+      if (diffDays <= 7) {
+        return { label: diffDays === 0 ? 'Expires Today' : `Exp in ${diffDays}d (${formatted})`, tone: 'soon', dateStr: formatted };
+      }
+      return { label: `Exp: ${formatted}`, tone: 'ok', dateStr: formatted };
+    }
+
+    function renderLowStockBanner(pos = 'store') {
       const alertEl = document.getElementById(`${pos}-low-stock-alert`);
       const textEl = document.getElementById(`${pos}-low-stock-text`);
       if (!alertEl || !textEl) return;
+
       const lowItems = state.products.filter((p) => p.pos === pos && isLowStock(p));
       if (!lowItems.length) {
         alertEl.classList.add('hidden');
         return;
       }
+
       const sample = lowItems.slice(0, 2).map((p) => `${p.name} (${p.stock})`).join(', ');
       const extra = lowItems.length > 2 ? ` +${lowItems.length - 2} more` : '';
       textEl.textContent = `Low Stock Alert (${lowItems.length}): ${sample}${extra}`;
@@ -1566,12 +1596,15 @@
     function renderProductCard(p) {
       const low = isLowStock(p);
       const out = (Number(p.stock) || 0) <= 0;
+      const exp = getExpiryStatus(p.expiry);
       const imgHtml = p.image
         ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null;this.src='https://placehold.co/300x200/f1f5f9/475569?text=${encodeURIComponent(p.name.slice(0, 12))}'" class="w-full h-24 object-contain rounded-2xl bg-slate-100 p-1" />`
         : `<div class="w-full h-24 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs px-2 text-center">${escapeHtml(p.category)}</div>`;
 
       return `
-        <div class="bg-white rounded-3xl p-3 shadow-card border ${low ? 'border-amber-300 bg-amber-50/20' : 'border-slate-100'} flex flex-col justify-between gap-2">
+        <div class="bg-white rounded-3xl p-3 shadow-card border ${
+          exp?.tone === 'expired' ? 'border-rose-300 bg-rose-50/20' : low ? 'border-amber-300 bg-amber-50/20' : 'border-slate-100'
+        } flex flex-col justify-between gap-2">
           <div class="space-y-1.5">
             <div class="relative">
               <div onclick="openProductDetail('${p.id}')" class="cursor-pointer">${imgHtml}</div>
@@ -1582,6 +1615,9 @@
             </div>
             <div onclick="openProductDetail('${p.id}')" class="cursor-pointer">
               <p class="text-xs font-black text-slate-900 line-clamp-2 leading-snug">${escapeHtml(p.name)}</p>
+              ${exp ? `<p class="text-[10px] font-extrabold mt-0.5 ${
+                exp.tone === 'expired' ? 'text-rose-600' : exp.tone === 'soon' ? 'text-amber-700' : 'text-slate-500'
+              }">${escapeHtml(exp.label)}</p>` : ''}
               <div class="flex items-center justify-between gap-1 mt-1">
                 <span class="text-sm font-black text-brand-purple">${formatPeso(p.price)}</span>
                 <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
@@ -1673,11 +1709,15 @@
       const box = document.getElementById('detail-content');
       if (!modal || !box) return;
       const profitPerUnit = (Number(p.price) || 0) - (Number(p.cost) || 0);
+      const exp = getExpiryStatus(p.expiry);
       box.innerHTML = `
         <div class="flex items-start justify-between gap-2">
           <div>
             <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-purple-100 text-brand-purple">${escapeHtml(p.pos)} • ${escapeHtml(p.category)}</span>
             <h3 class="text-base font-black text-slate-900 mt-1">${escapeHtml(p.name)}</h3>
+            ${exp ? `<p class="text-[11px] font-extrabold mt-0.5 ${
+              exp.tone === 'expired' ? 'text-rose-600' : exp.tone === 'soon' ? 'text-amber-700' : 'text-slate-600'
+            }">${escapeHtml(exp.label)}</p>` : `<p class="text-[11px] font-semibold text-slate-400 mt-0.5">No expiry date set</p>`}
           </div>
           <button type="button" onclick="closeDetailModal()" class="text-xs font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">Close</button>
         </div>
@@ -1729,6 +1769,7 @@
       document.getElementById('editor-cost').value = existing ? existing.cost : '';
       document.getElementById('editor-stock').value = existing ? existing.stock : '10';
       document.getElementById('editor-low-stock').value = existing ? (existing.lowStockThreshold ?? 5) : '5';
+      document.getElementById('editor-expiry').value = existing ? (existing.expiry || '') : '';
       document.getElementById('editor-image').value = existing ? (existing.image || '') : '';
 
       if (titleEl) titleEl.textContent = existing ? 'Edit Product' : 'Add Product';
@@ -1753,6 +1794,7 @@
       const cost = Math.max(0, parseFloat(document.getElementById('editor-cost').value) || 0);
       const stock = Math.max(0, parseInt(document.getElementById('editor-stock').value, 10) || 0);
       const lowStockThreshold = Math.max(0, parseInt(document.getElementById('editor-low-stock').value, 10) || 0);
+      const expiry = (document.getElementById('editor-expiry')?.value || '').trim();
       const image = document.getElementById('editor-image').value.trim();
 
       if (!name) return showToast('Enter product name', true);
@@ -1764,6 +1806,7 @@
           prod.name = name;
           prod.category = category;
           prod.barcode = barcode;
+          prod.expiry = expiry;
           prod.price = price;
           prod.cost = cost;
           prod.stock = stock;
@@ -1778,6 +1821,7 @@
           name,
           category,
           barcode,
+          expiry,
           price,
           cost,
           stock,
@@ -2772,17 +2816,19 @@
         return a.name.localeCompare(b.name);
       });
 
+      const topTen = ranked.slice(0, 10);
+
       if (summaryEl) {
-        summaryEl.textContent = `${ranked.length} products`;
+        summaryEl.textContent = `Top ${topTen.length} of ${ranked.length}`;
       }
 
-      if (!ranked.length) {
+      if (!topTen.length) {
         chartEl.innerHTML = `<p class="text-xs font-bold text-slate-400 text-center py-3">No product sales data yet.</p>`;
         return;
       }
 
-      const maxUnits = Math.max(1, ...ranked.map((r) => r.unitsSold));
-      chartEl.innerHTML = ranked.map((item, idx) => {
+      const maxUnits = Math.max(1, ...topTen.map((r) => r.unitsSold));
+      chartEl.innerHTML = topTen.map((item, idx) => {
         const pct = Math.max(4, Math.round((item.unitsSold / maxUnits) * 100));
         const badgeClass = item.unitsSold > 0
           ? 'bg-purple-100 text-brand-purple'
