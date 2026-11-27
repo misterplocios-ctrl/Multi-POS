@@ -826,7 +826,7 @@
       return Number(itemOrStock || 0) <= LOW_STOCK_THRESHOLD;
     }
 
-    function renderProductMedia(item, imgClass = 'w-full h-full object-cover', labelClass = 'text-xs font-extrabold uppercase tracking-wider text-brand-purple') {
+    function renderProductMedia(item, imgClass = 'w-full h-full object-contain p-1.5', labelClass = 'text-xs font-extrabold uppercase tracking-wider text-brand-purple') {
       const label = (item && item.name ? String(item.name).trim().slice(0, 2) : 'POS') || 'POS';
       const safeLabel = escapeHtmlAttr(label);
       const url = item && item.imageUrl ? String(item.imageUrl).trim() : '';
