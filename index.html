@@ -300,15 +300,15 @@
       </section>
 
       <!-- TAB 4: GCASH & E-LOAD -->
-      <section id="tab-gcash" class="hidden space-y-3.5 md:max-w-xl">
-        <div class="bg-brand-dark text-white rounded-3xl p-4 shadow-card space-y-3">
+      <section id="tab-gcash" class="hidden w-full space-y-4">
+        <div class="bg-brand-dark text-white rounded-3xl p-4 md:p-6 shadow-card space-y-3">
           <div class="flex items-start justify-between gap-2">
             <div>
               <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-400/20 text-sky-200">
                 GCash &amp; E-Load
               </span>
               <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
-                <span id="gcash-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
+                <span id="gcash-sales-banner" class="text-2xl md:text-3xl font-black tracking-tight">₱0.00</span>
                 <span class="text-xs font-semibold text-slate-300">Total Profit</span>
               </div>
               <p class="text-xs font-semibold text-emerald-300 mt-0.5">
@@ -317,98 +317,100 @@
             </div>
             <div class="text-right">
               <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
-              <p id="total-amount-gcash" class="text-sm font-black text-teal-300">₱0.00</p>
-              <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] leading-tight">
+              <p id="total-amount-gcash" class="text-sm md:text-base font-black text-teal-300">₱0.00</p>
+              <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] md:text-xs leading-tight">
                 <p class="text-sky-200 font-semibold">Capital: <span id="gcash-puhunan-banner" class="font-black text-white">₱0.00</span></p>
               </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
-            <div class="bg-white/5 rounded-2xl px-3 py-2">
+          <div class="grid grid-cols-2 gap-2 md:gap-4 pt-2 border-t border-white/10 text-[11px] md:text-xs">
+            <div class="bg-white/5 rounded-2xl px-3 py-2.5">
               <p class="text-slate-400 font-semibold">Weekly Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="gcash-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ Fee <span id="gcash-weekly-profit">₱0.00</span></span></p>
             </div>
-            <div class="bg-white/5 rounded-2xl px-3 py-2">
+            <div class="bg-white/5 rounded-2xl px-3 py-2.5">
               <p class="text-slate-400 font-semibold">Monthly Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="gcash-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ Fee <span id="gcash-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-2.5">
-          <div class="flex items-center justify-between gap-2">
-            <div>
-              <h2 class="text-xs font-black text-slate-900">GCash Capital</h2>
-              <p class="text-[11px] font-semibold text-slate-500">Current: <span id="gcash-puhunan-display" class="font-black text-sky-700">₱0.00</span></p>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+          <div class="md:col-span-5 bg-white rounded-3xl p-4 md:p-5 shadow-card border border-slate-100 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h2 class="text-sm font-black text-slate-900">GCash Capital</h2>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">Current: <span id="gcash-puhunan-display" class="font-black text-sky-700">₱0.00</span></p>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <input id="gcash-puhunan-input" type="number" step="0.01" min="0" placeholder="Capital (₱)"
-              class="min-w-0 flex-1 rounded-xl border border-slate-200 px-2.5 py-2 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
-            <button type="button" onclick="setGcashPuhunan()"
-              class="px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-98 text-white text-[11px] font-extrabold transition shrink-0">
-              Set
-            </button>
-            <button type="button" onclick="addGcashPuhunan()"
-              class="px-2.5 py-2 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-98 text-white text-[11px] font-extrabold transition shrink-0">
-              + Add
-            </button>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-3">
-          <h2 class="text-sm font-black text-slate-900">Record GCash / E-Load Transaction</h2>
-
-          <div class="grid grid-cols-3 gap-1.5">
-            <button type="button" id="gcash-type-cash_in" onclick="setGcashType('cash_in')"
-              class="gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition">
-              Cash In
-            </button>
-            <button type="button" id="gcash-type-cash_out" onclick="setGcashType('cash_out')"
-              class="gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">
-              Cash Out
-            </button>
-            <button type="button" id="gcash-type-eload" onclick="setGcashType('eload')"
-              class="gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">
-              E-Load
-            </button>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Amount (₱)</label>
-            <input id="gcash-amount" type="number" step="0.01" min="1" oninput="autoSuggestGcashFee()" placeholder="0.00"
-              class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
-            <div class="flex items-center gap-1.5 mt-2 flex-wrap">
-              <button type="button" onclick="setGcashAmount(100)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱100</button>
-              <button type="button" onclick="setGcashAmount(200)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱200</button>
-              <button type="button" onclick="setGcashAmount(500)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱500</button>
-              <button type="button" onclick="setGcashAmount(1000)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱1,000</button>
+            <div class="flex items-center gap-2">
+              <input id="gcash-puhunan-input" type="number" step="0.01" min="0" placeholder="Capital (₱)"
+                class="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+              <button type="button" onclick="setGcashPuhunan()"
+                class="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-98 text-white text-xs font-extrabold transition shrink-0">
+                Set
+              </button>
+              <button type="button" onclick="addGcashPuhunan()"
+                class="px-3.5 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-98 text-white text-xs font-extrabold transition shrink-0">
+                + Add
+              </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-2.5">
+          <div class="md:col-span-7 bg-white rounded-3xl p-4 md:p-5 shadow-card border border-slate-100 space-y-3">
+            <h2 class="text-sm font-black text-slate-900">Record GCash / E-Load Transaction</h2>
+
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" id="gcash-type-cash_in" onclick="setGcashType('cash_in')"
+                class="gcash-type-btn py-2.5 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition">
+                Cash In
+              </button>
+              <button type="button" id="gcash-type-cash_out" onclick="setGcashType('cash_out')"
+                class="gcash-type-btn py-2.5 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">
+                Cash Out
+              </button>
+              <button type="button" id="gcash-type-eload" onclick="setGcashType('eload')"
+                class="gcash-type-btn py-2.5 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">
+                E-Load
+              </button>
+            </div>
+
             <div>
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">Service Fee / Kita (₱)</label>
-              <input id="gcash-fee" type="number" step="0.01" min="0" placeholder="10.00"
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Amount (₱)</label>
+              <input id="gcash-amount" type="number" step="0.01" min="1" oninput="autoSuggestGcashFee()" placeholder="0.00"
                 class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+              <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+                <button type="button" onclick="setGcashAmount(100)" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱100</button>
+                <button type="button" onclick="setGcashAmount(200)" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱200</button>
+                <button type="button" onclick="setGcashAmount(500)" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱500</button>
+                <button type="button" onclick="setGcashAmount(1000)" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱1,000</button>
+              </div>
             </div>
-            <div>
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">Reference / Mobile</label>
-              <input id="gcash-note" type="text" placeholder="Optional note"
-                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900 focus:outline-none focus:border-brand-purple" />
-            </div>
-          </div>
 
-          <div class="flex items-center gap-2 pt-1">
-            <button type="button" onclick="recordGcashTransaction()"
-              class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark active:scale-98 text-white text-sm font-black shadow-sm transition">
-              Record GCash Entry
-            </button>
-            <button type="button" onclick="clearGcashForm()"
-              class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition">
-              Clear
-            </button>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Service Fee / Kita (₱)</label>
+                <input id="gcash-fee" type="number" step="0.01" min="0" placeholder="10.00"
+                  class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Reference / Mobile</label>
+                <input id="gcash-note" type="text" placeholder="Optional note"
+                  class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900 focus:outline-none focus:border-brand-purple" />
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+              <button type="button" onclick="recordGcashTransaction()"
+                class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark active:scale-98 text-white text-sm font-black shadow-sm transition">
+                Record GCash Entry
+              </button>
+              <button type="button" onclick="clearGcashForm()"
+                class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition">
+                Clear
+              </button>
+            </div>
           </div>
         </div>
       </section>
