@@ -3,44 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Buddy Sari-Sari Store — Multi-POS</title>
+  <title>Sari-Sari Store POS &amp; Ledger</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
           },
           colors: {
             brand: {
-              purple: '#6B21A8',
-              dark: '#4C1D95',
-              light: '#F3E8FF',
-              soft: '#FAF5FF',
-              accent: '#7E22CE'
-            }
+              purple: '#6D28D9',
+              purpleDark: '#5B21B6',
+              dark: '#0B1220',
+              teal: '#14B8A6',
+            },
           },
           boxShadow: {
-            card: '0 6px 20px -4px rgba(107, 33, 168, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04)',
-            float: '0 12px 28px -6px rgba(76, 29, 149, 0.28)'
-          }
-        }
-      }
+            card: '0 4px 18px -4px rgba(15, 23, 42, 0.08)',
+            float: '0 10px 28px -6px rgba(15, 23, 42, 0.22)',
+          },
+        },
+      },
     };
   </script>
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #F4F5F7;
-      color: #0F172A;
+    * {
       -webkit-tap-highlight-color: transparent;
     }
+    html, body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #F4F5F7;
+      color: #0F172A;
+      overflow-x: hidden;
+    }
+    /* Prevent mobile auto-zoom on inputs */
     input, select, textarea {
       font-size: 16px !important;
     }
@@ -51,686 +52,580 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    @keyframes navButtonFloat {
+      0% {
+        transform: translateY(0) scale(1);
+      }
+      45% {
+        transform: translateY(-7px) scale(1.06);
+      }
+      100% {
+        transform: translateY(-4px) scale(1.03);
+      }
+    }
+    .nav-btn-float {
+      animation: navButtonFloat 0.36s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 8px 18px -6px rgba(109, 40, 217, 0.35);
+    }
   </style>
 </head>
 <body class="min-h-screen flex justify-center selection:bg-purple-200 selection:text-brand-dark">
-  <div id="app-shell" class="w-full max-w-md min-h-screen bg-[#F4F5F7] relative pb-28 flex flex-col">
+  <div id="app-shell" class="w-full max-w-md md:max-w-5xl lg:max-w-6xl min-h-screen bg-[#F4F5F7] relative pb-28 flex flex-col md:shadow-xl md:my-4 md:min-h-[calc(100vh-2rem)] md:rounded-3xl md:border md:border-slate-200/80">
 
     <!-- TOP HEADER -->
-    <header class="sticky top-0 z-30 bg-[#F4F5F7]/95 backdrop-blur px-4 pt-3 pb-2 border-b border-slate-200/60 flex items-center justify-between gap-2">
+    <header class="sticky top-0 z-30 bg-[#F4F5F7]/95 backdrop-blur px-4 md:px-6 pt-3 pb-2 border-b border-slate-200/60 flex items-center justify-between gap-2 md:rounded-t-3xl">
       <div class="flex items-center gap-2">
-        <div class="w-9 h-9 rounded-2xl bg-brand-purple text-white flex items-center justify-center shadow-xs">
-          <i data-lucide="store" class="w-4 h-4"></i>
+        <div class="w-9 h-9 rounded-2xl bg-brand-purple text-white flex items-center justify-center font-black text-sm shadow-sm">
+          POS
         </div>
         <div>
-          <p class="text-[10px] font-extrabold uppercase tracking-wider text-brand-purple">Multi-POS</p>
-          <h1 id="header-store-title" class="font-display text-sm font-extrabold text-slate-900 leading-tight">Buddy Sari-Sari</h1>
+          <h1 class="text-sm md:text-base font-black tracking-tight text-slate-900 leading-tight">Sari-Sari Counter</h1>
+          <p id="header-subtitle" class="text-[11px] font-semibold text-slate-500 leading-tight">Store POS</p>
         </div>
       </div>
 
       <div class="flex items-center gap-1.5">
-        <button onclick="openCurrentTabProductEditor()" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-purple-50 text-brand-purple border border-purple-200/80 text-xs font-extrabold flex items-center gap-1 shadow-2xs transition active:scale-95">
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-          <span>Add</span>
+        <button id="header-add-btn" onclick="openEditorModal(currentTab === 'softdrinks' ? 'softdrinks' : currentTab === 'cigarettes' ? 'cigarettes' : 'store')"
+          class="px-3 py-1.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs font-extrabold shadow-sm transition flex items-center gap-1">
+          <span>+</span>
+          <span>Add Product</span>
         </button>
-        <button onclick="openExpenseModal()" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 text-amber-700 border border-amber-200/80 text-xs font-extrabold flex items-center gap-1 shadow-2xs transition active:scale-95">
-          <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+        <button onclick="openExpenseModal()"
+          class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 active:scale-95 text-rose-600 border border-rose-200 text-xs font-extrabold transition flex items-center gap-1">
+          <span>-</span>
           <span>Expense</span>
-        </button>
-        <button onclick="openCartDrawer(getActiveCartPos())" class="relative px-2.5 py-1.5 rounded-xl bg-brand-purple hover:bg-brand-dark text-white text-xs font-extrabold flex items-center gap-1 shadow-xs transition active:scale-95">
-          <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
-          <span id="header-cart-badge">0</span>
         </button>
       </div>
     </header>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-1 px-4 pt-3 space-y-4">
+    <main class="flex-1 px-4 md:px-6 pt-3 md:pt-5 space-y-4 md:space-y-5">
 
       <!-- TAB 1: STORE POS -->
       <section id="tab-store" class="space-y-3.5">
-        <div class="bg-gradient-to-br from-[#F3E8FF] via-[#EDE9FE] to-[#E9D5FF] rounded-3xl p-4 border border-purple-200/70 shadow-card">
-          <div class="flex items-start justify-between gap-3">
+        <!-- Store Dark Banner -->
+        <div class="bg-brand-dark text-white rounded-3xl p-4 shadow-card space-y-3">
+          <div class="flex items-start justify-between gap-2">
             <div>
-              <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/80 text-brand-purple mb-1.5">General Merchandise</span>
-              <h2 class="font-display text-xl font-extrabold text-slate-900 leading-tight">Store Counter</h2>
-              <p class="text-xs font-medium text-slate-600 mt-0.5">Everyday essentials, canned goods, snacks &amp; toiletries.</p>
+              <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-purple-200">
+                Store Counter
+              </span>
+              <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
+                <span id="store-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
+                <span class="text-xs font-semibold text-slate-300">Total Benta</span>
+              </div>
+              <p class="text-xs font-semibold text-emerald-300 mt-0.5">
+                Kita: <span id="store-profit-banner">₱0.00</span>
+              </p>
             </div>
-            <div class="bg-white/90 rounded-2xl px-3 py-2 text-right shrink-0 shadow-2xs">
-              <p class="text-[10px] font-bold uppercase text-slate-400">Store Sales</p>
-              <p id="store-banner-sales" class="font-display text-sm font-extrabold text-brand-purple">₱0.00</p>
-              <p id="store-weekly-summary" class="text-[9px] font-bold text-slate-500 mt-0.5">Wk: ₱0.00 • Kita: ₱0.00</p>
-              <p id="store-monthly-summary" class="text-[9px] font-bold text-emerald-700">Mo: ₱0.00 • Kita: ₱0.00</p>
+            <div class="text-right">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
+              <p id="total-amount-store" class="text-sm font-black text-teal-300">₱0.00</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
+            <div class="bg-white/5 rounded-2xl px-3 py-2">
+              <p class="text-slate-400 font-semibold">Weekly Benta / Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="store-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="store-weekly-profit">₱0.00</span></span></p>
+            </div>
+            <div class="bg-white/5 rounded-2xl px-3 py-2">
+              <p class="text-slate-400 font-semibold">Monthly Benta / Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="store-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="store-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
         </div>
 
-        <!-- Categories -->
-        <div id="store-categories" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1"></div>
-
-        <!-- Search + Count + Low Stock Toggle -->
-        <div class="flex items-center gap-2">
-          <div class="relative flex-1">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input id="store-search" oninput="renderStoreGrid()" type="text" placeholder="Search store items..."
-              class="w-full pl-9 pr-3 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-brand-purple" />
+        <!-- Search & Category Pills -->
+        <div class="space-y-2.5">
+          <div class="relative">
+            <input id="store-search" type="search" oninput="renderStoreCatalog()" placeholder="Search store items (rice, noodles, soap...)"
+              class="w-full bg-white rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 placeholder-slate-400 border border-slate-200/80 focus:outline-none focus:border-brand-purple shadow-xs" />
           </div>
-          <button id="store-low-stock-btn" onclick="toggleLowStockFilter('Store')"
-            class="px-3 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs font-extrabold text-slate-600 hover:border-rose-300 hover:text-rose-600 transition shrink-0">
-            Low Stock
-          </button>
+          <div id="store-categories" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5"></div>
         </div>
 
-        <div class="flex items-center justify-between px-0.5">
-          <span id="store-item-count" class="text-[11px] font-bold text-slate-500">0 items</span>
-          <button onclick="openProductEditor('Store', null)" class="text-xs font-extrabold text-brand-purple hover:underline flex items-center gap-1">
-            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-            <span>Add Store Product</span>
-          </button>
-        </div>
-
-        <!-- 2-Column Product Grid -->
-        <div id="store-grid" class="grid grid-cols-2 gap-3"></div>
+        <!-- Product Grid -->
+        <div id="store-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4"></div>
       </section>
 
       <!-- TAB 2: SOFTDRINKS POS -->
       <section id="tab-softdrinks" class="hidden space-y-3.5">
-        <div class="bg-gradient-to-br from-[#EDE9FE] via-[#DDD6FE] to-[#F3E8FF] rounded-3xl p-4 border border-purple-200/70 shadow-card">
-          <div class="flex items-start justify-between gap-3">
+        <div class="bg-brand-dark text-white rounded-3xl p-4 shadow-card space-y-3">
+          <div class="flex items-start justify-between gap-2">
             <div>
-              <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/80 text-brand-purple mb-1.5">Chilled Beverages</span>
-              <h2 class="font-display text-xl font-extrabold text-slate-900 leading-tight">Softdrinks POS</h2>
-              <p class="text-xs font-medium text-slate-600 mt-0.5">Bottled sodas, juices &amp; cold refreshments.</p>
+              <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-teal-400/20 text-teal-200">
+                Softdrinks Counter
+              </span>
+              <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
+                <span id="softdrinks-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
+                <span class="text-xs font-semibold text-slate-300">Total Benta</span>
+              </div>
+              <p class="text-xs font-semibold text-emerald-300 mt-0.5">
+                Kita: <span id="softdrinks-profit-banner">₱0.00</span>
+              </p>
             </div>
-            <div class="bg-white/90 rounded-2xl px-3 py-2 text-right shrink-0 shadow-2xs">
-              <p class="text-[10px] font-bold uppercase text-slate-400">Drinks Sales</p>
-              <p id="softdrinks-banner-sales" class="font-display text-sm font-extrabold text-brand-purple">₱0.00</p>
-              <p id="softdrinks-weekly-summary" class="text-[9px] font-bold text-slate-500 mt-0.5">Wk: ₱0.00 • Kita: ₱0.00</p>
-              <p id="softdrinks-monthly-summary" class="text-[9px] font-bold text-emerald-700">Mo: ₱0.00 • Kita: ₱0.00</p>
+            <div class="text-right">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
+              <p id="total-amount-softdrinks" class="text-sm font-black text-teal-300">₱0.00</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
+            <div class="bg-white/5 rounded-2xl px-3 py-2">
+              <p class="text-slate-400 font-semibold">Weekly Benta / Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="softdrinks-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="softdrinks-weekly-profit">₱0.00</span></span></p>
+            </div>
+            <div class="bg-white/5 rounded-2xl px-3 py-2">
+              <p class="text-slate-400 font-semibold">Monthly Benta / Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="softdrinks-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="softdrinks-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <div class="relative flex-1">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input id="softdrinks-search" oninput="renderSoftdrinksGrid()" type="text" placeholder="Search softdrinks..."
-              class="w-full pl-9 pr-3 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-brand-purple" />
-          </div>
-          <button id="softdrinks-low-stock-btn" onclick="toggleLowStockFilter('Softdrinks')"
-            class="px-3 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs font-extrabold text-slate-600 hover:border-rose-300 hover:text-rose-600 transition shrink-0">
-            Low Stock
-          </button>
+        <div class="relative">
+          <input id="softdrinks-search" type="search" oninput="renderSoftdrinksCatalog()" placeholder="Search softdrinks (Coke, Sprite, Royal...)"
+            class="w-full bg-white rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 placeholder-slate-400 border border-slate-200/80 focus:outline-none focus:border-brand-purple shadow-xs" />
         </div>
 
-        <div class="flex items-center justify-between px-0.5">
-          <span id="softdrinks-item-count" class="text-[11px] font-bold text-slate-500">0 items</span>
-          <button onclick="openProductEditor('Softdrinks', null)" class="text-xs font-extrabold text-brand-purple hover:underline flex items-center gap-1">
-            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-            <span>Add Softdrink Product</span>
-          </button>
-        </div>
-
-        <div id="softdrinks-grid" class="grid grid-cols-2 gap-3"></div>
+        <div id="softdrinks-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4"></div>
       </section>
 
       <!-- TAB 3: CIGARETTES POS -->
       <section id="tab-cigarettes" class="hidden space-y-3.5">
-        <div class="bg-gradient-to-br from-[#F3E8FF] via-[#FCE7F3] to-[#EDE9FE] rounded-3xl p-4 border border-purple-200/70 shadow-card">
-          <div class="flex items-start justify-between gap-3">
+        <div class="bg-brand-dark text-white rounded-3xl p-4 shadow-card space-y-3">
+          <div class="flex items-start justify-between gap-2">
             <div>
-              <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/80 text-brand-purple mb-1.5">Stick &amp; Pack POS</span>
-              <h2 class="font-display text-xl font-extrabold text-slate-900 leading-tight">Cigarettes Counter</h2>
-              <p class="text-xs font-medium text-slate-600 mt-0.5">Sell per stick or full pack with stock tracking.</p>
+              <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200">
+                Cigarettes / Yosi Counter
+              </span>
+              <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
+                <span id="cigarettes-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
+                <span class="text-xs font-semibold text-slate-300">Total Benta</span>
+              </div>
+              <p class="text-xs font-semibold text-emerald-300 mt-0.5">
+                Kita: <span id="cigarettes-profit-banner">₱0.00</span>
+              </p>
             </div>
-            <div class="bg-white/90 rounded-2xl px-3 py-2 text-right shrink-0 shadow-2xs">
-              <p class="text-[10px] font-bold uppercase text-slate-400">Yosi Sales</p>
-              <p id="cigarettes-banner-sales" class="font-display text-sm font-extrabold text-brand-purple">₱0.00</p>
-              <p id="cigarettes-weekly-summary" class="text-[9px] font-bold text-slate-500 mt-0.5">Wk: ₱0.00 • Kita: ₱0.00</p>
-              <p id="cigarettes-monthly-summary" class="text-[9px] font-bold text-emerald-700">Mo: ₱0.00 • Kita: ₱0.00</p>
+            <div class="text-right">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
+              <p id="total-amount-cigarettes" class="text-sm font-black text-teal-300">₱0.00</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
+            <div class="bg-white/5 rounded-2xl px-3 py-2">
+              <p class="text-slate-400 font-semibold">Weekly Benta / Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="cigarettes-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="cigarettes-weekly-profit">₱0.00</span></span></p>
+            </div>
+            <div class="bg-white/5 rounded-2xl px-3 py-2">
+              <p class="text-slate-400 font-semibold">Monthly Benta / Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="cigarettes-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="cigarettes-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <div class="relative flex-1">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input id="cigarettes-search" oninput="renderCigarettesGrid()" type="text" placeholder="Search cigarette brands..."
-              class="w-full pl-9 pr-3 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-brand-purple" />
-          </div>
-          <button id="cigarettes-low-stock-btn" onclick="toggleLowStockFilter('Cigarettes')"
-            class="px-3 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs font-extrabold text-slate-600 hover:border-rose-300 hover:text-rose-600 transition shrink-0">
-            Low Stock
-          </button>
+        <div class="relative">
+          <input id="cigarettes-search" type="search" oninput="renderCigarettesCatalog()" placeholder="Search yosi / sticks / packs..."
+            class="w-full bg-white rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 placeholder-slate-400 border border-slate-200/80 focus:outline-none focus:border-brand-purple shadow-xs" />
         </div>
 
-        <div class="flex items-center justify-between px-0.5">
-          <span id="cigarettes-item-count" class="text-[11px] font-bold text-slate-500">0 items</span>
-          <button onclick="openProductEditor('Cigarettes', null)" class="text-xs font-extrabold text-brand-purple hover:underline flex items-center gap-1">
-            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-            <span>Add Cigarette Product</span>
-          </button>
-        </div>
-
-        <div id="cigarettes-grid" class="grid grid-cols-2 gap-3"></div>
+        <div id="cigarettes-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4"></div>
       </section>
 
       <!-- TAB 4: GCASH & E-LOAD -->
-      <section id="tab-gcash" class="hidden space-y-3.5">
-        <div class="bg-gradient-to-br from-brand-purple to-brand-dark text-white rounded-3xl p-4 shadow-float">
-          <div class="flex items-start justify-between gap-3">
+      <section id="tab-gcash" class="hidden space-y-3.5 md:max-w-xl">
+        <div class="bg-brand-dark text-white rounded-3xl p-4 shadow-card space-y-3">
+          <div class="flex items-start justify-between gap-2">
             <div>
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-purple-200">Digital Wallet &amp; Load</p>
-              <h2 class="font-display text-xl font-extrabold mt-0.5">GCash &amp; E-Load</h2>
-              <p class="text-xs text-purple-100/90 mt-0.5">Compute service fees and log Cash-In, Cash-Out, or Load.</p>
+              <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-400/20 text-sky-200">
+                GCash &amp; E-Load
+              </span>
+              <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
+                <span id="gcash-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
+                <span class="text-xs font-semibold text-slate-300">Total Benta</span>
+              </div>
+              <p class="text-xs font-semibold text-emerald-300 mt-0.5">
+                Kita (Service Fee): <span id="gcash-profit-banner">₱0.00</span>
+              </p>
             </div>
-            <div class="bg-white/15 backdrop-blur-xs rounded-2xl px-3 py-2 text-right shrink-0 border border-white/15">
-              <p class="text-[10px] font-bold uppercase text-purple-200">GCash Benta</p>
-              <p id="gcash-banner-sales" class="font-display text-sm font-extrabold text-white">₱0.00</p>
-              <p id="gcash-weekly-summary" class="text-[9px] font-bold text-purple-100 mt-0.5">Wk: ₱0.00 • Kita: ₱0.00</p>
-              <p id="gcash-monthly-summary" class="text-[9px] font-bold text-emerald-200">Mo: ₱0.00 • Kita: ₱0.00</p>
+            <div class="text-right">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
+              <p id="total-amount-gcash" class="text-sm font-black text-teal-300">₱0.00</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
+            <div class="bg-white/5 rounded-2xl px-3 py-2">
+              <p class="text-slate-400 font-semibold">Weekly Benta / Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="gcash-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="gcash-weekly-profit">₱0.00</span></span></p>
+            </div>
+            <div class="bg-white/5 rounded-2xl px-3 py-2">
+              <p class="text-slate-400 font-semibold">Monthly Benta / Kita</p>
+              <p class="font-extrabold text-white mt-0.5"><span id="gcash-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="gcash-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
         </div>
 
         <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-3">
-          <div class="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-2xl">
-            <button id="gc-type-cashin" onclick="setGcashType('Cash-In')" class="py-2.5 rounded-xl text-xs font-extrabold bg-brand-purple text-white shadow-sm transition">Cash-In</button>
-            <button id="gc-type-cashout" onclick="setGcashType('Cash-Out')" class="py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-brand-purple transition">Cash-Out</button>
-            <button id="gc-type-eload" onclick="setGcashType('E-Load')" class="py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-brand-purple transition">E-Load</button>
+          <h2 class="text-sm font-black text-slate-900">Record GCash / E-Load Transaction</h2>
+
+          <div class="grid grid-cols-3 gap-1.5">
+            <button type="button" id="gcash-type-cash_in" onclick="setGcashType('cash_in')"
+              class="gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition">
+              Cash In
+            </button>
+            <button type="button" id="gcash-type-cash_out" onclick="setGcashType('cash_out')"
+              class="gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">
+              Cash Out
+            </button>
+            <button type="button" id="gcash-type-eload" onclick="setGcashType('eload')"
+              class="gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">
+              E-Load
+            </button>
           </div>
 
-          <div class="relative">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input id="gcash-search" oninput="handleGcashSearchBar()" type="text" placeholder="Quick mobile (09...) or amount..."
-              class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-brand-purple" />
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Amount (₱)</label>
+            <input id="gcash-amount" type="number" step="0.01" min="1" oninput="autoSuggestGcashFee()" placeholder="0.00"
+              class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+              <button type="button" onclick="setGcashAmount(100)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱100</button>
+              <button type="button" onclick="setGcashAmount(200)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱200</button>
+              <button type="button" onclick="setGcashAmount(500)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱500</button>
+              <button type="button" onclick="setGcashAmount(1000)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">₱1,000</button>
+            </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2.5">
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Amount (₱)</label>
-              <input id="gcash-amount" oninput="recalcGcash(false)" type="number" min="0" step="1" placeholder="0"
-                class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-extrabold text-slate-900 focus:outline-none focus:border-brand-purple" />
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Service Fee / Kita (₱)</label>
+              <input id="gcash-fee" type="number" step="0.01" min="0" placeholder="10.00"
+                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
             </div>
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Service Fee (₱)</label>
-              <input id="gcash-fee" oninput="recalcGcash(true)" type="number" min="0" step="1" value="0"
-                class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-extrabold text-brand-purple focus:outline-none focus:border-brand-purple" />
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Reference / Mobile</label>
+              <input id="gcash-note" type="text" placeholder="Optional note"
+                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900 focus:outline-none focus:border-brand-purple" />
             </div>
           </div>
 
-          <div class="flex flex-wrap gap-1.5">
-            <button onclick="setGcashAmount(100)" class="px-2.5 py-1 rounded-lg bg-purple-50 text-brand-purple text-[11px] font-extrabold">₱100</button>
-            <button onclick="setGcashAmount(300)" class="px-2.5 py-1 rounded-lg bg-purple-50 text-brand-purple text-[11px] font-extrabold">₱300</button>
-            <button onclick="setGcashAmount(500)" class="px-2.5 py-1 rounded-lg bg-purple-50 text-brand-purple text-[11px] font-extrabold">₱500</button>
-            <button onclick="setGcashAmount(1000)" class="px-2.5 py-1 rounded-lg bg-purple-50 text-brand-purple text-[11px] font-extrabold">₱1,000</button>
-            <button onclick="clearGcashForm()" class="ml-auto px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-bold">Clear</button>
+          <div class="flex items-center gap-2 pt-1">
+            <button type="button" onclick="recordGcashTransaction()"
+              class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark active:scale-98 text-white text-sm font-black shadow-sm transition">
+              Record GCash Entry
+            </button>
+            <button type="button" onclick="clearGcashForm()"
+              class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition">
+              Clear
+            </button>
           </div>
-
-          <div class="grid grid-cols-2 gap-2.5">
-            <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Customer / Number</label>
-              <input id="gcash-customer" type="text" placeholder="09XX XXX XXXX"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-brand-purple" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Ref No. (Optional)</label>
-              <input id="gcash-ref" type="text" placeholder="Last 4-6 digits"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-brand-purple" />
-            </div>
-          </div>
-
-          <div class="bg-brand-soft rounded-2xl p-3 flex items-center justify-between border border-purple-100">
-            <div>
-              <p class="text-[10px] font-extrabold uppercase text-slate-500">Total to Collect / Settle</p>
-              <p id="gcash-total-display" class="font-display text-lg font-extrabold text-slate-900">₱0.00</p>
-            </div>
-            <div class="text-right">
-              <p class="text-[10px] font-extrabold uppercase text-brand-purple">Fee Earned</p>
-              <p id="gcash-fee-display" class="font-display text-sm font-extrabold text-brand-purple">+₱0.00</p>
-            </div>
-          </div>
-
-          <button onclick="recordGcashTransaction()" class="w-full py-3 rounded-2xl bg-brand-purple hover:bg-brand-dark text-white text-xs font-extrabold shadow-float transition active:scale-[0.99]">
-            Record GCash Transaction
-          </button>
         </div>
       </section>
 
       <!-- TAB 5: REPORTS & LEDGER -->
       <section id="tab-reports" class="hidden space-y-3.5">
-        <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-3">
-          <div class="flex items-center justify-between">
+        <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-3.5">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
             <div>
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-brand-purple">Daily Summary</p>
-              <h2 class="font-display text-lg font-extrabold text-slate-900">Sales &amp; Profit Ledger</h2>
+              <h2 class="text-sm font-black text-slate-900">Sales, Kita &amp; Total Amount</h2>
+              <p class="text-[11px] font-semibold text-slate-500">Expenses deduct from Total Amount only</p>
             </div>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="toggleAutoSync()" id="auto-sync-btn"
-                class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-extrabold transition flex items-center gap-1" title="Toggle Auto Sync">
-                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-                <span id="auto-sync-label">Auto Sync: ON</span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button type="button" onclick="exportTransactionsCSV()"
+                class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition">
+                Export CSV
               </button>
-              <button type="button" onclick="resetDemoData()" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-extrabold transition">
-                Reset Data
+              <label class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition cursor-pointer">
+                Import CSV
+                <input type="file" accept=".csv,text/csv" onchange="importTransactionsCSV(event)" class="hidden" />
+              </label>
+              <button type="button" id="autosync-toggle-btn" onclick="toggleAutoSync()"
+                class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition">
+                Auto Sync: ON
               </button>
             </div>
           </div>
 
-          <!-- Export / Import CSV Controls & Sync Status -->
-          <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 rounded-2xl p-2.5 border border-slate-100">
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="exportAllCsv()"
-                class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-purple-50 text-brand-purple border border-purple-200/80 text-[11px] font-extrabold transition flex items-center gap-1 shadow-2xs">
-                <i data-lucide="download" class="w-3 h-3"></i>
-                <span>Export CSV</span>
-              </button>
-              <button type="button" onclick="triggerCsvImport()"
-                class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-purple-50 text-slate-700 border border-slate-200 text-[11px] font-extrabold transition flex items-center gap-1 shadow-2xs">
-                <i data-lucide="upload" class="w-3 h-3"></i>
-                <span>Import CSV</span>
-              </button>
-              <input id="csv-import-input" type="file" accept=".csv,text/csv" onchange="handleCsvFileSelected(event)" class="hidden" />
-            </div>
-            <span id="sync-status-text" class="text-[10px] font-bold text-slate-500">Synced</span>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2.5">
+          <!-- Top KPIs -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
             <div class="bg-purple-50/80 rounded-2xl p-3">
-              <p class="text-[10px] font-bold uppercase text-slate-500">Gross Sales</p>
-              <p id="kpi-gross-sales" class="font-display text-base font-extrabold text-slate-900 mt-0.5">₱0.00</p>
+              <p class="text-[10px] font-extrabold uppercase text-purple-700">Total Benta (Sales)</p>
+              <p id="rep-gross-sales" class="text-base font-black text-slate-900 mt-0.5">₱0.00</p>
             </div>
             <div class="bg-emerald-50/80 rounded-2xl p-3">
-              <p class="text-[10px] font-bold uppercase text-slate-500">Est. Net Profit</p>
-              <p id="kpi-net-profit" class="font-display text-base font-extrabold text-emerald-700 mt-0.5">₱0.00</p>
+              <p class="text-[10px] font-extrabold uppercase text-emerald-700">Total Kita (Profit)</p>
+              <p id="rep-gross-profit" class="text-base font-black text-slate-900 mt-0.5">₱0.00</p>
             </div>
-            <div class="bg-amber-50/80 rounded-2xl p-3">
-              <p class="text-[10px] font-bold uppercase text-slate-500">Expenses</p>
-              <p id="kpi-expenses" class="font-display text-base font-extrabold text-amber-700 mt-0.5">₱0.00</p>
+            <div class="bg-rose-50/80 rounded-2xl p-3">
+              <p class="text-[10px] font-extrabold uppercase text-rose-700">Total Expenses</p>
+              <p id="rep-total-expenses" class="text-base font-black text-slate-900 mt-0.5">₱0.00</p>
             </div>
-            <div class="bg-slate-100/90 rounded-2xl p-3">
-              <p class="text-[10px] font-bold uppercase text-slate-500">GCash Fees</p>
-              <p id="kpi-gcash-fees" class="font-display text-base font-extrabold text-brand-purple mt-0.5">₱0.00</p>
+            <div class="bg-teal-50/90 rounded-2xl p-3 border border-teal-200/70">
+              <p class="text-[10px] font-extrabold uppercase text-teal-800">Total Amount</p>
+              <p id="rep-total-amount" class="text-base font-black text-slate-900 mt-0.5">₱0.00</p>
             </div>
           </div>
 
           <!-- Weekly & Monthly Sales + Kita -->
           <div class="pt-1 border-t border-slate-100">
             <div class="flex items-center justify-between mb-2">
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Weekly &amp; Monthly Sales &amp; Kita</p>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Weekly &amp; Monthly Benta &amp; Kita</p>
               <span class="text-[10px] font-semibold text-slate-400">Active Entries</span>
             </div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
               <div class="bg-purple-50/60 rounded-2xl p-2.5 border border-purple-100/80">
-                <p class="text-[10px] font-bold uppercase text-slate-500">Weekly Sales</p>
-                <p id="rep-weekly-sales" class="font-display text-sm font-extrabold text-slate-900 mt-0.5">₱0.00</p>
-                <p id="rep-weekly-kita" class="text-[10px] font-bold text-emerald-700 mt-0.5">Kita: ₱0.00</p>
+                <p class="text-[10px] font-extrabold text-purple-700">Weekly Benta</p>
+                <p id="rep-weekly-sales" class="text-xs font-black text-slate-900 mt-0.5">₱0.00</p>
               </div>
-              <div class="bg-purple-50/60 rounded-2xl p-2.5 border border-purple-100/80">
-                <p class="text-[10px] font-bold uppercase text-slate-500">Monthly Sales</p>
-                <p id="rep-monthly-sales" class="font-display text-sm font-extrabold text-slate-900 mt-0.5">₱0.00</p>
-                <p id="rep-monthly-kita" class="text-[10px] font-bold text-emerald-700 mt-0.5">Kita: ₱0.00</p>
+              <div class="bg-emerald-50/60 rounded-2xl p-2.5 border border-emerald-100/80">
+                <p class="text-[10px] font-extrabold text-emerald-700">Weekly Kita</p>
+                <p id="rep-weekly-profit" class="text-xs font-black text-slate-900 mt-0.5">₱0.00</p>
+              </div>
+              <div class="bg-indigo-50/60 rounded-2xl p-2.5 border border-indigo-100/80">
+                <p class="text-[10px] font-extrabold text-indigo-700">Monthly Benta</p>
+                <p id="rep-monthly-sales" class="text-xs font-black text-slate-900 mt-0.5">₱0.00</p>
+              </div>
+              <div class="bg-teal-50/60 rounded-2xl p-2.5 border border-teal-100/80">
+                <p class="text-[10px] font-extrabold text-teal-800">Monthly Kita</p>
+                <p id="rep-monthly-profit" class="text-xs font-black text-slate-900 mt-0.5">₱0.00</p>
               </div>
             </div>
           </div>
 
-          <!-- Per-Counter Total Benta Breakdown -->
+          <!-- Per-Counter Breakdown -->
           <div class="pt-1 border-t border-slate-100">
             <div class="flex items-center justify-between mb-2">
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Total Benta per Counter (Minus Expense)</p>
-              <span class="text-[10px] font-semibold text-slate-400">Auto-deducted</span>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Benta &amp; Kita per Counter</p>
+              <span id="autosync-status-text" class="text-[10px] font-semibold text-slate-400">Synced</span>
             </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div class="bg-slate-50 rounded-2xl p-2.5 border border-slate-100">
-                <p class="text-[10px] font-bold uppercase text-slate-500">Store Benta</p>
-                <p id="rep-store-benta" class="font-display text-sm font-extrabold text-slate-900 mt-0.5">₱0.00</p>
-                <p id="rep-store-profit" class="text-[10px] font-bold text-emerald-700 mt-0.5">Kita: ₱0.00</p>
-              </div>
-              <div class="bg-slate-50 rounded-2xl p-2.5 border border-slate-100">
-                <p class="text-[10px] font-bold uppercase text-slate-500">Softdrinks Benta</p>
-                <p id="rep-softdrinks-benta" class="font-display text-sm font-extrabold text-slate-900 mt-0.5">₱0.00</p>
-                <p id="rep-softdrinks-profit" class="text-[10px] font-bold text-emerald-700 mt-0.5">Kita: ₱0.00</p>
-              </div>
-              <div class="bg-slate-50 rounded-2xl p-2.5 border border-slate-100">
-                <p class="text-[10px] font-bold uppercase text-slate-500">Sigarilyo Benta</p>
-                <p id="rep-cigarettes-benta" class="font-display text-sm font-extrabold text-slate-900 mt-0.5">₱0.00</p>
-                <p id="rep-cigarettes-profit" class="text-[10px] font-bold text-emerald-700 mt-0.5">Kita: ₱0.00</p>
-              </div>
-              <div class="bg-slate-50 rounded-2xl p-2.5 border border-slate-100">
-                <p class="text-[10px] font-bold uppercase text-slate-500">GCash Benta</p>
-                <p id="rep-gcash-benta" class="font-display text-sm font-extrabold text-slate-900 mt-0.5">₱0.00</p>
-                <p id="rep-gcash-profit" class="text-[10px] font-bold text-brand-purple mt-0.5">Fee/Kita: ₱0.00</p>
-              </div>
-            </div>
+            <div id="rep-counter-cards" class="grid grid-cols-2 md:grid-cols-4 gap-2.5"></div>
           </div>
         </div>
 
         <div id="report-filters" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar"></div>
-        <div id="transactions-ledger" class="space-y-2.5"></div>
+        <div id="transactions-ledger" class="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0"></div>
       </section>
 
     </main>
 
     <!-- FLOATING CART BAR -->
-    <div id="floating-cart-bar" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-30">
-      <button onclick="openCartDrawer(getActiveCartPos())"
-        class="w-full py-3 px-4 rounded-2xl bg-brand-dark hover:bg-brand-purple text-white shadow-float flex items-center justify-between transition active:scale-[0.99]">
-        <div class="flex items-center gap-2.5">
-          <span id="fab-cart-count" class="w-6 h-6 rounded-full bg-white text-brand-dark text-xs font-extrabold flex items-center justify-center">0</span>
-          <div class="text-left">
-            <p id="fab-cart-pos" class="text-[10px] font-bold uppercase tracking-wider text-purple-200">Store Cart</p>
-            <p class="text-xs font-extrabold">View Cart &amp; Checkout</p>
-          </div>
+    <div id="floating-cart-bar" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md md:max-w-xl px-4 z-30">
+      <button type="button" onclick="openCartDrawer(getActiveCartPos())"
+        class="w-full bg-brand-purple hover:bg-brand-purpleDark active:scale-99 text-white rounded-2xl px-4 py-3 shadow-float flex items-center justify-between gap-2 transition">
+        <div class="flex items-center gap-2">
+          <span id="cart-badge-count" class="bg-white text-brand-purple font-black text-xs px-2 py-0.5 rounded-full">0</span>
+          <span class="text-xs font-extrabold">View Cart &amp; Checkout</span>
         </div>
-        <span id="fab-cart-total" class="font-display text-sm font-extrabold">₱0.00</span>
+        <span id="cart-badge-total" class="text-sm font-black">₱0.00</span>
       </button>
     </div>
 
     <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-slate-200/80 px-2 py-1.5 z-30 grid grid-cols-5 gap-1">
-      <button id="nav-store" onclick="switchTab('store')" class="flex flex-col items-center py-1.5 rounded-xl text-brand-purple font-extrabold transition">
-        <i data-lucide="store" class="w-4 h-4"></i>
-        <span class="text-[10px] mt-0.5">Store</span>
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md md:max-w-2xl bg-white/95 backdrop-blur border-t md:border md:bottom-3 md:rounded-2xl border-slate-200/80 px-2 py-1.5 z-30 grid grid-cols-5 gap-1 md:shadow-card">
+      <button type="button" id="nav-store" onclick="switchTab('store')" class="flex flex-col items-center py-1.5 rounded-xl text-brand-purple font-extrabold transition nav-btn-float">
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 10l1-5h16l1 5M5 10v10h14V10M9 20v-6h6v6" />
+        </svg>
+        <span class="text-xs font-black">Store</span>
       </button>
-      <button id="nav-softdrinks" onclick="switchTab('softdrinks')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-semibold transition">
-        <i data-lucide="cup-soda" class="w-4 h-4"></i>
-        <span class="text-[10px] mt-0.5">Drinks</span>
+      <button type="button" id="nav-softdrinks" onclick="switchTab('softdrinks')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition">
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 3h8l-1 4H9L8 3zm1 4h6l-1 13a2 2 0 01-2 1.8h0A2 2 0 0110 20L9 7z" />
+        </svg>
+        <span class="text-xs font-black">Drinks</span>
       </button>
-      <button id="nav-cigarettes" onclick="switchTab('cigarettes')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-semibold transition">
-        <i data-lucide="flame" class="w-4 h-4"></i>
-        <span class="text-[10px] mt-0.5">Yosi</span>
+      <button type="button" id="nav-cigarettes" onclick="switchTab('cigarettes')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition">
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 17h14v3H3v-3zm17 0h1v3h-1v-3zM18 13c0-1.5 2-2 2-3.5S18 7 18 5.5" />
+        </svg>
+        <span class="text-xs font-black">Yosi</span>
       </button>
-      <button id="nav-gcash" onclick="switchTab('gcash')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-semibold transition">
-        <i data-lucide="smartphone" class="w-4 h-4"></i>
-        <span class="text-[10px] mt-0.5">GCash</span>
+      <button type="button" id="nav-gcash" onclick="switchTab('gcash')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition">
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2m-3-3h7m0 0l-2.5-2.5M21 12l-2.5 2.5" />
+        </svg>
+        <span class="text-xs font-black">GCash</span>
       </button>
-      <button id="nav-reports" onclick="switchTab('reports')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-semibold transition">
-        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-        <span class="text-[10px] mt-0.5">Reports</span>
+      <button type="button" id="nav-reports" onclick="switchTab('reports')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition">
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9m6 10V5m6 14v-7m4 7H2" />
+        </svg>
+        <span class="text-xs font-black">Reports</span>
       </button>
     </nav>
 
     <!-- TOAST BANNER -->
-    <div id="toast-banner" class="hidden fixed top-16 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-50 pointer-events-none">
+    <div id="toast-banner" class="hidden fixed top-16 left-1/2 -translate-x-1/2 w-full max-w-md md:max-w-lg px-4 z-50 pointer-events-none">
       <div id="toast-inner" class="rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center bg-slate-900 text-white"></div>
     </div>
 
     <!-- PRODUCT DETAIL MODAL -->
     <div id="detail-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-float max-h-[90vh] overflow-y-auto">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <span id="detail-pos-badge" class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-purple-100 text-brand-purple">Store</span>
-            <h3 id="detail-name" class="font-display text-lg font-extrabold text-slate-900 mt-1">Product Name</h3>
-            <p id="detail-meta" class="text-xs font-semibold text-slate-500"></p>
-          </div>
-          <button onclick="closeDetailModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold">✕</button>
-        </div>
-
-        <div id="detail-media-box" class="w-full h-36 rounded-2xl bg-brand-soft flex items-center justify-center overflow-hidden border border-purple-100"></div>
-
-        <div id="detail-cig-mode-wrap" class="hidden space-y-1.5">
-          <label class="block text-[10px] font-extrabold uppercase text-slate-500">Sell Format</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button id="detail-mode-stick" onclick="setDetailCigMode('stick')" class="py-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white">Per Stick</button>
-            <button id="detail-mode-pack" onclick="setDetailCigMode('pack')" class="py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700">Full Pack (20s)</button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between bg-slate-50 rounded-2xl p-3">
-          <div>
-            <p class="text-[10px] font-bold uppercase text-slate-400">Unit Price</p>
-            <p id="detail-unit-price" class="font-display text-base font-extrabold text-slate-900">₱0.00</p>
-            <p id="detail-stock-info" class="text-[11px] font-bold text-slate-500 mt-0.5"></p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="changeDetailQty(-1)" class="w-9 h-9 rounded-xl bg-white border border-slate-200 font-extrabold text-slate-800">-</button>
-            <span id="detail-qty" class="w-8 text-center text-sm font-extrabold text-slate-900">1</span>
-            <button onclick="changeDetailQty(1)" class="w-9 h-9 rounded-xl bg-white border border-slate-200 font-extrabold text-slate-800">+</button>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button onclick="quickRestockFromDetail(10)" class="px-3 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-extrabold">+10 Stock</button>
-          <button onclick="addDetailToCart()" class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-dark text-white text-xs font-extrabold shadow-float transition">
-            Add to Cart • <span id="detail-subtotal">₱0.00</span>
-          </button>
-        </div>
+      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-float max-h-[90vh] overflow-y-auto">
+        <div id="detail-content"></div>
       </div>
     </div>
 
     <!-- PRODUCT EDITOR MODAL (Add / Edit) -->
     <div id="editor-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[92vh] overflow-y-auto">
+      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[92vh] overflow-y-auto">
         <div class="flex items-center justify-between">
-          <div>
-            <p id="editor-pos-label" class="text-[10px] font-extrabold uppercase text-brand-purple">Store Product</p>
-            <h3 id="editor-title" class="font-display text-lg font-extrabold text-slate-900">Add Product</h3>
-          </div>
-          <button onclick="closeProductEditor()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold">✕</button>
+          <h3 id="editor-title" class="text-base font-black text-slate-900">Add Product</h3>
+          <button type="button" onclick="closeEditorModal()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2 py-1 rounded-lg bg-slate-100">Close</button>
         </div>
-
-        <div class="space-y-2.5">
+        <form id="editor-form" onsubmit="saveProductFromForm(event)" class="space-y-3">
+          <input type="hidden" id="editor-id" />
           <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Product Name</label>
-            <input id="ed-name" type="text" placeholder="e.g. Lucky Me Pancit Canton"
-              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Counter / POS</label>
+            <select id="editor-pos" class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 bg-white">
+              <option value="store">Store</option>
+              <option value="softdrinks">Softdrinks</option>
+              <option value="cigarettes">Cigarettes / Yosi</option>
+            </select>
           </div>
-
-          <div id="ed-store-fields" class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-2.5">
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Category</label>
-              <input id="ed-category" type="text" placeholder="Snacks"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800" />
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Product Name</label>
+              <input id="editor-name" type="text" required placeholder="e.g. Coke Mismo"
+                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900" />
             </div>
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Unit</label>
-              <input id="ed-unit" type="text" placeholder="pack / pc"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800" />
-            </div>
-          </div>
-
-          <div id="ed-softdrink-fields" class="hidden grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Size / Label</label>
-              <input id="ed-size" type="text" placeholder="12oz / Mismo"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800" />
-            </div>
-            <div class="flex items-end pb-2">
-              <label class="inline-flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-                <input id="ed-glass" type="checkbox" class="rounded text-brand-purple" />
-                <span>Glass Bottle</span>
-              </label>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Category</label>
+              <input id="editor-category" type="text" required placeholder="e.g. Drinks, Pantry"
+                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900" />
             </div>
           </div>
-
-          <div id="ed-standard-price-fields" class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-3 gap-2">
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Original Price (₱)</label>
-              <input id="ed-cost-price" type="number" min="0" step="0.5" placeholder="0"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-800" />
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Price (₱)</label>
+              <input id="editor-price" type="number" step="0.01" min="0" required
+                class="w-full rounded-2xl border border-slate-200 px-3 py-2.5 font-bold text-slate-900" />
             </div>
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Selling Price (₱)</label>
-              <input id="ed-price" type="number" min="0" step="0.5" placeholder="0"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-brand-purple" />
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Cost (₱)</label>
+              <input id="editor-cost" type="number" step="0.01" min="0" required
+                class="w-full rounded-2xl border border-slate-200 px-3 py-2.5 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Stock</label>
+              <input id="editor-stock" type="number" step="1" min="0" required
+                class="w-full rounded-2xl border border-slate-200 px-3 py-2.5 font-bold text-slate-900" />
             </div>
           </div>
-
-          <div id="ed-cigarette-price-fields" class="hidden space-y-2">
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Stick Original (₱)</label>
-                <input id="ed-stick-cost" type="number" min="0" step="0.5" placeholder="7"
-                  class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-800" />
-              </div>
-              <div>
-                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Stick Selling (₱)</label>
-                <input id="ed-stick-price" type="number" min="0" step="0.5" placeholder="10"
-                  class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-brand-purple" />
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Pack Original (₱)</label>
-                <input id="ed-pack-cost" type="number" min="0" step="0.5" placeholder="140"
-                  class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-800" />
-              </div>
-              <div>
-                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Pack Selling (₱)</label>
-                <input id="ed-pack-price" type="number" min="0" step="0.5" placeholder="175"
-                  class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-brand-purple" />
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Current Stock</label>
-              <input id="ed-stock" type="number" min="0" step="1" placeholder="20"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-900" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Low Stock Alert At</label>
-              <input id="ed-low-stock" type="number" min="0" step="1" placeholder="10"
-                class="w-full px-3 py-2 rounded-xl bg-rose-50/70 border border-rose-200 text-xs font-extrabold text-rose-700" />
-            </div>
-          </div>
-
           <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Image URL (Optional)</label>
-            <input id="ed-image" type="text" placeholder="https://..."
-              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700" />
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Image URL (optional)</label>
+            <input id="editor-image" type="text" placeholder="https://..."
+              class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900" />
           </div>
-        </div>
-
-        <div class="flex items-center gap-2 pt-1">
-          <button id="ed-delete-btn" onclick="deleteProductFromEditor()" class="hidden px-3.5 py-2.5 rounded-2xl bg-rose-50 text-rose-600 text-xs font-extrabold">Delete</button>
-          <button onclick="saveProductFromEditor()" class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-dark text-white text-xs font-extrabold shadow-float transition">
-            Save Product
-          </button>
-        </div>
+          <div class="flex items-center gap-2 pt-1">
+            <button type="button" id="editor-delete-btn" onclick="deleteProductFromEditor()"
+              class="hidden px-4 py-3 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-extrabold transition">
+              Delete
+            </button>
+            <button type="submit" class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-sm font-black shadow-sm transition">
+              Save Product
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
     <!-- CART & CHECKOUT DRAWER MODAL -->
     <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[90vh] overflow-y-auto">
+      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between">
           <div>
-            <p id="cart-drawer-pos" class="text-[10px] font-extrabold uppercase text-brand-purple">Store Cart</p>
-            <h3 class="font-display text-lg font-extrabold text-slate-900">Checkout</h3>
+            <h3 id="cart-modal-title" class="text-base font-black text-slate-900">Cart &amp; Checkout</h3>
+            <p id="cart-modal-subtitle" class="text-[11px] font-semibold text-slate-500">Review items before completing sale</p>
           </div>
-          <button onclick="closeCartDrawer()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold">✕</button>
+          <button type="button" onclick="closeCartDrawer()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
         </div>
 
-        <div id="cart-items-list" class="space-y-2"></div>
+        <div id="cart-items-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
 
         <div class="border-t border-slate-100 pt-3 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-500">Total Amount</span>
-            <span id="cart-total-amount" class="font-display text-lg font-extrabold text-slate-900">₱0.00</span>
+          <div class="flex items-center justify-between text-sm font-black">
+            <span>Total</span>
+            <span id="cart-summary-total" class="text-brand-purple text-base">₱0.00</span>
           </div>
-
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-2.5">
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Payment Method</label>
-              <select id="checkout-method" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-800">
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Payment Method</label>
+              <select id="cart-payment-method" class="w-full rounded-2xl border border-slate-200 px-3 py-2 font-bold text-slate-900 bg-white">
                 <option value="Cash">Cash</option>
                 <option value="GCash">GCash</option>
                 <option value="Utang">Utang</option>
               </select>
             </div>
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Cash Received (₱)</label>
-              <input id="checkout-cash" oninput="updateCheckoutChange()" type="number" min="0" step="1" placeholder="0"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-900" />
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Cash Tendered (₱)</label>
+              <input id="cart-cash-tendered" type="number" step="0.01" min="0" oninput="updateCartChangePreview()" placeholder="Auto"
+                class="w-full rounded-2xl border border-slate-200 px-3 py-2 font-bold text-slate-900" />
             </div>
           </div>
-
-          <div class="flex items-center justify-between bg-purple-50 rounded-xl px-3 py-2">
-            <span class="text-xs font-bold text-slate-600">Change</span>
-            <span id="checkout-change" class="font-display text-sm font-extrabold text-brand-purple">₱0.00</span>
+          <p id="cart-change-preview" class="text-xs font-extrabold text-emerald-700"></p>
+          <div class="flex items-center gap-2 pt-1">
+            <button type="button" onclick="clearCurrentCart()" class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold">
+              Clear
+            </button>
+            <button type="button" onclick="completeCartCheckout()" class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-sm font-black shadow-sm">
+              Complete Sale
+            </button>
           </div>
-
-          <button onclick="completeCartCheckout()" class="w-full py-3 rounded-2xl bg-brand-purple hover:bg-brand-dark text-white text-xs font-extrabold shadow-float transition">
-            Complete Sale
-          </button>
         </div>
       </div>
     </div>
 
     <!-- EXPENSE MODAL -->
     <div id="expense-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float">
+      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-[10px] font-extrabold uppercase text-amber-600">Store Expense</p>
-            <h3 class="font-display text-lg font-extrabold text-slate-900">Record Expense</h3>
-          </div>
-          <button onclick="closeExpenseModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold">✕</button>
+          <h3 class="text-base font-black text-slate-900">Record Expense</h3>
+          <button type="button" onclick="closeExpenseModal()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
         </div>
-
-        <div class="space-y-2.5">
+        <form onsubmit="recordExpense(event)" class="space-y-3">
           <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Expense Title</label>
-            <input id="exp-title" type="text" placeholder="e.g. Plastic bags, Ice, Electricity"
-              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900" />
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Amount (₱)</label>
-              <input id="exp-amount" type="number" min="0" step="1" placeholder="0"
-                class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-900" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Deduct From</label>
-              <select id="exp-pos" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-800">
-                <option value="General">All / Net Money</option>
-                <option value="Store">Store Money</option>
-                <option value="Softdrinks">Softdrinks Money</option>
-                <option value="Cigarettes">Cigarettes Money</option>
-                <option value="GCash">GCash Money</option>
-              </select>
-            </div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Counter / Tag</label>
+            <select id="expense-counter" class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 bg-white">
+              <option value="store">Store</option>
+              <option value="softdrinks">Softdrinks</option>
+              <option value="cigarettes">Cigarettes / Yosi</option>
+              <option value="gcash">GCash</option>
+              <option value="general">General</option>
+            </select>
           </div>
           <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Category / Note</label>
-            <input id="exp-category" type="text" placeholder="Operations"
-              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800" />
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Description</label>
+            <input id="expense-desc" type="text" required placeholder="e.g. Ice, plastic bags, delivery"
+              class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900" />
           </div>
-        </div>
-
-        <button onclick="saveExpense()" class="w-full py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold shadow-xs transition">
-          Save Expense
-        </button>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Amount (₱)</label>
+            <input id="expense-amount" type="number" step="0.01" min="0.01" required placeholder="0.00"
+              class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900" />
+          </div>
+          <button type="submit" class="w-full py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-black shadow-sm">
+            Save Expense
+          </button>
+        </form>
       </div>
     </div>
 
     <!-- VOID CONFIRMATION MODAL -->
     <div id="void-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-float">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700">Void Confirmation</span>
-            <h3 class="font-display text-lg font-extrabold text-slate-900 mt-1">Void this transaction?</h3>
-            <p class="text-xs font-medium text-slate-500 mt-0.5">Voided entries will be excluded from sales, profit, and expenses.</p>
-          </div>
-          <button onclick="closeVoidModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold">✕</button>
+      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-float">
+        <div>
+          <h3 class="text-base font-black text-slate-900">Confirm Void Transaction</h3>
+          <p id="void-modal-desc" class="text-xs font-semibold text-slate-600 mt-1"></p>
         </div>
-
-        <div id="void-tx-preview" class="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1">
-          <p id="void-tx-summary" class="text-xs font-extrabold text-slate-900"></p>
-          <p id="void-tx-meta" class="text-[11px] font-semibold text-slate-500"></p>
-          <p id="void-tx-amount" class="font-display text-sm font-extrabold text-rose-600 pt-1"></p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2.5">
-          <button onclick="closeVoidModal()" class="py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeVoidModal()" class="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold">
             Cancel
           </button>
-          <button onclick="confirmVoidTransaction()" class="py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-float transition">
-            Yes, Void It
+          <button type="button" id="void-confirm-btn" class="flex-1 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold">
+            Void Transaction
           </button>
         </div>
       </div>
@@ -739,1614 +634,1153 @@
   </div>
 
   <script>
-    const LOW_STOCK_THRESHOLD = 10;
-    const STORAGE_KEY = 'buddy_sarisari_multipos_v2';
-    const AUTO_SYNC_KEY = 'buddy_sarisari_autosync_enabled';
-    const SYNC_SNAPSHOT_KEY = 'buddy_sarisari_multipos_snapshot';
+    /**
+     * Sari-Sari Store POS & Ledger Application
+     * Single-file client-side app with localStorage persistence, CSV export/import,
+     * multi-counter POS (Store, Softdrinks, Cigarettes, GCash), and voidable ledger.
+     */
+    const STORAGE_KEY = 'sarisari_pos_state_v1';
+    const BACKUP_KEY = 'sarisari_pos_backup_v1';
+    const AUTOSYNC_KEY = 'sarisari_pos_autosync_v1';
 
-    const STORE_PRODUCTS = [
-      { id: 'st-1', name: 'Lucky Me Pancit Canton', category: 'Snacks', unit: 'pack', costPrice: 12, price: 15, stock: 28, lowStockThreshold: 10 },
-      { id: 'st-2', name: 'Argentina Corned Beef 150g', category: 'Canned Goods', unit: 'can', costPrice: 33, price: 39, stock: 14, lowStockThreshold: 10 },
-      { id: 'st-3', name: 'Nescafe Classic Twin Pack', category: 'Coffee', unit: 'pack', costPrice: 11, price: 14, stock: 35, lowStockThreshold: 10 },
-      { id: 'st-4', name: 'Safeguard White Soap 60g', category: 'Toiletries', unit: 'pc', costPrice: 20, price: 25, stock: 8, lowStockThreshold: 10 }
-    ];
-
-    const SOFTDRINK_PRODUCTS = [
-      { id: 'sd-1', name: 'Coca-Cola Mismo 295ml', category: 'Softdrinks', size: '295ml', glassBottle: false, costPrice: 11, price: 15, stock: 24, lowStockThreshold: 10 },
-      { id: 'sd-2', name: 'Sprite Mismo 295ml', category: 'Softdrinks', size: '295ml', glassBottle: false, costPrice: 11, price: 15, stock: 18, lowStockThreshold: 10 },
-      { id: 'sd-3', name: 'Royal Tru-Orange 8oz', category: 'Softdrinks', size: '8oz', glassBottle: true, costPrice: 9, price: 12, stock: 9, lowStockThreshold: 10 }
-    ];
-
-    const CIGARETTE_PRODUCTS = [
-      { id: 'cg-1', name: 'Marlboro Red', stickCostPrice: 7, stickPrice: 10, packCostPrice: 140, packPrice: 175, stock: 60, lowStockThreshold: 10 },
-      { id: 'cg-2', name: 'Winston Red', stickCostPrice: 6, stickPrice: 8, packCostPrice: 120, packPrice: 150, stock: 40, lowStockThreshold: 10 }
+    const DEFAULT_PRODUCTS = [
+      { id: 'p-1', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 15, cost: 11.5, stock: 36, image: 'https://placehold.co/300x200/f3e8ff/5b21b6?text=Pancit+Canton' },
+      { id: 'p-2', pos: 'store', name: 'Argentina Corned Beef 150g', category: 'Canned Goods', price: 38, cost: 31, stock: 20, image: 'https://placehold.co/300x200/ede9fe/4c1d95?text=Corned+Beef' },
+      { id: 'p-3', pos: 'store', name: 'Safeguard White Bar', category: 'Bath & Hygiene', price: 24, cost: 19, stock: 18, image: 'https://placehold.co/300x200/e0e7ff/3730a3?text=Safeguard' },
+      { id: 'p-4', pos: 'store', name: 'Bear Brand Swakpack 33g', category: 'Milk & Coffee', price: 13, cost: 10, stock: 45, image: 'https://placehold.co/300x200/fce7f3/9d174d?text=Bear+Brand' },
+      { id: 'p-5', pos: 'softdrinks', name: 'Coca-Cola Mismo 295ml', category: 'Softdrinks', price: 15, cost: 11, stock: 48, image: 'https://placehold.co/300x200/fee2e2/991b1b?text=Coke+Mismo' },
+      { id: 'p-6', pos: 'softdrinks', name: 'Sprite Mismo 295ml', category: 'Softdrinks', price: 15, cost: 11, stock: 36, image: 'https://placehold.co/300x200/dcfce7/166534?text=Sprite+Mismo' },
+      { id: 'p-7', pos: 'softdrinks', name: 'Royal Tru-Orange Mismo', category: 'Softdrinks', price: 15, cost: 11, stock: 30, image: 'https://placehold.co/300x200/ffedd5/9a3412?text=Royal+Mismo' },
+      { id: 'p-8', pos: 'cigarettes', name: 'Marlboro Red (Stick)', category: 'Sticks', price: 10, cost: 7.5, stock: 100, image: 'https://placehold.co/300x200/fef3c7/92400e?text=Marlboro+Red' },
+      { id: 'p-9', pos: 'cigarettes', name: 'Fortune Red (Stick)', category: 'Sticks', price: 7, cost: 5, stock: 120, image: 'https://placehold.co/300x200/f1f5f9/334155?text=Fortune+Red' }
     ];
 
     let state = {
-      activeTab: 'store',
-      storeCategory: 'All',
-      storeLowStockOnly: false,
-      softdrinksLowStockOnly: false,
-      cigarettesLowStockOnly: false,
-      gcashType: 'Cash-In',
-      reportFilter: 'All',
-      carts: {
-        Store: [],
-        Softdrinks: [],
-        Cigarettes: []
-      },
-      activeCartDrawerPos: 'Store',
-      detailProduct: null,
-      detailQty: 1,
-      detailCigMode: 'stick',
-      editorState: {
-        pos: 'Store',
-        productId: null
-      },
-      pendingVoidTxId: null,
-      storeProducts: [],
-      softdrinkProducts: [],
-      cigaretteProducts: [],
-      transactions: [],
-      autoSyncEnabled: true,
-      lastSyncedAt: ''
+      products: [],
+      carts: { store: [], softdrinks: [], cigarettes: [] },
+      transactions: []
     };
 
-    function formatPeso(num) {
-      const val = Number(num || 0);
-      return '₱' + val.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    let currentTab = 'store';
+    let selectedStoreCategory = 'All';
+    let selectedReportFilter = 'all';
+    let currentGcashType = 'cash_in';
+    let activeCartPos = 'store';
+    let pendingVoidId = null;
+    let autoSyncEnabled = true;
+
+    function formatPeso(amount) {
+      const num = Number(amount) || 0;
+      return '₱' + num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    function escapeHtmlAttr(str) {
-      return String(str || '')
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
-
-    function showToast(msg, type = 'info') {
-      const banner = document.getElementById('toast-banner');
-      const inner = document.getElementById('toast-inner');
-      if (!banner || !inner) return;
-      inner.textContent = msg;
-      inner.className = 'rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center ' +
-        (type === 'error' ? 'bg-rose-600 text-white' : type === 'success' ? 'bg-emerald-700 text-white' : 'bg-slate-900 text-white');
-      banner.classList.remove('hidden');
-      clearTimeout(showToast._timer);
-      showToast._timer = setTimeout(() => banner.classList.add('hidden'), 2400);
-    }
-
-    function isLowStock(itemOrStock) {
-      if (itemOrStock && typeof itemOrStock === 'object') {
-        const threshold = Number(itemOrStock.lowStockThreshold ?? LOW_STOCK_THRESHOLD);
-        return Number(itemOrStock.stock || 0) <= threshold;
-      }
-      return Number(itemOrStock || 0) <= LOW_STOCK_THRESHOLD;
-    }
-
-    function renderProductMedia(item, imgClass = 'w-full h-full object-contain p-1.5', labelClass = 'text-xs font-extrabold uppercase tracking-wider text-brand-purple') {
-      const label = (item && item.name ? String(item.name).trim().slice(0, 2) : 'POS') || 'POS';
-      const safeLabel = escapeHtmlAttr(label);
-      const url = item && item.imageUrl ? String(item.imageUrl).trim() : '';
-      if (url && /^https?:\/\//i.test(url)) {
-        const safeUrl = escapeHtmlAttr(url);
-        return `
-          <img src="${safeUrl}" alt="${escapeHtmlAttr(item.name || 'Product')}" class="${imgClass}"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-          <span style="display:none;" class="${labelClass} items-center justify-center w-full h-full uppercase">${safeLabel}</span>
-        `;
-      }
-      return `<span class="${labelClass} uppercase">${safeLabel}</span>`;
-    }
-
-    function saveState() {
+    function showToast(message, isError = false) {
       try {
-        const nowLabel = new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        state.lastSyncedAt = nowLabel;
-        const payload = JSON.stringify({
-          transactions: state.transactions,
-          storeProducts: state.storeProducts,
-          softdrinkProducts: state.softdrinkProducts,
-          cigaretteProducts: state.cigaretteProducts,
-          updatedAt: Date.now(),
-          syncedAtLabel: nowLabel
-        });
-        localStorage.setItem(STORAGE_KEY, payload);
-        if (state.autoSyncEnabled) {
-          localStorage.setItem(SYNC_SNAPSHOT_KEY, payload);
-        }
-        updateSyncStatusUI();
+        const banner = document.getElementById('toast-banner');
+        const inner = document.getElementById('toast-inner');
+        if (!banner || !inner) return;
+        inner.textContent = message;
+        inner.className = `rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center ${
+          isError ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'
+        }`;
+        banner.classList.remove('hidden');
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+          banner.classList.add('hidden');
+        }, 2400);
       } catch (err) {
-        // Ignore storage errors
+        console.error('Toast error:', err);
       }
     }
 
     function loadState() {
       try {
-        const autoSyncSaved = localStorage.getItem(AUTO_SYNC_KEY);
-        if (autoSyncSaved !== null) {
-          state.autoSyncEnabled = autoSyncSaved === 'true';
+        const savedSync = localStorage.getItem(AUTOSYNC_KEY);
+        if (savedSync !== null) {
+          autoSyncEnabled = savedSync === 'true';
         }
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          state.transactions = Array.isArray(parsed.transactions) ? parsed.transactions : [];
-          state.storeProducts = Array.isArray(parsed.storeProducts) ? parsed.storeProducts : STORE_PRODUCTS.map(p => ({ ...p }));
-          state.softdrinkProducts = Array.isArray(parsed.softdrinkProducts) ? parsed.softdrinkProducts : SOFTDRINK_PRODUCTS.map(p => ({ ...p }));
-          state.cigaretteProducts = Array.isArray(parsed.cigaretteProducts) ? parsed.cigaretteProducts : CIGARETTE_PRODUCTS.map(p => ({ ...p }));
-          state.lastSyncedAt = parsed.syncedAtLabel || '';
-          updateSyncStatusUI();
-          return;
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state = {
+            products: Array.isArray(parsed.products) ? parsed.products : [...DEFAULT_PRODUCTS],
+            carts: {
+              store: Array.isArray(parsed.carts?.store) ? parsed.carts.store : [],
+              softdrinks: Array.isArray(parsed.carts?.softdrinks) ? parsed.carts.softdrinks : [],
+              cigarettes: Array.isArray(parsed.carts?.cigarettes) ? parsed.carts.cigarettes : []
+            },
+            transactions: Array.isArray(parsed.transactions) ? parsed.transactions : []
+          };
+        } else {
+          state = {
+            products: [...DEFAULT_PRODUCTS],
+            carts: { store: [], softdrinks: [], cigarettes: [] },
+            transactions: []
+          };
+          saveState();
         }
       } catch (err) {
-        // Fallback to defaults
+        console.error('Failed to load state:', err);
+        state = {
+          products: [...DEFAULT_PRODUCTS],
+          carts: { store: [], softdrinks: [], cigarettes: [] },
+          transactions: []
+        };
       }
-      state.transactions = [];
-      state.storeProducts = STORE_PRODUCTS.map(p => ({ ...p }));
-      state.softdrinkProducts = SOFTDRINK_PRODUCTS.map(p => ({ ...p }));
-      state.cigaretteProducts = CIGARETTE_PRODUCTS.map(p => ({ ...p }));
-      updateSyncStatusUI();
     }
 
-    function updateSyncStatusUI() {
-      const btn = document.getElementById('auto-sync-btn');
-      const label = document.getElementById('auto-sync-label');
-      const statusText = document.getElementById('sync-status-text');
-      if (btn) {
-        btn.className = state.autoSyncEnabled
-          ? 'px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-extrabold transition flex items-center gap-1'
-          : 'px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-extrabold transition flex items-center gap-1';
-      }
-      if (label) {
-        label.textContent = state.autoSyncEnabled ? 'Auto Sync: ON' : 'Auto Sync: OFF';
-      }
-      if (statusText) {
-        statusText.textContent = state.autoSyncEnabled
-          ? (state.lastSyncedAt ? `Auto-synced • ${state.lastSyncedAt}` : 'Auto Sync Ready')
-          : 'Auto Sync Paused';
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        if (autoSyncEnabled) {
+          localStorage.setItem(BACKUP_KEY, JSON.stringify({
+            updatedAt: new Date().toISOString(),
+            payload: state
+          }));
+          const statusEl = document.getElementById('autosync-status-text');
+          if (statusEl) statusEl.textContent = 'Auto-synced';
+        }
+      } catch (err) {
+        console.error('Failed to save state:', err);
+        showToast('Storage full or unavailable', true);
       }
     }
 
     function toggleAutoSync() {
-      state.autoSyncEnabled = !state.autoSyncEnabled;
-      try {
-        localStorage.setItem(AUTO_SYNC_KEY, String(state.autoSyncEnabled));
-      } catch (err) {
-        // Ignore storage errors
+      autoSyncEnabled = !autoSyncEnabled;
+      localStorage.setItem(AUTOSYNC_KEY, String(autoSyncEnabled));
+      const btn = document.getElementById('autosync-toggle-btn');
+      if (btn) {
+        btn.textContent = `Auto Sync: ${autoSyncEnabled ? 'ON' : 'OFF'}`;
+        btn.className = autoSyncEnabled
+          ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
+          : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
       }
-      if (state.autoSyncEnabled) {
-        saveState();
-        showToast('Auto Sync enabled', 'success');
+      if (autoSyncEnabled) saveState();
+      showToast(`Auto Sync ${autoSyncEnabled ? 'enabled' : 'disabled'}`);
+    }
+
+    function switchTab(tabName) {
+      currentTab = tabName;
+      const tabs = ['store', 'softdrinks', 'cigarettes', 'gcash', 'reports'];
+      tabs.forEach((t) => {
+        const sec = document.getElementById(`tab-${t}`);
+        const nav = document.getElementById(`nav-${t}`);
+        if (sec) sec.classList.toggle('hidden', t !== tabName);
+        if (nav) {
+          nav.classList.remove('nav-btn-float');
+          void nav.offsetWidth;
+          nav.className = t === tabName
+            ? 'flex flex-col items-center py-1.5 rounded-xl bg-purple-50 text-brand-purple font-extrabold transition nav-btn-float'
+            : 'flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-bold transition';
+        }
+      });
+
+      const titles = {
+        store: 'Store POS',
+        softdrinks: 'Softdrinks Counter',
+        cigarettes: 'Cigarettes / Yosi Counter',
+        gcash: 'GCash & E-Load',
+        reports: 'Reports & Ledger'
+      };
+      const sub = document.getElementById('header-subtitle');
+      if (sub) sub.textContent = titles[tabName] || 'Sari-Sari Counter';
+
+      renderAll();
+    }
+
+    function renderProductMedia(product) {
+      const safeName = product.name || 'Item';
+      const fallback = `https://placehold.co/300x200/f1f5f9/475569?text=${encodeURIComponent(safeName.slice(0, 14))}`;
+      const src = product.image && product.image.trim() ? product.image.trim() : fallback;
+      return `<img src="${src}" alt="${safeName}" onerror="this.onerror=null;this.src='${fallback}'" class="w-full h-24 object-contain rounded-2xl bg-slate-50 p-1.5" />`;
+    }
+
+    function renderStoreCatalog() {
+      const grid = document.getElementById('store-grid');
+      const catBar = document.getElementById('store-categories');
+      const searchVal = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
+      if (!grid || !catBar) return;
+
+      const storeProds = state.products.filter((p) => p.pos === 'store');
+      const cats = ['All', ...new Set(storeProds.map((p) => p.category || 'General'))];
+
+      catBar.innerHTML = cats.map((cat) => {
+        const active = selectedStoreCategory === cat;
+        return `<button type="button" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')"
+          class="px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition ${
+            active ? 'bg-brand-purple text-white' : 'bg-white text-slate-600 border border-slate-200/80'
+          }">${cat}</button>`;
+      }).join('');
+
+      const filtered = storeProds.filter((p) => {
+        const matchCat = selectedStoreCategory === 'All' || (p.category || 'General') === selectedStoreCategory;
+        const matchSearch = !searchVal || p.name.toLowerCase().includes(searchVal) || (p.category || '').toLowerCase().includes(searchVal);
+        return matchCat && matchSearch;
+      });
+
+      renderProductGrid(grid, filtered);
+    }
+
+    function selectCategory(cat) {
+      selectedStoreCategory = cat;
+      renderStoreCatalog();
+    }
+
+    function renderSoftdrinksCatalog() {
+      const grid = document.getElementById('softdrinks-grid');
+      const searchVal = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
+      if (!grid) return;
+      const items = state.products.filter((p) => p.pos === 'softdrinks' && (!searchVal || p.name.toLowerCase().includes(searchVal)));
+      renderProductGrid(grid, items);
+    }
+
+    function renderCigarettesCatalog() {
+      const grid = document.getElementById('cigarettes-grid');
+      const searchVal = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
+      if (!grid) return;
+      const items = state.products.filter((p) => p.pos === 'cigarettes' && (!searchVal || p.name.toLowerCase().includes(searchVal)));
+      renderProductGrid(grid, items);
+    }
+
+    function renderProductGrid(container, items) {
+      if (!items.length) {
+        container.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No products found.</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map((p) => {
+        const outOfStock = Number(p.stock) <= 0;
+        return `
+          <div class="bg-white rounded-3xl p-3 shadow-card border border-slate-100 flex flex-col justify-between gap-2">
+            <div onclick="openDetailModal('${p.id}')" class="cursor-pointer space-y-1.5">
+              ${renderProductMedia(p)}
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-[10px] font-bold text-slate-400 truncate">${p.category || 'Item'}</span>
+                <span class="text-[10px] font-extrabold ${outOfStock ? 'text-rose-600' : 'text-slate-500'}">Stk: ${p.stock}</span>
+              </div>
+              <h3 class="text-xs font-extrabold text-slate-900 line-clamp-2 leading-snug">${p.name}</h3>
+            </div>
+            <div class="flex items-center justify-between gap-1 pt-1">
+              <span class="text-sm font-black text-brand-purple">${formatPeso(p.price)}</span>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="openEditorModal('${p.pos}', '${p.id}')"
+                  class="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-[10px] font-extrabold text-slate-700">
+                  Edit
+                </button>
+                <button type="button" ${outOfStock ? 'disabled' : ''} onclick="addToCart('${p.id}')"
+                  class="px-2.5 py-1 rounded-xl ${
+                    outOfStock ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-brand-purple hover:bg-brand-purpleDark text-white'
+                  } text-[10px] font-extrabold">
+                  + Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openDetailModal(productId) {
+      const p = state.products.find((item) => item.id === productId);
+      if (!p) return;
+      const modal = document.getElementById('detail-modal');
+      const box = document.getElementById('detail-content');
+      const profitPerUnit = Math.max(0, (Number(p.price) || 0) - (Number(p.cost) || 0));
+      box.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold uppercase text-brand-purple">${p.pos} • ${p.category || 'Item'}</span>
+          <button type="button" onclick="closeDetailModal()" class="text-xs font-extrabold bg-slate-100 px-2.5 py-1 rounded-lg text-slate-600">Close</button>
+        </div>
+        ${renderProductMedia(p)}
+        <div>
+          <h3 class="text-base font-black text-slate-900">${p.name}</h3>
+          <p class="text-xs font-semibold text-slate-500 mt-0.5">Stock: ${p.stock} • Cost: ${formatPeso(p.cost)} • Kita/unit: ${formatPeso(profitPerUnit)}</p>
+        </div>
+        <div class="flex items-center justify-between pt-2">
+          <span class="text-xl font-black text-brand-purple">${formatPeso(p.price)}</span>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="closeDetailModal(); deleteProductWithConfirm('${p.id}');"
+              class="px-3 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-extrabold">
+              Delete
+            </button>
+            <button type="button" onclick="addToCart('${p.id}'); closeDetailModal();"
+              class="px-4 py-2.5 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-black">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal')?.classList.add('hidden');
+    }
+
+    function openEditorModal(defaultPos = 'store', productId = null) {
+      const modal = document.getElementById('editor-modal');
+      const title = document.getElementById('editor-title');
+      const deleteBtn = document.getElementById('editor-delete-btn');
+      document.getElementById('editor-id').value = productId || '';
+
+      if (productId) {
+        const p = state.products.find((item) => item.id === productId);
+        if (!p) return;
+        title.textContent = 'Edit Product';
+        if (deleteBtn) deleteBtn.classList.remove('hidden');
+        document.getElementById('editor-pos').value = p.pos || defaultPos;
+        document.getElementById('editor-name').value = p.name || '';
+        document.getElementById('editor-category').value = p.category || '';
+        document.getElementById('editor-price').value = p.price ?? 0;
+        document.getElementById('editor-cost').value = p.cost ?? 0;
+        document.getElementById('editor-stock').value = p.stock ?? 0;
+        document.getElementById('editor-image').value = p.image || '';
       } else {
-        updateSyncStatusUI();
-        showToast('Auto Sync paused', 'info');
+        title.textContent = 'Add Product';
+        if (deleteBtn) deleteBtn.classList.add('hidden');
+        document.getElementById('editor-pos').value = defaultPos;
+        document.getElementById('editor-name').value = '';
+        document.getElementById('editor-category').value = defaultPos === 'softdrinks' ? 'Softdrinks' : defaultPos === 'cigarettes' ? 'Sticks' : 'General';
+        document.getElementById('editor-price').value = '';
+        document.getElementById('editor-cost').value = '';
+        document.getElementById('editor-stock').value = '10';
+        document.getElementById('editor-image').value = '';
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function deleteProductFromEditor() {
+      const id = document.getElementById('editor-id')?.value.trim();
+      if (!id) return;
+      deleteProductWithConfirm(id, () => closeEditorModal());
+    }
+
+    function deleteProductWithConfirm(productId, onAfterDelete = null) {
+      const prod = state.products.find((p) => p.id === productId);
+      if (!prod) return showToast('Product not found', true);
+
+      const modal = document.getElementById('void-modal');
+      const titleEl = modal?.querySelector('h3');
+      const descEl = document.getElementById('void-modal-desc');
+      const btn = document.getElementById('void-confirm-btn');
+
+      if (titleEl) titleEl.textContent = 'Delete Product';
+      if (descEl) descEl.textContent = `Delete "${prod.name}"? Tatanggalin din ito sa cart kung naroon.`;
+      if (btn) {
+        btn.textContent = 'Delete Product';
+        btn.onclick = () => {
+          try {
+            state.products = state.products.filter((p) => p.id !== productId);
+            ['store', 'softdrinks', 'cigarettes'].forEach((pos) => {
+              state.carts[pos] = (state.carts[pos] || []).filter((c) => c.productId !== productId);
+            });
+            saveState();
+            closeVoidModal();
+            if (typeof onAfterDelete === 'function') onAfterDelete();
+            renderAll();
+            showToast('Product deleted');
+          } catch (err) {
+            console.error('Delete product error:', err);
+            showToast('Failed to delete product', true);
+          }
+        };
+      }
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeEditorModal() {
+      document.getElementById('editor-modal')?.classList.add('hidden');
+    }
+
+    function saveProductFromForm(e) {
+      e.preventDefault();
+      try {
+        const id = document.getElementById('editor-id').value.trim();
+        const pos = document.getElementById('editor-pos').value;
+        const name = document.getElementById('editor-name').value.trim();
+        const category = document.getElementById('editor-category').value.trim() || 'General';
+        const price = Math.max(0, parseFloat(document.getElementById('editor-price').value) || 0);
+        const cost = Math.max(0, parseFloat(document.getElementById('editor-cost').value) || 0);
+        const stock = Math.max(0, parseInt(document.getElementById('editor-stock').value, 10) || 0);
+        const image = document.getElementById('editor-image').value.trim();
+
+        if (!name) return showToast('Enter product name', true);
+
+        if (id) {
+          const idx = state.products.findIndex((p) => p.id === id);
+          if (idx !== -1) {
+            state.products[idx] = { ...state.products[idx], pos, name, category, price, cost, stock, image };
+          }
+          showToast('Product updated');
+        } else {
+          state.products.unshift({
+            id: 'p-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+            pos,
+            name,
+            category,
+            price,
+            cost,
+            stock,
+            image
+          });
+          showToast('Product added');
+        }
+
+        saveState();
+        closeEditorModal();
+        renderAll();
+      } catch (err) {
+        console.error('Save product error:', err);
+        showToast('Could not save product', true);
       }
     }
 
-    function runAutoSyncTick() {
-      if (!state.autoSyncEnabled) return;
+    function addToCart(productId) {
       try {
-        const snapRaw = localStorage.getItem(SYNC_SNAPSHOT_KEY);
-        if (snapRaw) {
-          const snap = JSON.parse(snapRaw);
-          const currentRaw = localStorage.getItem(STORAGE_KEY);
-          const current = currentRaw ? JSON.parse(currentRaw) : {};
-          if (Number(snap.updatedAt || 0) > Number(current.updatedAt || 0)) {
-            localStorage.setItem(STORAGE_KEY, snapRaw);
-            loadState();
-            renderAllGrids();
-            updateDashboardKPIs();
-            if (state.activeTab === 'reports') renderReports();
+        const p = state.products.find((item) => item.id === productId);
+        if (!p) return showToast('Product not found', true);
+        if (Number(p.stock) <= 0) return showToast('Out of stock', true);
+
+        const pos = ['store', 'softdrinks', 'cigarettes'].includes(p.pos) ? p.pos : 'store';
+        const cart = state.carts[pos] || [];
+        const existing = cart.find((c) => c.productId === p.id);
+        const currentQty = existing ? existing.qty : 0;
+
+        if (currentQty + 1 > Number(p.stock)) {
+          return showToast(`Only ${p.stock} in stock`, true);
+        }
+
+        if (existing) {
+          existing.qty += 1;
+          existing.name = p.name;
+          existing.price = Number(p.price) || 0;
+          existing.cost = Number(p.cost) || 0;
+        } else {
+          cart.push({
+            productId: p.id,
+            pos,
+            name: p.name,
+            price: Number(p.price) || 0,
+            cost: Number(p.cost) || 0,
+            qty: 1
+          });
+        }
+        state.carts[pos] = cart;
+        activeCartPos = pos;
+        saveState();
+        updateCartBar();
+        showToast(`${p.name} added to cart`);
+      } catch (err) {
+        console.error('Add to cart error:', err);
+        showToast('Failed to add item', true);
+      }
+    }
+
+    function getActiveCartPos() {
+      if (['store', 'softdrinks', 'cigarettes'].includes(currentTab)) {
+        if ((state.carts[currentTab] || []).length > 0) return currentTab;
+      }
+      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
+        if ((state.carts[pos] || []).length > 0) return pos;
+      }
+      return ['store', 'softdrinks', 'cigarettes'].includes(currentTab) ? currentTab : 'store';
+    }
+
+    function getTotalCartCount() {
+      return ['store', 'softdrinks', 'cigarettes'].reduce((sum, pos) => {
+        return sum + (state.carts[pos] || []).reduce((s, item) => s + (Number(item.qty) || 0), 0);
+      }, 0);
+    }
+
+    function getTotalCartAmount() {
+      return ['store', 'softdrinks', 'cigarettes'].reduce((sum, pos) => {
+        return sum + (state.carts[pos] || []).reduce((s, item) => s + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
+      }, 0);
+    }
+
+    function updateCartBar() {
+      const bar = document.getElementById('floating-cart-bar');
+      const countEl = document.getElementById('cart-badge-count');
+      const totalEl = document.getElementById('cart-badge-total');
+      const count = getTotalCartCount();
+      const total = getTotalCartAmount();
+      if (!bar || !countEl || !totalEl) return;
+
+      if (count > 0 && currentTab !== 'reports') {
+        bar.classList.remove('hidden');
+        countEl.textContent = String(count);
+        totalEl.textContent = formatPeso(total);
+      } else {
+        bar.classList.add('hidden');
+      }
+    }
+
+    function openCartDrawer(pos = null) {
+      const targetPos = pos || getActiveCartPos();
+      activeCartPos = targetPos;
+      renderCartModal();
+      document.getElementById('cart-modal')?.classList.remove('hidden');
+    }
+
+    function closeCartDrawer() {
+      document.getElementById('cart-modal')?.classList.add('hidden');
+    }
+
+    function renderCartModal() {
+      const list = document.getElementById('cart-items-list');
+      const title = document.getElementById('cart-modal-title');
+      const subtitle = document.getElementById('cart-modal-subtitle');
+      const totalEl = document.getElementById('cart-summary-total');
+
+      // Collect items across counters so nothing is missed
+      const allItems = [];
+      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
+        (state.carts[pos] || []).forEach((item, idx) => {
+          allItems.push({ ...item, pos, idx });
+        });
+      }
+
+      if (title) title.textContent = 'Cart & Checkout';
+      if (subtitle) subtitle.textContent = `${allItems.length} item line(s) ready`;
+
+      if (!allItems.length) {
+        if (list) {
+          list.innerHTML = `<div class="bg-slate-50 rounded-2xl p-4 text-center text-xs font-bold text-slate-500">Cart is empty. Tap "+ Cart" on any product.</div>`;
+        }
+        if (totalEl) totalEl.textContent = formatPeso(0);
+        updateCartChangePreview();
+        return;
+      }
+
+      let grandTotal = 0;
+      list.innerHTML = allItems.map((item) => {
+        const lineTotal = (Number(item.price) || 0) * (Number(item.qty) || 0);
+        grandTotal += lineTotal;
+        return `
+          <div class="flex items-center justify-between gap-2 bg-slate-50 rounded-2xl p-2.5 border border-slate-100">
+            <div class="min-w-0">
+              <p class="text-xs font-extrabold text-slate-900 truncate">${item.name}</p>
+              <p class="text-[10px] font-semibold text-slate-500">${item.pos.toUpperCase()} • ${formatPeso(item.price)} each</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="changeCartQty('${item.pos}', ${item.idx}, -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">-</button>
+              <span class="text-xs font-black w-5 text-center">${item.qty}</span>
+              <button type="button" onclick="changeCartQty('${item.pos}', ${item.idx}, 1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">+</button>
+              <span class="text-xs font-black text-slate-900 ml-1">${formatPeso(lineTotal)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (totalEl) totalEl.textContent = formatPeso(grandTotal);
+      updateCartChangePreview();
+    }
+
+    function changeCartQty(pos, idx, delta) {
+      const cart = state.carts[pos] || [];
+      const item = cart[idx];
+      if (!item) return;
+
+      const prod = state.products.find((p) => p.id === item.productId);
+      const maxStock = prod ? Number(prod.stock) : 9999;
+      const nextQty = (Number(item.qty) || 0) + delta;
+
+      if (nextQty <= 0) {
+        cart.splice(idx, 1);
+      } else if (nextQty > maxStock) {
+        return showToast(`Max stock is ${maxStock}`, true);
+      } else {
+        item.qty = nextQty;
+      }
+
+      state.carts[pos] = cart;
+      saveState();
+      updateCartBar();
+      renderCartModal();
+    }
+
+    function clearCurrentCart() {
+      state.carts = { store: [], softdrinks: [], cigarettes: [] };
+      saveState();
+      updateCartBar();
+      renderCartModal();
+      showToast('Cart cleared');
+    }
+
+    function updateCartChangePreview() {
+      const preview = document.getElementById('cart-change-preview');
+      const tenderedRaw = document.getElementById('cart-cash-tendered')?.value;
+      const total = getTotalCartAmount();
+      if (!preview) return;
+      if (tenderedRaw === '' || tenderedRaw === undefined) {
+        preview.textContent = '';
+        return;
+      }
+      const tendered = parseFloat(tenderedRaw) || 0;
+      const change = tendered - total;
+      preview.textContent = change >= 0 ? `Change: ${formatPeso(change)}` : `Kulabo / Kulang: ${formatPeso(Math.abs(change))}`;
+      preview.className = change >= 0 ? 'text-xs font-extrabold text-emerald-700' : 'text-xs font-extrabold text-rose-600';
+    }
+
+    function completeCartCheckout() {
+      try {
+        const entries = [];
+        for (const pos of ['store', 'softdrinks', 'cigarettes']) {
+          for (const item of (state.carts[pos] || [])) {
+            entries.push({ ...item, pos });
           }
         }
-        saveState();
-      } catch (err) {
-        // Ignore sync errors
-      }
-    }
+        if (!entries.length) {
+          return showToast('Cart is empty', true);
+        }
 
-    function escapeCsvField(val) {
-      const str = String(val ?? '');
-      if (/[",\n\r]/.test(str)) {
-        return '"' + str.replace(/"/g, '""') + '"';
-      }
-      return str;
-    }
+        const method = document.getElementById('cart-payment-method')?.value || 'Cash';
+        const nowIso = new Date().toISOString();
 
-    function exportAllCsv() {
-      try {
-        const rows = [];
-        rows.push([
-          'RecordType', 'ID', 'POS', 'NameOrSummary', 'CategoryOrMethod',
-          'CostPrice', 'SellingPrice', 'Stock', 'LowStockThreshold',
-          'Amount', 'Profit', 'Fee', 'Voided', 'Timestamp'
-        ].map(escapeCsvField).join(','));
+        // Group sales by counter so each counter gets a clean transaction entry
+        const grouped = {};
+        for (const item of entries) {
+          const pos = item.pos || 'store';
+          const qty = Math.max(1, Number(item.qty) || 1);
+          const price = Number(item.price) || 0;
+          const cost = Number(item.cost) || 0;
+          const amount = price * qty;
+          const profit = Math.max(0, (price - cost) * qty);
 
-        const addProductRows = (posLabel, list) => {
-          (list || []).forEach(p => {
-            if (posLabel === 'Cigarettes') {
-              rows.push([
-                'Product', p.id, posLabel, p.name, 'Stick',
-                p.stickCostPrice ?? 0, p.stickPrice ?? 0, p.stock ?? 0, p.lowStockThreshold ?? LOW_STOCK_THRESHOLD,
-                '', '', '', '', ''
-              ].map(escapeCsvField).join(','));
-            } else {
-              rows.push([
-                'Product', p.id, posLabel, p.name, p.category || posLabel,
-                p.costPrice ?? 0, p.price ?? 0, p.stock ?? 0, p.lowStockThreshold ?? LOW_STOCK_THRESHOLD,
-                '', '', '', '', ''
-              ].map(escapeCsvField).join(','));
-            }
+          const prod = state.products.find((p) => p.id === item.productId);
+          if (prod) {
+            prod.stock = Math.max(0, (Number(prod.stock) || 0) - qty);
+          }
+
+          if (!grouped[pos]) {
+            grouped[pos] = { amount: 0, profit: 0, items: [] };
+          }
+          grouped[pos].amount += amount;
+          grouped[pos].profit += profit;
+          grouped[pos].items.push({
+            productId: item.productId,
+            name: item.name,
+            qty,
+            price
           });
-        };
+        }
 
-        addProductRows('Store', state.storeProducts);
-        addProductRows('Softdrinks', state.softdrinkProducts);
-        addProductRows('Cigarettes', state.cigaretteProducts);
-
-        (state.transactions || []).forEach(tx => {
-          rows.push([
-            'Transaction', tx.id, tx.pos || 'General', tx.summary || '', `${tx.kind || ''} (${tx.method || ''})`,
-            '', '', '', '',
-            tx.amount ?? 0, tx.profit ?? 0, tx.fee ?? 0, Boolean(tx.voided), tx.timestamp || ''
-          ].map(escapeCsvField).join(','));
+        Object.entries(grouped).forEach(([pos, grp]) => {
+          const summaryText = grp.items.map((i) => `${i.name} x${i.qty}`).join(', ');
+          state.transactions.unshift({
+            id: 'tx-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+            kind: 'sale',
+            pos,
+            title: summaryText,
+            amount: grp.amount,
+            profit: grp.profit,
+            paymentMethod: method,
+            items: grp.items,
+            voided: false,
+            createdAt: nowIso
+          });
         });
 
-        const csvContent = rows.join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        const dateStamp = new Date().toISOString().slice(0, 10);
-        link.href = url;
-        link.download = `buddy-sarisari-pos-${dateStamp}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        showToast('CSV exported', 'success');
+        state.carts = { store: [], softdrinks: [], cigarettes: [] };
+        const tenderedInput = document.getElementById('cart-cash-tendered');
+        if (tenderedInput) tenderedInput.value = '';
+
+        saveState();
+        closeCartDrawer();
+        renderAll();
+        showToast('Sale completed!');
       } catch (err) {
-        showToast('Failed to export CSV', 'error');
+        console.error('Checkout error:', err);
+        showToast('Checkout failed', true);
       }
     }
 
-    function triggerCsvImport() {
-      const input = document.getElementById('csv-import-input');
-      if (!input) return;
-      input.value = '';
-      input.click();
+    // GCash & E-Load Helpers
+    function setGcashType(type) {
+      currentGcashType = type;
+      ['cash_in', 'cash_out', 'eload'].forEach((t) => {
+        const btn = document.getElementById(`gcash-type-${t}`);
+        if (btn) {
+          btn.className = t === type
+            ? 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition'
+            : 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
+        }
+      });
+      autoSuggestGcashFee();
     }
 
-    function parseCsvLine(line) {
-      const result = [];
-      let current = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        const next = line[i + 1];
-        if (inQuotes) {
-          if (ch === '"' && next === '"') {
-            current += '"';
-            i++;
-          } else if (ch === '"') {
-            inQuotes = false;
-          } else {
-            current += ch;
-          }
+    function setGcashAmount(val) {
+      const input = document.getElementById('gcash-amount');
+      if (input) {
+        input.value = String(val);
+        autoSuggestGcashFee();
+      }
+    }
+
+    function autoSuggestGcashFee() {
+      const amt = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
+      const feeInput = document.getElementById('gcash-fee');
+      if (!feeInput || amt <= 0) return;
+      const suggested = amt <= 500 ? 10 : Math.ceil(amt / 500) * 10;
+      if (feeInput.value === '' || feeInput.dataset.auto === 'true') {
+        feeInput.value = String(suggested);
+        feeInput.dataset.auto = 'true';
+      }
+    }
+
+    function clearGcashForm() {
+      const amt = document.getElementById('gcash-amount');
+      const fee = document.getElementById('gcash-fee');
+      const note = document.getElementById('gcash-note');
+      if (amt) amt.value = '';
+      if (fee) {
+        fee.value = '';
+        fee.dataset.auto = 'true';
+      }
+      if (note) note.value = '';
+    }
+
+    function recordGcashTransaction() {
+      try {
+        const amount = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
+        const fee = Math.max(0, parseFloat(document.getElementById('gcash-fee')?.value) || 0);
+        const note = (document.getElementById('gcash-note')?.value || '').trim();
+        if (amount <= 0) return showToast('Enter valid GCash / E-Load amount', true);
+
+        const labelMap = {
+          cash_in: 'GCash Cash In',
+          cash_out: 'GCash Cash Out',
+          eload: 'E-Load'
+        };
+
+        state.transactions.unshift({
+          id: 'tx-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          kind: 'gcash',
+          pos: 'gcash',
+          title: `${labelMap[currentGcashType] || 'GCash'}${note ? ` (${note})` : ''}`,
+          amount,
+          profit: fee,
+          paymentMethod: 'GCash',
+          voided: false,
+          createdAt: new Date().toISOString()
+        });
+
+        saveState();
+        clearGcashForm();
+        renderAll();
+        showToast('GCash entry recorded');
+      } catch (err) {
+        console.error('GCash error:', err);
+        showToast('Failed to record GCash entry', true);
+      }
+    }
+
+    // Expense Modal & Recording (deducts from Total Amount only)
+    function openExpenseModal() {
+      document.getElementById('expense-modal')?.classList.remove('hidden');
+    }
+
+    function closeExpenseModal() {
+      document.getElementById('expense-modal')?.classList.add('hidden');
+    }
+
+    function recordExpense(e) {
+      e.preventDefault();
+      try {
+        const pos = document.getElementById('expense-counter')?.value || 'general';
+        const desc = (document.getElementById('expense-desc')?.value || '').trim();
+        const amount = parseFloat(document.getElementById('expense-amount')?.value) || 0;
+        if (!desc || amount <= 0) return showToast('Enter expense description and amount', true);
+
+        state.transactions.unshift({
+          id: 'tx-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          kind: 'expense',
+          pos,
+          title: desc,
+          amount,
+          profit: 0,
+          paymentMethod: 'Cash',
+          voided: false,
+          createdAt: new Date().toISOString()
+        });
+
+        document.getElementById('expense-desc').value = '';
+        document.getElementById('expense-amount').value = '';
+        saveState();
+        closeExpenseModal();
+        renderAll();
+        showToast('Expense recorded');
+      } catch (err) {
+        console.error('Expense error:', err);
+        showToast('Failed to record expense', true);
+      }
+    }
+
+    // Void Transaction with Confirmation Modal
+    function openVoidModal(txId) {
+      const tx = state.transactions.find((t) => t.id === txId);
+      if (!tx || tx.voided) return;
+      pendingVoidId = txId;
+      const modal = document.getElementById('void-modal');
+      const titleEl = modal?.querySelector('h3');
+      const descEl = document.getElementById('void-modal-desc');
+      const btn = document.getElementById('void-confirm-btn');
+      if (titleEl) titleEl.textContent = 'Confirm Void Transaction';
+      if (descEl) {
+        descEl.textContent = `Void "${tx.title}" (${formatPeso(tx.amount)})? ${tx.kind === 'sale' ? 'Stock will be restored.' : ''}`;
+      }
+      if (btn) {
+        btn.textContent = 'Void Transaction';
+        btn.onclick = () => confirmVoidTransaction(txId);
+      }
+      document.getElementById('void-modal')?.classList.remove('hidden');
+    }
+
+    function closeVoidModal() {
+      pendingVoidId = null;
+      document.getElementById('void-modal')?.classList.add('hidden');
+    }
+
+    function confirmVoidTransaction(txId) {
+      try {
+        const tx = state.transactions.find((t) => t.id === txId);
+        if (!tx || tx.voided) return;
+        tx.voided = true;
+        tx.voidedAt = new Date().toISOString();
+
+        if (tx.kind === 'sale' && Array.isArray(tx.items)) {
+          tx.items.forEach((it) => {
+            const prod = state.products.find((p) => p.id === it.productId);
+            if (prod) {
+              prod.stock = (Number(prod.stock) || 0) + (Number(it.qty) || 0);
+            }
+          });
+        }
+
+        saveState();
+        closeVoidModal();
+        renderAll();
+        showToast('Transaction voided');
+      } catch (err) {
+        console.error('Void error:', err);
+        showToast('Failed to void transaction', true);
+      }
+    }
+
+    // Metrics & KPIs (Expenses deduct from Total Amount only, never from Sales)
+    function computeMetrics() {
+      const now = Date.now();
+      const weekMs = 7 * 24 * 60 * 60 * 1000;
+      const monthMs = 30 * 24 * 60 * 60 * 1000;
+
+      const counters = {
+        store: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
+        softdrinks: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
+        cigarettes: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
+        gcash: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 }
+      };
+
+      let grossSales = 0;
+      let grossProfit = 0;
+      let totalExpenses = 0;
+      let weeklySales = 0;
+      let weeklyProfit = 0;
+      let monthlySales = 0;
+      let monthlyProfit = 0;
+
+      for (const tx of state.transactions) {
+        if (tx.voided) continue;
+        const amt = Number(tx.amount) || 0;
+        const prof = Number(tx.profit) || 0;
+        const ts = new Date(tx.createdAt || now).getTime();
+        const isWeekly = (now - ts) <= weekMs;
+        const isMonthly = (now - ts) <= monthMs;
+
+        if (tx.kind === 'expense') {
+          totalExpenses += amt;
         } else {
-          if (ch === '"') {
-            inQuotes = true;
-          } else if (ch === ',') {
-            result.push(current);
-            current = '';
-          } else {
-            current += ch;
+          grossSales += amt;
+          grossProfit += prof;
+          if (isWeekly) {
+            weeklySales += amt;
+            weeklyProfit += prof;
+          }
+          if (isMonthly) {
+            monthlySales += amt;
+            monthlyProfit += prof;
+          }
+
+          const c = counters[tx.pos];
+          if (c) {
+            c.sales += amt;
+            c.profit += prof;
+            if (isWeekly) {
+              c.weeklySales += amt;
+              c.weeklyProfit += prof;
+            }
+            if (isMonthly) {
+              c.monthlySales += amt;
+              c.monthlyProfit += prof;
+            }
           }
         }
       }
-      result.push(current);
-      return result;
+
+      const totalAmount = grossSales - totalExpenses;
+      return {
+        counters,
+        grossSales,
+        grossProfit,
+        totalExpenses,
+        totalAmount,
+        weeklySales,
+        weeklyProfit,
+        monthlySales,
+        monthlyProfit
+      };
     }
 
-    function handleCsvFileSelected(event) {
-      const file = event?.target?.files?.[0];
-      if (!file) return;
+    function updateDashboardKPIs() {
+      const m = computeMetrics();
 
+      // Update per-counter banners
+      ['store', 'softdrinks', 'cigarettes', 'gcash'].forEach((pos) => {
+        const c = m.counters[pos];
+        const sEl = document.getElementById(`${pos}-sales-banner`);
+        const pEl = document.getElementById(`${pos}-profit-banner`);
+        const wSEl = document.getElementById(`${pos}-weekly-sales`);
+        const wPEl = document.getElementById(`${pos}-weekly-profit`);
+        const mSEl = document.getElementById(`${pos}-monthly-sales`);
+        const mPEl = document.getElementById(`${pos}-monthly-profit`);
+        const tAmtEl = document.getElementById(`total-amount-${pos}`);
+
+        if (sEl) sEl.textContent = formatPeso(c.sales);
+        if (pEl) pEl.textContent = formatPeso(c.profit);
+        if (wSEl) wSEl.textContent = formatPeso(c.weeklySales);
+        if (wPEl) wPEl.textContent = formatPeso(c.weeklyProfit);
+        if (mSEl) mSEl.textContent = formatPeso(c.monthlySales);
+        if (mPEl) mPEl.textContent = formatPeso(c.monthlyProfit);
+        if (tAmtEl) tAmtEl.textContent = formatPeso(m.totalAmount);
+      });
+
+      // Update Reports KPIs
+      const setText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+      setText('rep-gross-sales', formatPeso(m.grossSales));
+      setText('rep-gross-profit', formatPeso(m.grossProfit));
+      setText('rep-total-expenses', formatPeso(m.totalExpenses));
+      setText('rep-total-amount', formatPeso(m.totalAmount));
+      setText('rep-weekly-sales', formatPeso(m.weeklySales));
+      setText('rep-weekly-profit', formatPeso(m.weeklyProfit));
+      setText('rep-monthly-sales', formatPeso(m.monthlySales));
+      setText('rep-monthly-profit', formatPeso(m.monthlyProfit));
+    }
+
+    function renderReports() {
+      updateDashboardKPIs();
+      const m = computeMetrics();
+      const cardsEl = document.getElementById('rep-counter-cards');
+      const filterBar = document.getElementById('report-filters');
+      const ledgerEl = document.getElementById('transactions-ledger');
+
+      const labels = {
+        store: 'Store',
+        softdrinks: 'Softdrinks',
+        cigarettes: 'Cigarettes / Yosi',
+        gcash: 'GCash'
+      };
+
+      if (cardsEl) {
+        cardsEl.innerHTML = ['store', 'softdrinks', 'cigarettes', 'gcash'].map((pos) => {
+          const c = m.counters[pos];
+          return `
+            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1">
+              <p class="text-[11px] font-black text-slate-800">${labels[pos]}</p>
+              <p class="text-xs font-extrabold text-brand-purple">Benta: ${formatPeso(c.sales)}</p>
+              <p class="text-[11px] font-bold text-emerald-700">Kita: ${formatPeso(c.profit)}</p>
+              <p class="text-[10px] font-semibold text-slate-500">Wk: ${formatPeso(c.weeklySales)} • Mo: ${formatPeso(c.monthlySales)}</p>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const filters = [
+        { id: 'all', label: 'All' },
+        { id: 'store', label: 'Store' },
+        { id: 'softdrinks', label: 'Softdrinks' },
+        { id: 'cigarettes', label: 'Yosi' },
+        { id: 'gcash', label: 'GCash' },
+        { id: 'expense', label: 'Expenses' }
+      ];
+
+      if (filterBar) {
+        filterBar.innerHTML = filters.map((f) => {
+          const active = selectedReportFilter === f.id;
+          return `<button type="button" onclick="setReportFilter('${f.id}')"
+            class="px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition ${
+              active ? 'bg-brand-purple text-white' : 'bg-white text-slate-600 border border-slate-200/80'
+            }">${f.label}</button>`;
+        }).join('');
+      }
+
+      if (ledgerEl) {
+        const filteredTx = state.transactions.filter((tx) => {
+          if (selectedReportFilter === 'all') return true;
+          if (selectedReportFilter === 'expense') return tx.kind === 'expense';
+          return tx.pos === selectedReportFilter;
+        });
+
+        if (!filteredTx.length) {
+          ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No transactions yet.</div>`;
+          return;
+        }
+
+        ledgerEl.innerHTML = filteredTx.map((tx) => {
+          const isExpense = tx.kind === 'expense';
+          const dt = new Date(tx.createdAt || Date.now()).toLocaleString('en-PH', {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+          return `
+            <div class="bg-white rounded-2xl p-3.5 shadow-card border border-slate-100 flex items-center justify-between gap-3 ${tx.voided ? 'opacity-55' : ''}">
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                    isExpense ? 'bg-rose-100 text-rose-700' : 'bg-purple-100 text-purple-700'
+                  }">${tx.pos || tx.kind}</span>
+                  <span class="text-[10px] font-semibold text-slate-400">${dt}</span>
+                  ${tx.voided ? '<span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">VOIDED</span>' : ''}
+                </div>
+                <p class="text-xs font-extrabold text-slate-900 mt-1 truncate ${tx.voided ? 'line-through' : ''}">${tx.title}</p>
+                ${!isExpense ? `<p class="text-[11px] font-bold text-emerald-700">Kita: ${formatPeso(tx.profit)}</p>` : ''}
+              </div>
+              <div class="text-right shrink-0 space-y-1">
+                <p class="text-sm font-black ${isExpense ? 'text-rose-600' : 'text-slate-900'} ${tx.voided ? 'line-through' : ''}">
+                  ${isExpense ? '-' : ''}${formatPeso(tx.amount)}
+                </p>
+                ${!tx.voided ? `
+                  <button type="button" onclick="openVoidModal('${tx.id}')"
+                    class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-extrabold">
+                    Void
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function setReportFilter(filterId) {
+      selectedReportFilter = filterId;
+      renderReports();
+    }
+
+    // CSV Export & Import
+    function exportTransactionsCSV() {
+      try {
+        const headers = ['id', 'kind', 'pos', 'title', 'amount', 'profit', 'paymentMethod', 'voided', 'createdAt'];
+        const rows = state.transactions.map((tx) => headers.map((h) => {
+          const val = String(tx[h] ?? '').replace(/"/g, '""');
+          return `"${val}"`;
+        }).join(','));
+        const csv = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sarisari-ledger-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('CSV exported');
+      } catch (err) {
+        console.error('Export CSV error:', err);
+        showToast('Export failed', true);
+      }
+    }
+
+    function importTransactionsCSV(event) {
+      const file = event.target?.files?.[0];
+      if (!file) return;
       const reader = new FileReader();
-      reader.onload = function (e) {
+      reader.onload = (e) => {
         try {
           const text = String(e.target?.result || '');
-          const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-          if (lines.length < 2) {
-            showToast('CSV file is empty or invalid', 'error');
-            return;
-          }
+          const lines = text.split(/\r?\n/).filter((l) => l.trim());
+          if (lines.length < 2) return showToast('CSV has no data rows', true);
 
-          const importedStore = [];
-          const importedDrinks = [];
-          const importedCigs = [];
-          const importedTxs = [];
-
+          let imported = 0;
           for (let i = 1; i < lines.length; i++) {
-            const cols = parseCsvLine(lines[i]);
-            const recType = (cols[0] || '').trim();
-            if (recType === 'Product') {
-              const id = (cols[1] || '').trim() || `imp-${Date.now()}-${i}`;
-              const pos = (cols[2] || 'Store').trim();
-              const name = (cols[3] || '').trim();
-              if (!name) continue;
-              const catOrUnit = (cols[4] || 'General').trim();
-              const costVal = parseFloat(cols[5] || '0') || 0;
-              const priceVal = parseFloat(cols[6] || '0') || 0;
-              const stockVal = Math.max(0, parseInt(cols[7] || '0', 10) || 0);
-              const lowVal = Math.max(0, parseInt(cols[8] || String(LOW_STOCK_THRESHOLD), 10) || LOW_STOCK_THRESHOLD);
+            const cols = lines[i].match(/("([^"]|"")*"|[^,]+)/g) || [];
+            const clean = (idx) => (cols[idx] || '').replace(/^"|"$/g, '').replace(/""/g, '').trim();
+            const title = clean(3);
+            const amount = parseFloat(clean(4)) || 0;
+            if (!title || amount <= 0) continue;
 
-              if (pos === 'Softdrinks') {
-                importedDrinks.push({
-                  id, name, category: 'Softdrinks', size: catOrUnit || '295ml',
-                  glassBottle: false, costPrice: costVal, price: priceVal,
-                  stock: stockVal, lowStockThreshold: lowVal
-                });
-              } else if (pos === 'Cigarettes') {
-                importedCigs.push({
-                  id, name, stickCostPrice: costVal, stickPrice: priceVal,
-                  packCostPrice: costVal * 20, packPrice: priceVal * 20,
-                  stock: stockVal, lowStockThreshold: lowVal
-                });
-              } else {
-                importedStore.push({
-                  id, name, category: catOrUnit || 'General', unit: 'pc',
-                  costPrice: costVal, price: priceVal,
-                  stock: stockVal, lowStockThreshold: lowVal
-                });
-              }
-            } else if (recType === 'Transaction') {
-              const id = (cols[1] || '').trim() || `tx-imp-${Date.now()}-${i}`;
-              const pos = (cols[2] || 'General').trim();
-              const summary = (cols[3] || '').trim();
-              const kindMethod = (cols[4] || 'Sale').trim();
-              const kindMatch = kindMethod.match(/^(Sale|GCash|Expense)/i);
-              const kind = kindMatch ? (kindMatch[1].charAt(0).toUpperCase() + kindMatch[1].slice(1).toLowerCase()) : 'Sale';
-              const amount = parseFloat(cols[9] || '0') || 0;
-              const profit = parseFloat(cols[10] || '0') || 0;
-              const fee = parseFloat(cols[11] || '0') || 0;
-              const voided = String(cols[12] || '').toLowerCase() === 'true';
-              const timestamp = (cols[13] || '').trim();
-              if (summary || amount > 0) {
-                importedTxs.push({
-                  id, kind: kind === 'Gcash' ? 'GCash' : kind, pos, method: kindMethod,
-                  summary: summary || `${kind} Entry`, amount, profit, fee, voided, timestamp
-                });
-              }
-            }
+            const id = clean(0) || ('tx-imp-' + Date.now() + '-' + i);
+            if (state.transactions.some((t) => t.id === id)) continue;
+
+            state.transactions.push({
+              id,
+              kind: clean(1) || 'sale',
+              pos: clean(2) || 'store',
+              title,
+              amount,
+              profit: parseFloat(clean(5)) || 0,
+              paymentMethod: clean(6) || 'Cash',
+              voided: clean(7) === 'true',
+              createdAt: clean(8) || new Date().toISOString()
+            });
+            imported++;
           }
-
-          if (importedStore.length) state.storeProducts = importedStore;
-          if (importedDrinks.length) state.softdrinkProducts = importedDrinks;
-          if (importedCigs.length) state.cigaretteProducts = importedCigs;
-          if (importedTxs.length) state.transactions = importedTxs;
 
           saveState();
-          renderAllGrids();
-          updateDashboardKPIs();
-          renderReports();
-          showToast('CSV imported successfully', 'success');
+          renderAll();
+          showToast(`Imported ${imported} transaction(s)`);
         } catch (err) {
-          showToast('Error reading CSV file', 'error');
+          console.error('Import CSV error:', err);
+          showToast('Invalid CSV file', true);
+        } finally {
+          event.target.value = '';
         }
       };
       reader.readAsText(file);
     }
 
-    function getProductsArray(posName) {
-      if (posName === 'Softdrinks') return state.softdrinkProducts;
-      if (posName === 'Cigarettes') return state.cigaretteProducts;
-      return state.storeProducts;
-    }
-
-    function getActiveCartPos() {
-      if (state.activeTab === 'softdrinks') return 'Softdrinks';
-      if (state.activeTab === 'cigarettes') return 'Cigarettes';
-      return 'Store';
-    }
-
-    function getAllCartItems() {
-      const result = [];
-      ['Store', 'Softdrinks', 'Cigarettes'].forEach(pos => {
-        const list = Array.isArray(state.carts[pos]) ? state.carts[pos] : [];
-        list.forEach((item, idx) => {
-          result.push({ ...item, _pos: pos, _idx: idx });
-        });
-      });
-      return result;
-    }
-
-    function openCurrentTabProductEditor() {
-      openProductEditor(getActiveCartPos(), null);
-    }
-
-    function switchTab(tabName) {
-      state.activeTab = tabName;
-      ['store', 'softdrinks', 'cigarettes', 'gcash', 'reports'].forEach(t => {
-        const sec = document.getElementById('tab-' + t);
-        const nav = document.getElementById('nav-' + t);
-        if (sec) sec.classList.toggle('hidden', t !== tabName);
-        if (nav) {
-          if (t === tabName) {
-            nav.className = 'flex flex-col items-center py-1.5 rounded-xl text-brand-purple font-extrabold transition bg-purple-50/70';
-          } else {
-            nav.className = 'flex flex-col items-center py-1.5 rounded-xl text-slate-500 font-semibold transition';
-          }
-        }
-      });
-
-      if (tabName === 'store') renderStoreGrid();
-      if (tabName === 'softdrinks') renderSoftdrinksGrid();
-      if (tabName === 'cigarettes') renderCigarettesGrid();
-      if (tabName === 'reports') renderReports();
-      updateFloatingCartBar();
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function toggleLowStockFilter(posName) {
-      if (posName === 'Store') {
-        state.storeLowStockOnly = !state.storeLowStockOnly;
-        renderStoreGrid();
-      } else if (posName === 'Softdrinks') {
-        state.softdrinksLowStockOnly = !state.softdrinksLowStockOnly;
-        renderSoftdrinksGrid();
-      } else if (posName === 'Cigarettes') {
-        state.cigarettesLowStockOnly = !state.cigarettesLowStockOnly;
-        renderCigarettesGrid();
-      }
-    }
-
-    function updateLowStockButtonsUI() {
-      const map = [
-        ['store-low-stock-btn', state.storeLowStockOnly],
-        ['softdrinks-low-stock-btn', state.softdrinksLowStockOnly],
-        ['cigarettes-low-stock-btn', state.cigarettesLowStockOnly]
-      ];
-      map.forEach(([id, active]) => {
-        const btn = document.getElementById(id);
-        if (!btn) return;
-        btn.className = active
-          ? 'px-3 py-2.5 rounded-2xl bg-rose-600 border border-rose-600 text-xs font-extrabold text-white transition shrink-0 shadow-2xs'
-          : 'px-3 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs font-extrabold text-slate-600 hover:border-rose-300 hover:text-rose-600 transition shrink-0';
-      });
-    }
-
-    function addStockToProduct(posName, productId, addQty = 10, event = null) {
-      if (event) event.stopPropagation();
-      const arr = getProductsArray(posName);
-      const item = arr.find(p => p.id === productId);
-      if (!item) return;
-      item.stock = Number(item.stock || 0) + Number(addQty || 0);
-      saveState();
-      renderAllGrids();
-      if (state.detailProduct && state.detailProduct.id === productId) {
-        state.detailProduct.stock = item.stock;
-        updateDetailModalUI();
-      }
-      showToast(`+${addQty} stock added to ${item.name}`, 'success');
-    }
-
-    function renderStoreCategories() {
-      const wrap = document.getElementById('store-categories');
-      if (!wrap) return;
-      const cats = ['All', ...Array.from(new Set(state.storeProducts.map(i => i.category || 'General')))];
-      wrap.innerHTML = cats.map(cat => {
-        const active = state.storeCategory === cat;
-        return `
-          <button onclick="setStoreCategory('${escapeHtmlAttr(cat)}')"
-            class="px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition ${active ? 'bg-brand-purple text-white shadow-2xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:border-purple-300'}">
-            ${escapeHtmlAttr(cat)}
-          </button>
-        `;
-      }).join('');
-    }
-
-    function setStoreCategory(cat) {
-      state.storeCategory = cat;
-      renderStoreCategories();
-      renderStoreGrid();
-    }
-
-    function renderStoreGrid() {
-      renderStoreCategories();
-      updateLowStockButtonsUI();
-      const query = (document.getElementById('store-search')?.value || '').toLowerCase().trim();
-      const filtered = state.storeProducts.filter(item => {
-        const matchCat = state.storeCategory === 'All' || (item.category || 'General') === state.storeCategory;
-        const matchLow = !state.storeLowStockOnly || isLowStock(item);
-        const matchSearch = !query ||
-          String(item.name || '').toLowerCase().includes(query) ||
-          String(item.category || '').toLowerCase().includes(query);
-        return matchCat && matchLow && matchSearch;
-      });
-
-      const lowCount = state.storeProducts.filter(i => isLowStock(i)).length;
-      const countEl = document.getElementById('store-item-count');
-      if (countEl) {
-        countEl.textContent = lowCount > 0 ? `${filtered.length} items • ${lowCount} low` : `${filtered.length} items`;
-      }
-
-      const grid = document.getElementById('store-grid');
-      if (!grid) return;
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-2 bg-white rounded-3xl p-6 text-center border border-slate-100">
-            <p class="text-xs font-bold text-slate-500">No store items match your filter.</p>
-            <button onclick="openProductEditor('Store', null)" class="mt-2 text-xs font-extrabold text-brand-purple underline">+ Add Product</button>
-          </div>
-        `;
-        if (window.lucide) lucide.createIcons();
-        return;
-      }
-
-      grid.innerHTML = filtered.map(item => {
-        const low = isLowStock(item);
-        return `
-          <div class="bg-white rounded-[22px] p-3 shadow-card border ${low ? 'border-rose-200' : 'border-slate-100/80'} flex flex-col justify-between transition hover:-translate-y-0.5 relative">
-            <div onclick="openProductDetailModal('${item.id}', 'Store')" class="cursor-pointer">
-              <div class="w-full h-24 rounded-2xl bg-gradient-to-b from-[#F5EFFB] to-[#EAE0F6] flex items-center justify-center relative mb-2.5 overflow-hidden">
-                ${renderProductMedia(item)}
-                <span class="absolute top-2 right-2 text-[9px] font-bold ${low ? 'bg-rose-600 text-white' : 'bg-white/90 text-slate-600'} px-2 py-0.5 rounded-full">
-                  ${low ? `Low: ${item.stock}` : `${item.stock} left`}
-                </span>
-              </div>
-              <h4 class="text-xs font-extrabold text-slate-900 leading-snug line-clamp-1">${escapeHtmlAttr(item.name)}</h4>
-              <div class="flex items-center justify-between gap-1 mt-0.5">
-                <p class="text-[10px] font-bold uppercase text-brand-purple/80">${escapeHtmlAttr(item.category || 'Store')}</p>
-                <button onclick="addStockToProduct('Store', '${item.id}', 10, event)"
-                  class="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-1.5 py-0.5 rounded-md transition active:scale-95" title="Add +10 Stock">
-                  +10
-                </button>
-              </div>
-            </div>
-
-            <button onclick="event.stopPropagation(); openProductEditor('Store', '${item.id}')"
-              class="absolute top-4 left-4 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-2xs flex items-center justify-center transition active:scale-90" title="Edit Product">
-              <i data-lucide="pencil" class="w-3 h-3 text-brand-purple"></i>
-            </button>
-
-            <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
-              <div>
-                <span class="block text-[9px] font-semibold text-slate-400">Orig: ${formatPeso(item.costPrice ?? item.price)}</span>
-                <span class="font-display text-sm font-extrabold text-slate-900">${formatPeso(item.price)}</span>
-              </div>
-              <button onclick="addToCartById('Store', '${item.id}')"
-                class="w-7 h-7 rounded-full bg-brand-purple hover:bg-brand-dark text-white flex items-center justify-center shadow-2xs transition active:scale-90" title="Quick Add">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function renderSoftdrinksGrid() {
-      updateLowStockButtonsUI();
-      const query = (document.getElementById('softdrinks-search')?.value || '').toLowerCase().trim();
-      const filtered = state.softdrinkProducts.filter(item => {
-        const matchLow = !state.softdrinksLowStockOnly || isLowStock(item);
-        const matchSearch = !query ||
-          String(item.name || '').toLowerCase().includes(query) ||
-          String(item.size || '').toLowerCase().includes(query);
-        return matchLow && matchSearch;
-      });
-
-      const lowCount = state.softdrinkProducts.filter(i => isLowStock(i)).length;
-      const countEl = document.getElementById('softdrinks-item-count');
-      if (countEl) {
-        countEl.textContent = lowCount > 0 ? `${filtered.length} items • ${lowCount} low` : `${filtered.length} items`;
-      }
-
-      const grid = document.getElementById('softdrinks-grid');
-      if (!grid) return;
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-2 bg-white rounded-3xl p-6 text-center border border-slate-100">
-            <p class="text-xs font-bold text-slate-500">No softdrinks match your filter.</p>
-            <button onclick="openProductEditor('Softdrinks', null)" class="mt-2 text-xs font-extrabold text-brand-purple underline">+ Add Softdrink</button>
-          </div>
-        `;
-        if (window.lucide) lucide.createIcons();
-        return;
-      }
-
-      grid.innerHTML = filtered.map(item => {
-        const low = isLowStock(item);
-        return `
-          <div class="bg-white rounded-[22px] p-3 shadow-card border ${low ? 'border-rose-200' : 'border-slate-100/80'} flex flex-col justify-between transition hover:-translate-y-0.5 relative">
-            <div onclick="openProductDetailModal('${item.id}', 'Softdrinks')" class="cursor-pointer">
-              <div class="w-full h-24 rounded-2xl bg-gradient-to-b from-[#F5EFFB] to-[#EAE0F6] flex items-center justify-center relative mb-2.5 overflow-hidden">
-                ${renderProductMedia(item)}
-                <span class="absolute top-2 right-2 text-[9px] font-bold ${low ? 'bg-rose-600 text-white' : 'bg-white/90 text-slate-600'} px-2 py-0.5 rounded-full">
-                  ${low ? `Low: ${item.stock}` : `${item.stock} left`}
-                </span>
-              </div>
-              <h4 class="text-xs font-extrabold text-slate-900 leading-snug line-clamp-1">${escapeHtmlAttr(item.name)}</h4>
-              <div class="flex items-center justify-between gap-1 mt-0.5">
-                <p class="text-[10px] font-bold uppercase text-brand-purple/80">${escapeHtmlAttr(item.size || 'Drink')}</p>
-                <button onclick="addStockToProduct('Softdrinks', '${item.id}', 12, event)"
-                  class="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-1.5 py-0.5 rounded-md transition active:scale-95" title="Add +12 Stock">
-                  +12
-                </button>
-              </div>
-            </div>
-
-            <button onclick="event.stopPropagation(); openProductEditor('Softdrinks', '${item.id}')"
-              class="absolute top-4 left-4 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-2xs flex items-center justify-center transition active:scale-90" title="Edit Softdrink">
-              <i data-lucide="pencil" class="w-3 h-3 text-brand-purple"></i>
-            </button>
-
-            <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
-              <div>
-                <span class="block text-[9px] font-semibold text-slate-400">Orig: ${formatPeso(item.costPrice ?? item.price)}</span>
-                <span class="font-display text-sm font-extrabold text-slate-900">${formatPeso(item.price)}</span>
-              </div>
-              <button onclick="addToCartById('Softdrinks', '${item.id}')"
-                class="w-7 h-7 rounded-full bg-brand-purple hover:bg-brand-dark text-white flex items-center justify-center shadow-2xs transition active:scale-90" title="Quick Add">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function renderCigarettesGrid() {
-      updateLowStockButtonsUI();
-      const query = (document.getElementById('cigarettes-search')?.value || '').toLowerCase().trim();
-      const filtered = state.cigaretteProducts.filter(item => {
-        const matchLow = !state.cigarettesLowStockOnly || isLowStock(item);
-        const matchSearch = !query || String(item.name || '').toLowerCase().includes(query);
-        return matchLow && matchSearch;
-      });
-
-      const lowCount = state.cigaretteProducts.filter(i => isLowStock(i)).length;
-      const countEl = document.getElementById('cigarettes-item-count');
-      if (countEl) {
-        countEl.textContent = lowCount > 0 ? `${filtered.length} items • ${lowCount} low` : `${filtered.length} items`;
-      }
-
-      const grid = document.getElementById('cigarettes-grid');
-      if (!grid) return;
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-2 bg-white rounded-3xl p-6 text-center border border-slate-100">
-            <p class="text-xs font-bold text-slate-500">No cigarettes match your filter.</p>
-            <button onclick="openProductEditor('Cigarettes', null)" class="mt-2 text-xs font-extrabold text-brand-purple underline">+ Add Cigarette</button>
-          </div>
-        `;
-        if (window.lucide) lucide.createIcons();
-        return;
-      }
-
-      grid.innerHTML = filtered.map(item => {
-        const low = isLowStock(item);
-        return `
-          <div class="bg-white rounded-[22px] p-3 shadow-card border ${low ? 'border-rose-200' : 'border-slate-100/80'} flex flex-col justify-between transition hover:-translate-y-0.5 relative">
-            <div onclick="openProductDetailModal('${item.id}', 'Cigarettes')" class="cursor-pointer">
-              <div class="w-full h-24 rounded-2xl bg-gradient-to-b from-[#F5EFFB] to-[#EAE0F6] flex items-center justify-center relative mb-2.5 overflow-hidden">
-                ${renderProductMedia(item)}
-                <span class="absolute top-2 right-2 text-[9px] font-bold ${low ? 'bg-rose-600 text-white' : 'bg-white/90 text-slate-600'} px-2 py-0.5 rounded-full">
-                  ${low ? `Low: ${item.stock}s` : `${item.stock} sticks`}
-                </span>
-              </div>
-              <h4 class="text-xs font-extrabold text-slate-900 leading-snug line-clamp-1">${escapeHtmlAttr(item.name)}</h4>
-              <div class="flex items-center justify-between gap-1 mt-0.5">
-                <p class="text-[10px] font-bold uppercase text-brand-purple/80">Pack: ${formatPeso(item.packPrice || 175)}</p>
-                <button onclick="addStockToProduct('Cigarettes', '${item.id}', 20, event)"
-                  class="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-1.5 py-0.5 rounded-md transition active:scale-95" title="Add +20 Sticks">
-                  +20
-                </button>
-              </div>
-            </div>
-
-            <button onclick="event.stopPropagation(); openProductEditor('Cigarettes', '${item.id}')"
-              class="absolute top-4 left-4 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-2xs flex items-center justify-center transition active:scale-90" title="Edit Cigarette">
-              <i data-lucide="pencil" class="w-3 h-3 text-brand-purple"></i>
-            </button>
-
-            <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
-              <div>
-                <span class="block text-[9px] font-semibold text-slate-400">Orig: ${formatPeso(item.stickCostPrice ?? 7)}/stick</span>
-                <span class="font-display text-sm font-extrabold text-slate-900">${formatPeso(item.stickPrice ?? 10)}</span>
-              </div>
-              <button onclick="addToCartById('Cigarettes', '${item.id}')"
-                class="w-7 h-7 rounded-full bg-brand-purple hover:bg-brand-dark text-white flex items-center justify-center shadow-2xs transition active:scale-90" title="Quick Add Stick">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function renderAllGrids() {
-      renderStoreGrid();
-      renderSoftdrinksGrid();
-      renderCigarettesGrid();
-    }
-
-    function addToCartById(posName, productId, mode = 'stick', qty = 1) {
-      const targetPos = posName || getActiveCartPos();
-      const arr = getProductsArray(targetPos);
-      let item = arr.find(p => p.id === productId);
-      if (!item) {
-        for (const candidatePos of ['Store', 'Softdrinks', 'Cigarettes']) {
-          const found = getProductsArray(candidatePos).find(p => p.id === productId);
-          if (found) {
-            item = found;
-            posName = candidatePos;
-            break;
-          }
-        }
-      }
-      if (!item) {
-        showToast('Product not found', 'error');
-        return;
-      }
-
-      const resolvedPos = posName || targetPos;
-      if (!Array.isArray(state.carts[resolvedPos])) {
-        state.carts[resolvedPos] = [];
-      }
-
-      const safeQty = Math.max(1, parseInt(qty, 10) || 1);
-      const stockNeeded = resolvedPos === 'Cigarettes' && mode === 'pack' ? safeQty * 20 : safeQty;
-      if (Number(item.stock || 0) < stockNeeded) {
-        showToast(`Not enough stock for ${item.name}`, 'error');
-        return;
-      }
-
-      let unitPrice = Number(item.price || 0);
-      let unitCost = Number(item.costPrice ?? item.price ?? 0);
-      let label = item.name;
-      let stockDeduct = safeQty;
-
-      if (resolvedPos === 'Cigarettes') {
-        if (mode === 'pack') {
-          unitPrice = Number(item.packPrice || (Number(item.stickPrice || 10) * 20));
-          unitCost = Number(item.packCostPrice || (Number(item.stickCostPrice || 7) * 20));
-          label = `${item.name} (Pack)`;
-          stockDeduct = safeQty * 20;
-        } else {
-          unitPrice = Number(item.stickPrice || item.price || 10);
-          unitCost = Number(item.stickCostPrice ?? item.costPrice ?? 7);
-          label = `${item.name} (Stick)`;
-          stockDeduct = safeQty;
-        }
-      }
-
-      const cartKey = `${item.id}::${mode}`;
-      const cart = state.carts[resolvedPos];
-      const existing = cart.find(c => c.cartKey === cartKey);
-      if (existing) {
-        if (Number(item.stock || 0) < (Number(existing.stockDeduct || 0) + stockDeduct)) {
-          showToast('Reached available stock limit', 'error');
-          return;
-        }
-        existing.qty = Number(existing.qty || 0) + safeQty;
-        existing.stockDeduct = Number(existing.stockDeduct || 0) + stockDeduct;
-      } else {
-        cart.push({
-          cartKey,
-          pos: resolvedPos,
-          productId: item.id,
-          name: label,
-          qty: safeQty,
-          stockDeduct,
-          unitPrice,
-          unitCost
-        });
-      }
-
-      state.activeCartDrawerPos = resolvedPos;
-      updateFloatingCartBar();
-      showToast(`Added ${label} to ${resolvedPos} cart`, 'success');
-    }
-
-    function updateFloatingCartBar() {
-      const allItems = getAllCartItems();
-      const totalItems = allItems.reduce((sum, i) => sum + Number(i.qty || 0), 0);
-      const totalAmount = allItems.reduce((sum, i) => sum + (Number(i.qty || 0) * Number(i.unitPrice || 0)), 0);
-
-      const badge = document.getElementById('header-cart-badge');
-      if (badge) badge.textContent = String(totalItems);
-
-      const pos = getActiveCartPos();
-      const activeCart = state.carts[pos] || [];
-      const displayCount = activeCart.length ? activeCart.reduce((s, i) => s + Number(i.qty || 0), 0) : totalItems;
-      const displayAmount = activeCart.length ? activeCart.reduce((s, i) => s + (Number(i.qty || 0) * Number(i.unitPrice || 0)), 0) : totalAmount;
-      const displayPosLabel = activeCart.length ? `${pos} Cart` : 'All Carts';
-
-      const fab = document.getElementById('floating-cart-bar');
-      if (!fab) return;
-      if (totalItems > 0 && ['store', 'softdrinks', 'cigarettes'].includes(state.activeTab)) {
-        fab.classList.remove('hidden');
-        document.getElementById('fab-cart-count').textContent = String(displayCount);
-        document.getElementById('fab-cart-pos').textContent = displayPosLabel;
-        document.getElementById('fab-cart-total').textContent = formatPeso(displayAmount);
-      } else {
-        fab.classList.add('hidden');
-      }
-    }
-
-    function openProductDetailModal(productId, posName) {
-      const arr = getProductsArray(posName);
-      const item = arr.find(p => p.id === productId);
-      if (!item) return;
-
-      state.detailProduct = { ...item, _pos: posName };
-      state.detailQty = 1;
-      state.detailCigMode = 'stick';
-
-      document.getElementById('detail-pos-badge').textContent = posName;
-      document.getElementById('detail-name').textContent = item.name;
-      document.getElementById('detail-meta').textContent = posName === 'Cigarettes'
-        ? `Stick: ${formatPeso(item.stickPrice || 10)} • Pack: ${formatPeso(item.packPrice || 175)}`
-        : `${item.category || posName} • Orig: ${formatPeso(item.costPrice ?? item.price)}`;
-
-      document.getElementById('detail-media-box').innerHTML = renderProductMedia(item, 'w-full h-full object-cover', 'text-lg font-extrabold text-brand-purple');
-      document.getElementById('detail-cig-mode-wrap').classList.toggle('hidden', posName !== 'Cigarettes');
-      setDetailCigMode('stick');
-      updateDetailModalUI();
-      document.getElementById('detail-modal').classList.remove('hidden');
-    }
-
-    function setDetailCigMode(mode) {
-      state.detailCigMode = mode;
-      const sBtn = document.getElementById('detail-mode-stick');
-      const pBtn = document.getElementById('detail-mode-pack');
-      if (mode === 'pack') {
-        pBtn.className = 'py-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white';
-        sBtn.className = 'py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700';
-      } else {
-        sBtn.className = 'py-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white';
-        pBtn.className = 'py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700';
-      }
-      updateDetailModalUI();
-    }
-
-    function changeDetailQty(delta) {
-      state.detailQty = Math.max(1, state.detailQty + delta);
-      updateDetailModalUI();
-    }
-
-    function quickRestockFromDetail(qty) {
-      if (!state.detailProduct) return;
-      addStockToProduct(state.detailProduct._pos, state.detailProduct.id, qty);
-    }
-
-    function updateDetailModalUI() {
-      const p = state.detailProduct;
-      if (!p) return;
-      let unitPrice = Number(p.price || 0);
-      if (p._pos === 'Cigarettes') {
-        unitPrice = state.detailCigMode === 'pack'
-          ? Number(p.packPrice || 175)
-          : Number(p.stickPrice || 10);
-      }
-      const subtotal = unitPrice * state.detailQty;
-      document.getElementById('detail-unit-price').textContent = formatPeso(unitPrice);
-      document.getElementById('detail-stock-info').textContent = `Available Stock: ${p.stock} (Low at ${p.lowStockThreshold ?? LOW_STOCK_THRESHOLD})`;
-      document.getElementById('detail-qty').textContent = String(state.detailQty);
-      document.getElementById('detail-subtotal').textContent = formatPeso(subtotal);
-    }
-
-    function addDetailToCart() {
-      if (!state.detailProduct) return;
-      addToCartById(state.detailProduct._pos, state.detailProduct.id, state.detailCigMode, state.detailQty);
-      closeDetailModal();
-    }
-
-    function closeDetailModal() {
-      document.getElementById('detail-modal').classList.add('hidden');
-      state.detailProduct = null;
-    }
-
-    function openProductEditor(posName, productId = null) {
-      state.editorState = { pos: posName, productId };
-      const arr = getProductsArray(posName);
-      const existing = productId ? arr.find(p => p.id === productId) : null;
-
-      document.getElementById('editor-pos-label').textContent = `${posName} Product`;
-      document.getElementById('editor-title').textContent = existing ? 'Edit Product' : `Add ${posName} Product`;
-      document.getElementById('ed-delete-btn').classList.toggle('hidden', !existing);
-
-      document.getElementById('ed-store-fields').classList.toggle('hidden', posName !== 'Store');
-      document.getElementById('ed-softdrink-fields').classList.toggle('hidden', posName !== 'Softdrinks');
-      document.getElementById('ed-standard-price-fields').classList.toggle('hidden', posName === 'Cigarettes');
-      document.getElementById('ed-cigarette-price-fields').classList.toggle('hidden', posName !== 'Cigarettes');
-
-      document.getElementById('ed-name').value = existing ? existing.name : '';
-      document.getElementById('ed-category').value = existing?.category || 'General';
-      document.getElementById('ed-unit').value = existing?.unit || 'pc';
-      document.getElementById('ed-size').value = existing?.size || '295ml';
-      document.getElementById('ed-glass').checked = Boolean(existing?.glassBottle);
-
-      document.getElementById('ed-cost-price').value = existing?.costPrice ?? '';
-      document.getElementById('ed-price').value = existing?.price ?? '';
-
-      document.getElementById('ed-stick-cost').value = existing?.stickCostPrice ?? 7;
-      document.getElementById('ed-stick-price').value = existing?.stickPrice ?? 10;
-      document.getElementById('ed-pack-cost').value = existing?.packCostPrice ?? 140;
-      document.getElementById('ed-pack-price').value = existing?.packPrice ?? 175;
-
-      document.getElementById('ed-stock').value = existing?.stock ?? 20;
-      document.getElementById('ed-low-stock').value = existing?.lowStockThreshold ?? LOW_STOCK_THRESHOLD;
-      document.getElementById('ed-image').value = existing?.imageUrl || '';
-
-      document.getElementById('editor-modal').classList.remove('hidden');
-    }
-
-    function closeProductEditor() {
-      document.getElementById('editor-modal').classList.add('hidden');
-    }
-
-    function saveProductFromEditor() {
-      const { pos, productId } = state.editorState;
-      const name = (document.getElementById('ed-name')?.value || '').trim();
-      if (!name) {
-        showToast('Please enter a product name', 'error');
-        return;
-      }
-
-      const stock = Math.max(0, parseInt(document.getElementById('ed-stock')?.value || '0', 10) || 0);
-      const lowStockThreshold = Math.max(0, parseInt(document.getElementById('ed-low-stock')?.value || String(LOW_STOCK_THRESHOLD), 10) || 0);
-      const imageUrl = (document.getElementById('ed-image')?.value || '').trim();
-      const arr = getProductsArray(pos);
-
-      let payload = {
-        id: productId || `${pos.toLowerCase().slice(0, 2)}-${Date.now()}`,
-        name,
-        stock,
-        lowStockThreshold,
-        imageUrl
-      };
-
-      if (pos === 'Cigarettes') {
-        const stickCostPrice = Math.max(0, parseFloat(document.getElementById('ed-stick-cost')?.value || '0') || 0);
-        const stickPrice = Math.max(0, parseFloat(document.getElementById('ed-stick-price')?.value || '0') || 0);
-        const packCostPrice = Math.max(0, parseFloat(document.getElementById('ed-pack-cost')?.value || '0') || 0);
-        const packPrice = Math.max(0, parseFloat(document.getElementById('ed-pack-price')?.value || '0') || 0);
-        payload = { ...payload, stickCostPrice, stickPrice, packCostPrice, packPrice };
-      } else {
-        const costPrice = Math.max(0, parseFloat(document.getElementById('ed-cost-price')?.value || '0') || 0);
-        const price = Math.max(0, parseFloat(document.getElementById('ed-price')?.value || '0') || 0);
-        payload = { ...payload, costPrice, price };
-        if (pos === 'Store') {
-          payload.category = (document.getElementById('ed-category')?.value || 'General').trim() || 'General';
-          payload.unit = (document.getElementById('ed-unit')?.value || 'pc').trim() || 'pc';
-        } else if (pos === 'Softdrinks') {
-          payload.category = 'Softdrinks';
-          payload.size = (document.getElementById('ed-size')?.value || '295ml').trim() || '295ml';
-          payload.glassBottle = Boolean(document.getElementById('ed-glass')?.checked);
-        }
-      }
-
-      if (productId) {
-        const idx = arr.findIndex(p => p.id === productId);
-        if (idx !== -1) arr[idx] = { ...arr[idx], ...payload };
-      } else {
-        arr.unshift(payload);
-      }
-
-      saveState();
-      renderAllGrids();
-      closeProductEditor();
-      showToast(productId ? 'Product updated' : 'Product added', 'success');
-    }
-
-    function deleteProductFromEditor() {
-      const { pos, productId } = state.editorState;
-      if (!productId) return;
-      if (pos === 'Store') {
-        state.storeProducts = state.storeProducts.filter(p => p.id !== productId);
-      } else if (pos === 'Softdrinks') {
-        state.softdrinkProducts = state.softdrinkProducts.filter(p => p.id !== productId);
-      } else if (pos === 'Cigarettes') {
-        state.cigaretteProducts = state.cigaretteProducts.filter(p => p.id !== productId);
-      }
-      saveState();
-      renderAllGrids();
-      closeProductEditor();
-      showToast('Product removed', 'info');
-    }
-
-    function openCartDrawer(posName) {
-      const requestedPos = posName || getActiveCartPos();
-      let targetPos = requestedPos;
-      if (!(state.carts[targetPos] || []).length) {
-        const fallbackPos = ['Store', 'Softdrinks', 'Cigarettes'].find(p => (state.carts[p] || []).length > 0);
-        if (fallbackPos) targetPos = fallbackPos;
-      }
-      state.activeCartDrawerPos = targetPos;
-      const hasAny = getAllCartItems().length > 0;
-      document.getElementById('cart-drawer-pos').textContent = hasAny ? `${targetPos} Cart` : `${requestedPos} Cart`;
-      renderCartDrawerItems();
-      const cashInput = document.getElementById('checkout-cash');
-      if (cashInput) cashInput.value = '';
-      updateCheckoutChange();
-      document.getElementById('cart-modal').classList.remove('hidden');
-    }
-
-    function closeCartDrawer() {
-      document.getElementById('cart-modal').classList.add('hidden');
-    }
-
-    function renderCartDrawerItems() {
-      const pos = state.activeCartDrawerPos;
-      let cart = Array.isArray(state.carts[pos]) ? state.carts[pos] : [];
-      if (!cart.length) {
-        const fallbackPos = ['Store', 'Softdrinks', 'Cigarettes'].find(p => Array.isArray(state.carts[p]) && state.carts[p].length > 0);
-        if (fallbackPos) {
-          state.activeCartDrawerPos = fallbackPos;
-          cart = state.carts[fallbackPos];
-          document.getElementById('cart-drawer-pos').textContent = `${fallbackPos} Cart`;
-        }
-      }
-
-      const list = document.getElementById('cart-items-list');
-      const totalEl = document.getElementById('cart-total-amount');
-
-      if (!cart.length) {
-        list.innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-4">Cart is empty.</p>`;
-        totalEl.textContent = formatPeso(0);
-        return;
-      }
-
-      const total = cart.reduce((s, i) => s + (Number(i.qty || 0) * Number(i.unitPrice || 0)), 0);
-      totalEl.textContent = formatPeso(total);
-
-      list.innerHTML = cart.map((item, idx) => `
-        <div class="flex items-center justify-between bg-slate-50 rounded-2xl p-2.5">
-          <div>
-            <p class="text-xs font-extrabold text-slate-900">${escapeHtmlAttr(item.name)}</p>
-            <p class="text-[10px] font-semibold text-slate-500">${Number(item.qty || 0)} × ${formatPeso(item.unitPrice)}</p>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="adjustCartItemQty('${escapeHtmlAttr(state.activeCartDrawerPos)}', ${idx}, -1)" class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-xs font-extrabold">-</button>
-            <span class="w-5 text-center text-xs font-extrabold">${Number(item.qty || 0)}</span>
-            <button type="button" onclick="adjustCartItemQty('${escapeHtmlAttr(state.activeCartDrawerPos)}', ${idx}, 1)" class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-xs font-extrabold">+</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function adjustCartItemQty(pos, idx, delta) {
-      const cart = state.carts[pos];
-      if (!cart || !cart[idx]) return;
-      const itemPos = cart[idx].pos || pos;
-      const prod = getProductsArray(itemPos).find(p => String(p.id) === String(cart[idx].productId));
-      const qtyNow = Math.max(1, Number(cart[idx].qty || 1));
-      const unitStockPerQty = Math.max(0, Number(cart[idx].stockDeduct ?? qtyNow)) / qtyNow;
-      const nextQty = qtyNow + Number(delta || 0);
-
-      if (nextQty <= 0) {
-        cart.splice(idx, 1);
-      } else {
-        if (prod && unitStockPerQty > 0 && Number(prod.stock || 0) < nextQty * unitStockPerQty) {
-          showToast('Not enough stock', 'error');
-          return;
-        }
-        cart[idx].qty = nextQty;
-        cart[idx].stockDeduct = nextQty * unitStockPerQty;
-      }
-
-      renderCartDrawerItems();
-      updateCheckoutChange();
-      updateFloatingCartBar();
-    }
-
-    function updateCheckoutChange() {
-      const pos = state.activeCartDrawerPos;
-      const cart = Array.isArray(state.carts[pos]) ? state.carts[pos] : [];
-      const total = cart.reduce((s, i) => s + (Number(i.qty || 0) * Number(i.unitPrice || 0)), 0);
-      const cash = parseFloat(document.getElementById('checkout-cash')?.value || '0') || 0;
-      const change = Math.max(0, cash - total);
-      const changeEl = document.getElementById('checkout-change');
-      if (changeEl) changeEl.textContent = formatPeso(change);
-    }
-
-    function completeCartCheckout() {
-      try {
-        let pos = state.activeCartDrawerPos;
-        let cart = Array.isArray(state.carts[pos]) ? state.carts[pos] : [];
-
-        if (!cart.length) {
-          const fallbackPos = ['Store', 'Softdrinks', 'Cigarettes'].find(p => Array.isArray(state.carts[p]) && state.carts[p].length > 0);
-          if (fallbackPos) {
-            pos = fallbackPos;
-            state.activeCartDrawerPos = fallbackPos;
-            cart = state.carts[fallbackPos];
-          }
-        }
-
-        if (!cart.length) {
-          showToast('Cart is empty', 'error');
-          return;
-        }
-
-        for (const cItem of cart) {
-          const itemPos = cItem.pos || pos;
-          const arr = getProductsArray(itemPos);
-          const needed = Math.max(0, Number(cItem.stockDeduct ?? cItem.qty ?? 0));
-          const prod = arr.find(p => String(p.id) === String(cItem.productId));
-          if (prod && needed > 0 && Number(prod.stock || 0) < needed) {
-            showToast(`Insufficient stock for ${cItem.name}`, 'error');
-            return;
-          }
-        }
-
-        for (const cItem of cart) {
-          const itemPos = cItem.pos || pos;
-          const arr = getProductsArray(itemPos);
-          const needed = Math.max(0, Number(cItem.stockDeduct ?? cItem.qty ?? 0));
-          const prod = arr.find(p => String(p.id) === String(cItem.productId));
-          if (prod && needed > 0) {
-            prod.stock = Math.max(0, Number(prod.stock || 0) - needed);
-          }
-        }
-
-        const total = cart.reduce((s, i) => s + (Number(i.qty || 0) * Number(i.unitPrice || 0)), 0);
-        const cost = cart.reduce((s, i) => s + (Number(i.qty || 0) * Number(i.unitCost || 0)), 0);
-        const methodEl = document.getElementById('checkout-method');
-        const method = methodEl ? methodEl.value : 'Cash';
-        const summaryText = cart.map(i => `${i.name} x${Number(i.qty || 1)}`).join(', ') || `${pos} Sale`;
-
-        if (!Array.isArray(state.transactions)) {
-          state.transactions = [];
-        }
-
-        state.transactions.unshift({
-          id: 'tx-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-          kind: 'Sale',
-          pos,
-          method,
-          summary: summaryText,
-          amount: total,
-          profit: Math.max(0, total - cost),
-          fee: 0,
-          createdAt: Date.now(),
-          voided: false,
-          items: cart.map(i => ({
-            pos: i.pos || pos,
-            productId: i.productId,
-            stockDeduct: Number(i.stockDeduct ?? i.qty ?? 0)
-          })),
-          timestamp: new Date().toLocaleString('en-PH', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
-        });
-
-        state.carts[pos] = [];
-        saveState();
-        renderAllGrids();
-        updateDashboardKPIs();
-        if (state.activeTab === 'reports') renderReports();
-        updateFloatingCartBar();
-        closeCartDrawer();
-        showToast(`Sale completed (${formatPeso(total)})`, 'success');
-      } catch (err) {
-        showToast(`Checkout failed: ${err && err.message ? err.message : 'Please try again.'}`, 'error');
-      }
-    }
-
-    function setGcashType(typeName) {
-      state.gcashType = typeName || 'Cash-In';
-      const buttons = [
-        ['gc-type-cashin', 'Cash-In'],
-        ['gc-type-cashout', 'Cash-Out'],
-        ['gc-type-eload', 'E-Load']
-      ];
-      buttons.forEach(([id, label]) => {
-        const btn = document.getElementById(id);
-        if (!btn) return;
-        btn.className = label === state.gcashType
-          ? 'py-2.5 rounded-xl text-xs font-extrabold bg-brand-purple text-white shadow-sm transition'
-          : 'py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-brand-purple transition';
-      });
-      recalcGcash(false);
-    }
-
-    function setGcashAmount(val) {
-      const amtEl = document.getElementById('gcash-amount');
-      if (!amtEl) return;
-      amtEl.value = String(Math.max(0, Number(val || 0)));
-      recalcGcash(false);
-    }
-
-    function clearGcashForm() {
-      ['gcash-search', 'gcash-amount', 'gcash-customer', 'gcash-ref'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-      const feeEl = document.getElementById('gcash-fee');
-      if (feeEl) feeEl.value = '0';
-      recalcGcash(true);
-    }
-
-    function handleGcashSearchBar() {
-      const q = (document.getElementById('gcash-search')?.value || '').trim();
-      if (!q) return;
-      const digitsOnly = q.replace(/\D/g, '');
-      if (/^09\d{7,9}$/.test(digitsOnly)) {
-        const custEl = document.getElementById('gcash-customer');
-        if (custEl) custEl.value = digitsOnly.slice(0, 11);
-      } else if (/^\d+(\.\d+)?$/.test(q)) {
-        const amtEl = document.getElementById('gcash-amount');
-        if (amtEl) {
-          amtEl.value = q;
-          recalcGcash(false);
-        }
-      }
-    }
-
-    function recalcGcash(manualFee = false) {
-      const amt = Math.max(0, parseFloat(document.getElementById('gcash-amount')?.value || '0') || 0);
-      const feeInput = document.getElementById('gcash-fee');
-      let fee = parseFloat(feeInput?.value || '0') || 0;
-      if (!manualFee) {
-        fee = amt <= 0 ? 0 : Math.max(5, Math.ceil(amt / 500) * 10);
-        if (feeInput) feeInput.value = String(fee);
-      }
-      const total = amt + fee;
-      document.getElementById('gcash-total-display').textContent = formatPeso(total);
-      document.getElementById('gcash-fee-display').textContent = `+${formatPeso(fee)}`;
-    }
-
-    function recordGcashTransaction() {
-      const amt = Math.max(0, parseFloat(document.getElementById('gcash-amount')?.value || '0') || 0);
-      const fee = Math.max(0, parseFloat(document.getElementById('gcash-fee')?.value || '0') || 0);
-      if (amt <= 0) {
-        showToast('Enter a valid GCash / Load amount', 'error');
-        return;
-      }
-      const cust = (document.getElementById('gcash-customer')?.value || '').trim() || 'Walk-in';
-      const ref = (document.getElementById('gcash-ref')?.value || '').trim();
-
-      state.transactions.unshift({
-        id: 'gc-' + Date.now(),
-        kind: 'GCash',
-        pos: 'GCash',
-        method: state.gcashType,
-        summary: `${state.gcashType} • ${cust}${ref ? ` (#${ref})` : ''}`,
-        amount: amt + fee,
-        profit: fee,
-        fee,
-        createdAt: Date.now(),
-        voided: false,
-        timestamp: new Date().toLocaleString('en-PH', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
-      });
-
-      saveState();
+    function renderAll() {
+      renderStoreCatalog();
+      renderSoftdrinksCatalog();
+      renderCigarettesCatalog();
       updateDashboardKPIs();
-      clearGcashForm();
-      showToast(`Recorded ${state.gcashType} (${formatPeso(amt)})`, 'success');
-    }
-
-    function openExpenseModal() {
-      document.getElementById('exp-title').value = '';
-      document.getElementById('exp-amount').value = '';
-      const expPos = document.getElementById('exp-pos');
-      if (expPos) {
-        if (state.activeTab === 'softdrinks') expPos.value = 'Softdrinks';
-        else if (state.activeTab === 'cigarettes') expPos.value = 'Cigarettes';
-        else if (state.activeTab === 'gcash') expPos.value = 'GCash';
-        else if (state.activeTab === 'store') expPos.value = 'Store';
-        else expPos.value = 'General';
+      updateCartBar();
+      if (currentTab === 'reports') {
+        renderReports();
       }
-      document.getElementById('exp-category').value = 'Operations';
-      document.getElementById('expense-modal').classList.remove('hidden');
     }
 
-    function closeExpenseModal() {
-      document.getElementById('expense-modal').classList.add('hidden');
-    }
-
-    function saveExpense() {
-      const title = (document.getElementById('exp-title')?.value || '').trim();
-      const amount = Math.max(0, parseFloat(document.getElementById('exp-amount')?.value || '0') || 0);
-      const pos = document.getElementById('exp-pos')?.value || 'General';
-      const category = (document.getElementById('exp-category')?.value || 'Operations').trim() || 'Operations';
-      if (!title || amount <= 0) {
-        showToast('Enter expense title and amount', 'error');
-        return;
+    // Cross-tab storage listener for Auto Sync
+    window.addEventListener('storage', (e) => {
+      if (!autoSyncEnabled) return;
+      if (e.key === STORAGE_KEY && e.newValue) {
+        loadState();
+        renderAll();
       }
-
-      state.transactions.unshift({
-        id: 'exp-' + Date.now(),
-        kind: 'Expense',
-        pos,
-        method: category,
-        summary: `${title} (${pos === 'General' ? 'Total Money' : pos + ' Money'})`,
-        amount,
-        profit: -amount,
-        fee: 0,
-        createdAt: Date.now(),
-        voided: false,
-        timestamp: new Date().toLocaleString('en-PH', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
-      });
-
-      saveState();
-      updateDashboardKPIs();
-      if (state.activeTab === 'reports') renderReports();
-      closeExpenseModal();
-      showToast(`Expense deducted (${formatPeso(amount)})`, 'success');
-    }
-
-    function openVoidModal(txId) {
-      const tx = state.transactions.find(t => t.id === txId);
-      if (!tx || tx.voided) return;
-      state.pendingVoidTxId = txId;
-      document.getElementById('void-tx-summary').textContent = tx.summary || tx.kind;
-      document.getElementById('void-tx-meta').textContent = `${tx.kind} • ${tx.pos || 'General'} • ${tx.timestamp || ''}`;
-      document.getElementById('void-tx-amount').textContent = `${tx.kind === 'Expense' ? '-' : ''}${formatPeso(tx.amount)}`;
-      document.getElementById('void-modal').classList.remove('hidden');
-    }
-
-    function closeVoidModal() {
-      state.pendingVoidTxId = null;
-      document.getElementById('void-modal').classList.add('hidden');
-    }
-
-    function restoreStockForVoidedSale(tx) {
-      if (!tx || tx.kind !== 'Sale' || !Array.isArray(tx.items)) return;
-      tx.items.forEach(entry => {
-        const restoreQty = Math.max(0, Number(entry.stockDeduct || 0));
-        if (!restoreQty || !entry.productId) return;
-        const candidatePositions = entry.pos
-          ? [entry.pos, 'Store', 'Softdrinks', 'Cigarettes']
-          : ['Store', 'Softdrinks', 'Cigarettes'];
-        for (const pName of candidatePositions) {
-          const prod = getProductsArray(pName).find(p => String(p.id) === String(entry.productId));
-          if (prod) {
-            prod.stock = Number(prod.stock || 0) + restoreQty;
-            break;
-          }
-        }
-      });
-    }
-
-    function confirmVoidTransaction() {
-      const txId = state.pendingVoidTxId;
-      if (!txId) return;
-      const tx = state.transactions.find(t => t.id === txId);
-      if (!tx || tx.voided) {
-        closeVoidModal();
-        return;
-      }
-
-      tx.voided = true;
-      tx.voidedAt = new Date().toLocaleString('en-PH', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
-      restoreStockForVoidedSale(tx);
-
-      saveState();
-      renderAllGrids();
-      updateDashboardKPIs();
-      renderReports();
-      closeVoidModal();
-      showToast('Transaction voided', 'info');
-    }
-
-    function updateDashboardKPIs() {
-      const activeTxs = state.transactions.filter(t => !t.voided);
-      const salesTxs = activeTxs.filter(t => t.kind === 'Sale');
-      const gcashTxs = activeTxs.filter(t => t.kind === 'GCash');
-      const expTxs = activeTxs.filter(t => t.kind === 'Expense');
-
-      const grossSales = salesTxs.reduce((s, t) => s + Number(t.amount || 0), 0) +
-        gcashTxs.reduce((s, t) => s + Number(t.amount || 0), 0);
-      const gcashFees = gcashTxs.reduce((s, t) => s + Number(t.fee || t.profit || 0), 0);
-      const totalExpenses = expTxs.reduce((s, t) => s + Number(t.amount || 0), 0);
-      const itemProfit = salesTxs.reduce((s, t) => s + Number(t.profit || 0), 0);
-      const netProfit = itemProfit + gcashFees - totalExpenses;
-
-      const kpiGross = document.getElementById('kpi-gross-sales');
-      const kpiNet = document.getElementById('kpi-net-profit');
-      const kpiExp = document.getElementById('kpi-expenses');
-      const kpiFees = document.getElementById('kpi-gcash-fees');
-      if (kpiGross) kpiGross.textContent = formatPeso(grossSales);
-      if (kpiNet) kpiNet.textContent = formatPeso(netProfit);
-      if (kpiExp) kpiExp.textContent = formatPeso(totalExpenses);
-      if (kpiFees) kpiFees.textContent = formatPeso(gcashFees);
-
-      const now = Date.now();
-      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-
-      const getTxTimeMs = (tx) => {
-        if (typeof tx.createdAt === 'number' && !Number.isNaN(tx.createdAt)) return tx.createdAt;
-        const idNum = parseInt(String(tx.id || '').replace(/\D+/g, '').slice(0, 13), 10);
-        if (idNum > 1700000000000) return idNum;
-        const parsed = Date.parse(tx.timestamp || '');
-        return Number.isNaN(parsed) ? now : parsed;
-      };
-
-      const weeklyTxs = activeTxs.filter(t => (now - getTxTimeMs(t)) <= sevenDaysMs);
-      const monthlyTxs = activeTxs.filter(t => (now - getTxTimeMs(t)) <= thirtyDaysMs);
-
-      const sumPeriod = (list) => {
-        const sales = list
-          .filter(t => t.kind === 'Sale' || t.kind === 'GCash')
-          .reduce((s, t) => s + Number(t.amount || 0), 0);
-        const kita = list
-          .filter(t => t.kind === 'Sale' || t.kind === 'GCash')
-          .reduce((s, t) => s + Number(t.profit || 0), 0);
-        return { sales, kita };
-      };
-
-      const weekly = sumPeriod(weeklyTxs);
-      const monthly = sumPeriod(monthlyTxs);
-
-      const wSalesEl = document.getElementById('rep-weekly-sales');
-      const wKitaEl = document.getElementById('rep-weekly-kita');
-      const mSalesEl = document.getElementById('rep-monthly-sales');
-      const mKitaEl = document.getElementById('rep-monthly-kita');
-      if (wSalesEl) wSalesEl.textContent = formatPeso(weekly.sales);
-      if (wKitaEl) wKitaEl.textContent = `Kita: ${formatPeso(weekly.kita)}`;
-      if (mSalesEl) mSalesEl.textContent = formatPeso(monthly.sales);
-      if (mKitaEl) mKitaEl.textContent = `Kita: ${formatPeso(monthly.kita)}`;
-
-      const counters = ['Store', 'Softdrinks', 'Cigarettes', 'GCash'];
-      counters.forEach(pos => {
-        const posActiveTxs = activeTxs.filter(t => (t.pos || 'Store') === pos);
-        const posSales = posActiveTxs
-          .filter(t => t.kind !== 'Expense')
-          .reduce((s, t) => s + Number(t.amount || 0), 0);
-        const posExp = posActiveTxs
-          .filter(t => t.kind === 'Expense')
-          .reduce((s, t) => s + Number(t.amount || 0), 0);
-        const posKita = posActiveTxs
-          .filter(t => t.kind !== 'Expense')
-          .reduce((s, t) => s + Number(t.profit || 0), 0) - posExp;
-
-        const netBenta = Math.max(0, posSales - posExp);
-        const key = pos.toLowerCase();
-        const bentaEl = document.getElementById(`rep-${key}-benta`);
-        const profitEl = document.getElementById(`rep-${key}-profit`);
-        if (bentaEl) bentaEl.textContent = formatPeso(netBenta);
-        if (profitEl) profitEl.textContent = `Kita: ${formatPeso(posKita)}`;
-
-        const posWeeklyTxs = posActiveTxs.filter(t => (now - getTxTimeMs(t)) <= sevenDaysMs);
-        const posMonthlyTxs = posActiveTxs.filter(t => (now - getTxTimeMs(t)) <= thirtyDaysMs);
-
-        const posWeeklySales = posWeeklyTxs.filter(t => t.kind !== 'Expense').reduce((s, t) => s + Number(t.amount || 0), 0);
-        const posWeeklyKita = posWeeklyTxs.filter(t => t.kind !== 'Expense').reduce((s, t) => s + Number(t.profit || 0), 0);
-
-        const posMonthlySales = posMonthlyTxs.filter(t => t.kind !== 'Expense').reduce((s, t) => s + Number(t.amount || 0), 0);
-        const posMonthlyKita = posMonthlyTxs.filter(t => t.kind !== 'Expense').reduce((s, t) => s + Number(t.profit || 0), 0);
-
-        const wkEl = document.getElementById(`${key}-weekly-summary`);
-        const moEl = document.getElementById(`${key}-monthly-summary`);
-        if (wkEl) wkEl.textContent = `Wk: ${formatPeso(posWeeklySales)} • Kita: ${formatPeso(posWeeklyKita)}`;
-        if (moEl) moEl.textContent = `Mo: ${formatPeso(posMonthlySales)} • Kita: ${formatPeso(posMonthlyKita)}`;
-      });
-
-      const storeBenta = activeTxs
-        .filter(t => t.kind === 'Sale' && (t.pos || 'Store') === 'Store')
-        .reduce((s, t) => s + Number(t.amount || 0), 0);
-
-      const drinksBenta = activeTxs
-        .filter(t => t.kind === 'Sale' && t.pos === 'Softdrinks')
-        .reduce((s, t) => s + Number(t.amount || 0), 0);
-
-      const yosiBenta = activeTxs
-        .filter(t => t.kind === 'Sale' && t.pos === 'Cigarettes')
-        .reduce((s, t) => s + Number(t.amount || 0), 0);
-
-      const gcashBenta = activeTxs
-        .filter(t => t.kind === 'GCash' && (t.pos || 'GCash') === 'GCash')
-        .reduce((s, t) => s + Number(t.amount || 0), 0);
-
-      const stBanner = document.getElementById('store-banner-sales');
-      const sdBanner = document.getElementById('softdrinks-banner-sales');
-      const cgBanner = document.getElementById('cigarettes-banner-sales');
-      const gcBanner = document.getElementById('gcash-banner-sales');
-      if (stBanner) stBanner.textContent = formatPeso(storeBenta);
-      if (sdBanner) sdBanner.textContent = formatPeso(drinksBenta);
-      if (cgBanner) cgBanner.textContent = formatPeso(yosiBenta);
-      if (gcBanner) gcBanner.textContent = formatPeso(gcashBenta);
-    }
-
-    function renderReports() {
-      updateDashboardKPIs();
-      const filterWrap = document.getElementById('report-filters');
-      if (filterWrap) {
-        const filters = ['All', 'Sale', 'GCash', 'Expense'];
-        filterWrap.innerHTML = filters.map(f => {
-          const active = state.reportFilter === f;
-          return `
-            <button onclick="setReportFilter('${f}')"
-              class="px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition ${active ? 'bg-brand-purple text-white' : 'bg-white text-slate-600 border border-slate-200/80'}">
-              ${f}
-            </button>
-          `;
-        }).join('');
-      }
-
-      const ledger = document.getElementById('transactions-ledger');
-      if (!ledger) return;
-      const rows = state.transactions.filter(t => state.reportFilter === 'All' || t.kind === state.reportFilter);
-
-      if (!rows.length) {
-        ledger.innerHTML = `<div class="bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-400">No transactions recorded yet.</div>`;
-        return;
-      }
-
-      ledger.innerHTML = rows.map(t => {
-        const isExp = t.kind === 'Expense';
-        const isVoided = Boolean(t.voided);
-        return `
-          <div class="bg-white rounded-2xl p-3 shadow-2xs border ${isVoided ? 'border-slate-200 opacity-65' : 'border-slate-100'} flex items-center justify-between gap-3">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${isExp ? 'bg-rose-100 text-rose-700' : 'bg-purple-100 text-brand-purple'}">${escapeHtmlAttr(t.kind)}</span>
-                ${isVoided ? `<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">VOIDED</span>` : ''}
-                <span class="text-[10px] font-bold text-slate-400">${escapeHtmlAttr(t.timestamp || '')}</span>
-              </div>
-              <p class="text-xs font-extrabold text-slate-900 mt-1 ${isVoided ? 'line-through text-slate-500' : ''}">${escapeHtmlAttr(t.summary || '')}</p>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="font-display text-sm font-extrabold ${isVoided ? 'line-through text-slate-400' : isExp ? 'text-rose-600' : 'text-slate-900'}">
-                ${isExp ? '-' : ''}${formatPeso(t.amount)}
-              </span>
-              ${isVoided
-                ? `<span class="text-[10px] font-extrabold text-slate-400 px-2 py-1">Void</span>`
-                : `<button type="button" onclick="openVoidModal('${escapeHtmlAttr(t.id)}')"
-                    class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-extrabold transition active:scale-95">
-                    Void
-                  </button>`
-              }
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function setReportFilter(f) {
-      state.reportFilter = f;
-      renderReports();
-    }
-
-    function resetDemoData() {
-      localStorage.removeItem(STORAGE_KEY);
-      loadState();
-      renderAllGrids();
-      renderReports();
-      showToast('Data reset to default catalog', 'info');
-    }
+    });
 
     window.addEventListener('DOMContentLoaded', () => {
       loadState();
-      renderAllGrids();
-      updateDashboardKPIs();
-      updateFloatingCartBar();
-      switchTab('store');
-      if (window.lucide) lucide.createIcons();
-
-      window.addEventListener('storage', (e) => {
-        if ((e.key === STORAGE_KEY || e.key === SYNC_SNAPSHOT_KEY) && state.autoSyncEnabled) {
-          loadState();
-          renderAllGrids();
-          updateDashboardKPIs();
-          if (state.activeTab === 'reports') renderReports();
-        }
-      });
-
-      setInterval(runAutoSyncTick, 5000);
+      const syncBtn = document.getElementById('autosync-toggle-btn');
+      if (syncBtn) {
+        syncBtn.textContent = `Auto Sync: ${autoSyncEnabled ? 'ON' : 'OFF'}`;
+        syncBtn.className = autoSyncEnabled
+          ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
+          : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
+      }
+      renderAll();
     });
   </script>
 </body>
