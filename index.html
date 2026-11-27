@@ -132,6 +132,10 @@
             <div class="text-right">
               <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
               <p id="total-amount-store" class="text-sm font-black text-teal-300">₱0.00</p>
+              <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] leading-tight">
+                <p class="text-slate-300 font-semibold">Orig: <span id="store-orig-total" class="font-black text-white">₱0.00</span></p>
+                <p class="text-emerald-300 font-semibold">Tubo: <span id="store-sell-total" class="font-black text-emerald-200">₱0.00</span></p>
+              </div>
             </div>
           </div>
 
@@ -183,6 +187,10 @@
             <div class="text-right">
               <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
               <p id="total-amount-softdrinks" class="text-sm font-black text-teal-300">₱0.00</p>
+              <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] leading-tight">
+                <p class="text-slate-300 font-semibold">Orig: <span id="softdrinks-orig-total" class="font-black text-white">₱0.00</span></p>
+                <p class="text-emerald-300 font-semibold">Tubo: <span id="softdrinks-sell-total" class="font-black text-emerald-200">₱0.00</span></p>
+              </div>
             </div>
           </div>
 
@@ -231,6 +239,10 @@
             <div class="text-right">
               <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
               <p id="total-amount-cigarettes" class="text-sm font-black text-teal-300">₱0.00</p>
+              <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] leading-tight">
+                <p class="text-slate-300 font-semibold">Orig: <span id="cigarettes-orig-total" class="font-black text-white">₱0.00</span></p>
+                <p class="text-emerald-300 font-semibold">Tubo: <span id="cigarettes-sell-total" class="font-black text-emerald-200">₱0.00</span></p>
+              </div>
             </div>
           </div>
 
@@ -515,19 +527,19 @@
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 10l1-5h16l1 5M5 10v10h14V10M9 20v-6h6v6" />
         </svg>
-        <span class="text-[11px] font-black">Store</span>
+        <span class="text-[11px] font-black leading-none">Store</span>
       </button>
       <button type="button" id="nav-softdrinks" onclick="switchTab('softdrinks')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 3h8l-1 4H9L8 3zm1 4h6l-1 13a2 2 0 01-2 1.8h0A2 2 0 0110 20L9 7z" />
         </svg>
-        <span class="text-[11px] font-black">Drinks</span>
+        <span class="text-[11px] font-black leading-none">Drinks</span>
       </button>
       <button type="button" id="nav-cigarettes" onclick="switchTab('cigarettes')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 17h14v3H3v-3zm17 0h1v3h-1v-3zM18 13c0-1.5 2-2 2-3.5S18 7 18 5.5" />
         </svg>
-        <span class="text-[11px] font-black">Yosi</span>
+        <span class="text-[11px] font-black leading-none">Yosi</span>
       </button>
       <button type="button" id="nav-gcash" onclick="switchTab('gcash')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
@@ -1998,9 +2010,25 @@
         }
       }
 
-      const totalAmount = totalBenta + counters.gcash.profit + gcashAmountSum - totalExpenses;
+      const totalAmount = totalBenta - totalExpenses;
+
+      const navTotals = {
+        store: { orig: 0, sell: 0 },
+        softdrinks: { orig: 0, sell: 0 },
+        cigarettes: { orig: 0, sell: 0 }
+      };
+      for (const p of state.products) {
+        if (!navTotals[p.pos]) continue;
+        const stock = Math.max(0, Number(p.stock) || 0);
+        const cost = Math.max(0, Number(p.cost) || 0);
+        const price = Math.max(0, Number(p.price) || 0);
+        navTotals[p.pos].orig += cost * stock;
+        navTotals[p.pos].sell += price * stock;
+      }
+
       return {
         counters,
+        navTotals,
         totalBenta,
         totalKita,
         totalExpenses,
@@ -2019,6 +2047,12 @@
         const el = document.getElementById(id);
         if (el) el.textContent = formatPeso(val);
       };
+
+      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
+        const nt = m.navTotals?.[pos] || { orig: 0, sell: 0 };
+        setTxt(`${pos}-orig-total`, nt.orig);
+        setTxt(`${pos}-sell-total`, nt.sell);
+      }
 
       setTxt('store-sales-banner', m.counters.store.sales);
       setTxt('store-profit-banner', m.counters.store.profit);
