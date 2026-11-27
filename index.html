@@ -291,6 +291,9 @@
             <div class="text-right">
               <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
               <p id="total-amount-gcash" class="text-sm font-black text-teal-300">₱0.00</p>
+              <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] leading-tight">
+                <p class="text-sky-200 font-semibold">Puhunan: <span id="gcash-puhunan-banner" class="font-black text-white">₱0.00</span></p>
+              </div>
             </div>
           </div>
 
@@ -303,6 +306,27 @@
               <p class="text-slate-400 font-semibold">Monthly Kita</p>
               <p class="font-extrabold text-white mt-0.5"><span id="gcash-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ Fee <span id="gcash-monthly-profit">₱0.00</span></span></p>
             </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h2 class="text-xs font-black text-slate-900">GCash Puhunan</h2>
+              <p class="text-[11px] font-semibold text-slate-500">Current: <span id="gcash-puhunan-display" class="font-black text-sky-700">₱0.00</span></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <input id="gcash-puhunan-input" type="number" step="0.01" min="0" placeholder="Puhunan (₱)"
+              class="min-w-0 flex-1 rounded-xl border border-slate-200 px-2.5 py-2 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            <button type="button" onclick="setGcashPuhunan()"
+              class="px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-98 text-white text-[11px] font-extrabold transition shrink-0">
+              Set
+            </button>
+            <button type="button" onclick="addGcashPuhunan()"
+              class="px-2.5 py-2 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-98 text-white text-[11px] font-extrabold transition shrink-0">
+              + Add
+            </button>
           </div>
         </div>
 
@@ -882,7 +906,8 @@
       products: [],
       carts: { store: [], softdrinks: [], cigarettes: [] },
       transactions: [],
-      utangRecords: []
+      utangRecords: [],
+      gcashPuhunan: 0
     };
     let currentTab = 'store';
     let selectedStoreCategory = 'All';
@@ -977,7 +1002,8 @@
           cigarettes: Array.isArray(raw?.carts?.cigarettes) ? raw.carts.cigarettes : []
         },
         transactions: Array.isArray(raw?.transactions) ? raw.transactions : [],
-        utangRecords: Array.isArray(raw?.utangRecords) ? raw.utangRecords : []
+        utangRecords: Array.isArray(raw?.utangRecords) ? raw.utangRecords : [],
+        gcashPuhunan: Math.max(0, Number(raw?.gcashPuhunan) || 0)
       };
       base.products = base.products.map((p, idx) => ({
         id: p.id || `prod-${Date.now()}-${idx}`,
@@ -1040,7 +1066,8 @@
         products: state.products,
         carts: state.carts,
         transactions: state.transactions,
-        utangRecords: state.utangRecords
+        utangRecords: state.utangRecords,
+        gcashPuhunan: Math.max(0, Number(state.gcashPuhunan) || 0)
       };
     }
 
@@ -1091,7 +1118,8 @@
           ? incoming.carts
           : state.carts,
         transactions: mergedTransactions,
-        utangRecords: mergedUtang
+        utangRecords: mergedUtang,
+        gcashPuhunan: Math.max(Number(state.gcashPuhunan) || 0, Number(incoming.gcashPuhunan) || 0)
       });
     }
 
@@ -1896,12 +1924,46 @@
     }
 
     // GCash & E-Load
+    function renderGcashPuhunan() {
+      const puhunan = Math.max(0, Number(state.gcashPuhunan) || 0);
+      const bannerEl = document.getElementById('gcash-puhunan-banner');
+      const dispEl = document.getElementById('gcash-puhunan-display');
+      if (bannerEl) bannerEl.textContent = formatPeso(puhunan);
+      if (dispEl) dispEl.textContent = formatPeso(puhunan);
+    }
+
+    function setGcashPuhunan() {
+      const inputEl = document.getElementById('gcash-puhunan-input');
+      const val = parseFloat(inputEl?.value);
+      if (Number.isNaN(val) || val < 0) {
+        return showToast('Enter a valid puhunan amount', true);
+      }
+      state.gcashPuhunan = val;
+      if (inputEl) inputEl.value = '';
+      saveState();
+      renderGcashPuhunan();
+      showToast(`GCash puhunan set to ${formatPeso(val)}`);
+    }
+
+    function addGcashPuhunan() {
+      const inputEl = document.getElementById('gcash-puhunan-input');
+      const addVal = parseFloat(inputEl?.value);
+      if (Number.isNaN(addVal) || addVal <= 0) {
+        return showToast('Enter amount to add to puhunan', true);
+      }
+      state.gcashPuhunan = Math.max(0, Number(state.gcashPuhunan) || 0) + addVal;
+      if (inputEl) inputEl.value = '';
+      saveState();
+      renderGcashPuhunan();
+      showToast(`Added ${formatPeso(addVal)} to GCash puhunan`);
+    }
+
     function setGcashType(type) {
-      activeGcashType = type;
+      activeGcashType = ['cash_in', 'cash_out', 'eload'].includes(type) ? type : 'cash_in';
       for (const t of ['cash_in', 'cash_out', 'eload']) {
         const btn = document.getElementById(`gcash-type-${t}`);
         if (btn) {
-          btn.className = t === type
+          btn.className = t === activeGcashType
             ? 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition'
             : 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
         }
@@ -1909,20 +1971,28 @@
       autoSuggestGcashFee();
     }
 
-    function setGcashAmount(val) {
-      const amtEl = document.getElementById('gcash-amount');
-      if (amtEl) {
-        amtEl.value = String(val);
+    function setGcashAmount(amt) {
+      const amtInput = document.getElementById('gcash-amount');
+      if (amtInput) {
+        amtInput.value = String(amt);
         autoSuggestGcashFee();
       }
     }
 
     function autoSuggestGcashFee() {
       const amt = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
-      const feeEl = document.getElementById('gcash-fee');
-      if (!feeEl || amt <= 0) return;
-      const suggested = Math.max(5, Math.ceil(amt / 500) * 10);
-      feeEl.value = suggested.toFixed(2);
+      const feeInput = document.getElementById('gcash-fee');
+      if (!feeInput) return;
+      if (amt <= 0) {
+        feeInput.value = '';
+        return;
+      }
+      if (activeGcashType === 'eload') {
+        feeInput.value = Math.max(2, Math.round(amt * 0.05)).toFixed(2);
+      } else {
+        const tiers = Math.max(1, Math.ceil(amt / 500));
+        feeInput.value = (tiers * 10).toFixed(2);
+      }
     }
 
     function clearGcashForm() {
@@ -1938,93 +2008,78 @@
       const amount = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
       const fee = Math.max(0, parseFloat(document.getElementById('gcash-fee')?.value) || 0);
       const note = (document.getElementById('gcash-note')?.value || '').trim();
-      if (amount <= 0) return showToast('Enter valid GCash amount', true);
+      if (amount <= 0) {
+        return showToast('Enter a valid GCash / E-Load amount', true);
+      }
 
-      const labelMap = { cash_in: 'GCash Cash In', cash_out: 'GCash Cash Out', eload: 'E-Load' };
-      const title = `${labelMap[activeGcashType] || 'GCash'} ${formatPeso(amount)}${note ? ` (${note})` : ''}`;
+      // Cash In: puhunan + amount + fee; Cash Out & E-Load: puhunan - amount + fee
+      const currentPuhunan = Math.max(0, Number(state.gcashPuhunan) || 0);
+      const puhunanDelta = activeGcashType === 'cash_in'
+        ? (amount + fee)
+        : (fee - amount);
+      const nextPuhunan = currentPuhunan + puhunanDelta;
+      if (nextPuhunan < 0) {
+        return showToast('Insufficient GCash puhunan for this transaction', true);
+      }
+      state.gcashPuhunan = nextPuhunan;
+
+      const labels = {
+        cash_in: 'GCash Cash In',
+        cash_out: 'GCash Cash Out',
+        eload: 'E-Load'
+      };
+      const label = labels[activeGcashType] || 'GCash';
+      const title = note ? `${label} (${note}) — ${formatPeso(amount)}` : `${label} — ${formatPeso(amount)}`;
 
       state.transactions.unshift({
-        id: `tx-gc-${Date.now()}`,
+        id: `tx-${Date.now()}`,
         kind: 'gcash',
         pos: 'gcash',
+        gcashType: activeGcashType,
+        puhunanDelta,
         title,
         amount,
+        fee,
         profit: fee,
         paymentMethod: 'GCash',
         voided: false,
-        createdAt: new Date().toISOString(),
-        items: []
+        createdAt: new Date().toISOString()
       });
 
       saveState();
       clearGcashForm();
       renderAll();
-      showToast(`GCash recorded (Fee: ${formatPeso(fee)})`);
+      showToast(`${label} recorded (+${formatPeso(fee)} fee)`);
     }
 
-    // Expenses
-    function openExpenseModal() {
-      document.getElementById('expense-modal')?.classList.remove('hidden');
-      setTimeout(() => document.getElementById('expense-desc')?.focus(), 40);
-    }
-
-    function closeExpenseModal() {
-      document.getElementById('expense-modal')?.classList.add('hidden');
-    }
-
-    function recordExpense(e) {
-      e.preventDefault();
-      const counter = document.getElementById('expense-counter')?.value || 'general';
-      const desc = (document.getElementById('expense-desc')?.value || '').trim();
-      const amount = parseFloat(document.getElementById('expense-amount')?.value) || 0;
-      if (!desc || amount <= 0) return showToast('Enter valid expense details', true);
-
-      state.transactions.unshift({
-        id: `tx-exp-${Date.now()}`,
-        kind: 'expense',
-        pos: counter,
-        title: desc,
-        amount,
-        profit: 0,
-        paymentMethod: 'Cash',
-        voided: false,
-        createdAt: new Date().toISOString(),
-        items: []
-      });
-
-      document.getElementById('expense-desc').value = '';
-      document.getElementById('expense-amount').value = '';
-      saveState();
-      closeExpenseModal();
-      renderAll();
-      showToast('Expense recorded');
-    }
-
-    // Utang Tracker
-    function setUtangFilter(filter) {
-      selectedUtangFilter = filter;
-      for (const f of ['unpaid', 'paid', 'all']) {
-        const btn = document.getElementById(`utang-filter-${f}`);
-        if (btn) {
-          btn.className = f === filter
-            ? 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
-            : 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition';
-        }
-      }
-      renderUtangTab();
-    }
-
+    // Utang Management
     function addManualUtang() {
       const customerName = (document.getElementById('utang-customer-input')?.value || '').trim();
-      const note = (document.getElementById('utang-note-input')?.value || '').trim();
+      const note = (document.getElementById('utang-note-input')?.value || '').trim() || 'Store Utang';
       const amount = parseFloat(document.getElementById('utang-amount-input')?.value) || 0;
-      if (!customerName || amount <= 0) return showToast('Enter customer name and amount', true);
+
+      if (!customerName) return showToast('Enter customer name', true);
+      if (amount <= 0) return showToast('Enter valid utang amount', true);
+
+      const txId = `tx-${Date.now()}`;
+      state.transactions.unshift({
+        id: txId,
+        kind: 'sale',
+        pos: 'store',
+        title: `Utang: ${customerName} (${note})`,
+        amount,
+        profit: 0,
+        paymentMethod: 'Utang',
+        customerName,
+        voided: false,
+        createdAt: new Date().toISOString()
+      });
 
       state.utangRecords.unshift({
-        id: `ut-${Date.now()}`,
-        txId: null,
+        id: `ut-${Date.now() + 1}`,
+        txId,
         customerName,
-        note: note || 'Manual Utang',
+        note,
         amount,
         paid: false,
         createdAt: new Date().toISOString()
@@ -2035,194 +2090,251 @@
       document.getElementById('utang-amount-input').value = '';
 
       saveState();
-      renderUtangTab();
-      showToast('Utang record added');
+      renderAll();
+      showToast(`Added utang for ${customerName}`);
     }
 
-    function toggleUtangPaid(id) {
-      const rec = state.utangRecords.find((u) => u.id === id);
+    function setUtangFilter(filter) {
+      selectedUtangFilter = ['unpaid', 'paid', 'all'].includes(filter) ? filter : 'unpaid';
+      for (const f of ['unpaid', 'paid', 'all']) {
+        const btn = document.getElementById(`utang-filter-${f}`);
+        if (btn) {
+          btn.className = f === selectedUtangFilter
+            ? 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
+            : 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition';
+        }
+      }
+      renderUtangTab();
+    }
+
+    function toggleUtangPaid(utangId) {
+      const rec = state.utangRecords.find((u) => u.id === utangId);
       if (!rec) return;
       rec.paid = !rec.paid;
+      rec.paidAt = rec.paid ? new Date().toISOString() : null;
       saveState();
-      renderUtangTab();
-      showToast(rec.paid ? 'Marked as Paid' : 'Marked as Unpaid');
+      renderAll();
+      showToast(rec.paid ? `Marked ${rec.customerName}'s utang as PAID` : `Marked ${rec.customerName}'s utang as UNPAID`);
     }
 
-    function deleteUtang(id) {
-      state.utangRecords = state.utangRecords.filter((u) => u.id !== id);
+    function deleteUtangRecord(utangId) {
+      const rec = state.utangRecords.find((u) => u.id === utangId);
+      if (!rec) return;
+      state.utangRecords = state.utangRecords.filter((u) => u.id !== utangId);
       saveState();
-      renderUtangTab();
-      showToast('Utang record removed');
+      renderAll();
+      showToast(`Removed utang record for ${rec.customerName}`);
     }
 
     function renderUtangTab() {
-      const activeList = state.utangRecords.filter((u) => {
-        if (!u.txId) return true;
-        const linkedTx = state.transactions.find((t) => t.id === u.txId);
-        return !linkedTx || !linkedTx.voided;
-      });
+      const unpaidTotal = state.utangRecords
+        .filter((u) => !u.paid)
+        .reduce((sum, u) => sum + (Number(u.amount) || 0), 0);
+      const paidTotal = state.utangRecords
+        .filter((u) => !!u.paid)
+        .reduce((sum, u) => sum + (Number(u.amount) || 0), 0);
+      const unpaidCount = state.utangRecords.filter((u) => !u.paid).length;
 
-      const unpaidSum = activeList.filter((u) => !u.paid).reduce((s, u) => s + (Number(u.amount) || 0), 0);
-      const paidSum = activeList.filter((u) => u.paid).reduce((s, u) => s + (Number(u.amount) || 0), 0);
-      const unpaidCount = activeList.filter((u) => !u.paid).length;
-
-      const setTxt = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val;
-      };
-      setTxt('utang-unpaid-banner', formatPeso(unpaidSum));
-      setTxt('utang-paid-banner', formatPeso(paidSum));
-      setTxt('utang-count-banner', String(unpaidCount));
+      const unpaidEl = document.getElementById('utang-unpaid-banner');
+      const paidEl = document.getElementById('utang-paid-banner');
+      const countEl = document.getElementById('utang-count-banner');
+      if (unpaidEl) unpaidEl.textContent = formatPeso(unpaidTotal);
+      if (paidEl) paidEl.textContent = formatPeso(paidTotal);
+      if (countEl) countEl.textContent = String(unpaidCount);
 
       const q = (document.getElementById('utang-search')?.value || '').trim().toLowerCase();
-      const filtered = activeList.filter((u) => {
-        const matchStatus = selectedUtangFilter === 'all' || (selectedUtangFilter === 'paid' ? u.paid : !u.paid);
-        const matchQ = !q || u.customerName.toLowerCase().includes(q) || (u.note || '').toLowerCase().includes(q);
-        return matchStatus && matchQ;
+      const filtered = state.utangRecords.filter((u) => {
+        const matchFilter = selectedUtangFilter === 'all'
+          ? true
+          : selectedUtangFilter === 'paid'
+            ? !!u.paid
+            : !u.paid;
+        const matchQ = !q || String(u.customerName || '').toLowerCase().includes(q) || String(u.note || '').toLowerCase().includes(q);
+        return matchFilter && matchQ;
       });
 
       const listEl = document.getElementById('utang-list');
       if (!listEl) return;
       if (!filtered.length) {
-        listEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No utang records matching filter.</div>`;
+        listEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No utang records found.</div>`;
         return;
       }
 
-      listEl.innerHTML = filtered.map((u) => `
-        <div class="bg-white rounded-2xl p-3.5 shadow-card border border-slate-100 flex items-center justify-between gap-3">
-          <div class="min-w-0">
-            <div class="flex items-center gap-1.5">
-              <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(u.customerName)}</p>
-              <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${
-                u.paid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-              }">${u.paid ? 'PAID' : 'UNPAID'}</span>
+      listEl.innerHTML = filtered.map((u) => {
+        const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }) : '';
+        return `
+          <div class="bg-white rounded-3xl p-4 shadow-card border ${u.paid ? 'border-emerald-200/80' : 'border-amber-200'} flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <p class="text-sm font-black text-slate-900 truncate">${escapeHtml(u.customerName)}</p>
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                  u.paid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'
+                }">${u.paid ? 'PAID' : 'UNPAID'}</span>
+                ${dateStr ? `<span class="text-[10px] font-semibold text-slate-400">${escapeHtml(dateStr)}</span>` : ''}
+              </div>
+              <p class="text-xs font-semibold text-slate-500 truncate mt-0.5">${escapeHtml(u.note || '')}</p>
+              <p class="text-sm font-black ${u.paid ? 'text-emerald-700' : 'text-amber-700'} mt-1">${formatPeso(u.amount)}</p>
             </div>
-            <p class="text-[11px] font-semibold text-slate-500 truncate mt-0.5">${escapeHtml(u.note || '')}</p>
-          </div>
-          <div class="text-right shrink-0 space-y-1">
-            <p class="text-sm font-black ${u.paid ? 'text-emerald-700' : 'text-amber-700'}">${formatPeso(u.amount)}</p>
-            <div class="flex items-center justify-end gap-2">
-              <button type="button" onclick="toggleUtangPaid('${u.id}')" class="text-[10px] font-extrabold text-brand-purple hover:underline">
-                ${u.paid ? 'Unmark' : 'Mark Paid'}
+            <div class="flex flex-col gap-1.5 shrink-0">
+              <button type="button" onclick="toggleUtangPaid('${u.id}')"
+                class="px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition ${
+                  u.paid
+                    ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                }">
+                ${u.paid ? 'Mark Unpaid' : 'Mark Paid'}
               </button>
-              <button type="button" onclick="deleteUtang('${u.id}')" class="text-[10px] font-extrabold text-rose-600 hover:underline">
+              <button type="button" onclick="deleteUtangRecord('${u.id}')"
+                class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-extrabold">
                 Delete
               </button>
             </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    function changeVoidPassword() {
-      toggleChangeVoidPasswordBox();
+    // Expenses
+    function openExpenseModal() {
+      const counterSelect = document.getElementById('expense-counter');
+      if (counterSelect && ['store', 'softdrinks', 'cigarettes', 'gcash'].includes(currentTab)) {
+        counterSelect.value = currentTab;
+      }
+      document.getElementById('expense-modal')?.classList.remove('hidden');
+      setTimeout(() => document.getElementById('expense-desc')?.focus(), 40);
     }
 
-    function toggleChangeVoidPasswordBox(forceOpen = null) {
+    function closeExpenseModal() {
+      document.getElementById('expense-modal')?.classList.add('hidden');
+    }
+
+    function recordExpense(e) {
+      e.preventDefault();
+      const pos = document.getElementById('expense-counter')?.value || 'general';
+      const desc = (document.getElementById('expense-desc')?.value || '').trim();
+      const amount = parseFloat(document.getElementById('expense-amount')?.value) || 0;
+      if (!desc) return showToast('Enter expense description', true);
+      if (amount <= 0) return showToast('Enter valid expense amount', true);
+
+      state.transactions.unshift({
+        id: `tx-${Date.now()}`,
+        kind: 'expense',
+        pos,
+        title: desc,
+        amount,
+        profit: 0,
+        paymentMethod: 'Cash',
+        voided: false,
+        createdAt: new Date().toISOString()
+      });
+
+      document.getElementById('expense-desc').value = '';
+      document.getElementById('expense-amount').value = '';
+      saveState();
+      closeExpenseModal();
+      renderAll();
+      showToast(`Expense recorded (${formatPeso(amount)})`);
+    }
+
+    // Void Password & Transaction Voiding
+    function getVoidPassword() {
+      return (localStorage.getItem(VOID_PASSWORD_KEY) || '1234').trim() || '1234';
+    }
+
+    function toggleChangeVoidPasswordBox(forceShow = null) {
       const box = document.getElementById('change-void-pass-box');
       if (!box) return;
-      const shouldOpen = forceOpen === null ? box.classList.contains('hidden') : Boolean(forceOpen);
-      box.classList.toggle('hidden', !shouldOpen);
-      const curEl = document.getElementById('void-current-pass-input');
-      const newEl = document.getElementById('void-new-pass-input');
-      if (curEl) curEl.value = '';
-      if (newEl) newEl.value = '';
-      if (shouldOpen) {
-        setTimeout(() => curEl?.focus(), 30);
+      const shouldShow = forceShow === null ? box.classList.contains('hidden') : !!forceShow;
+      box.classList.toggle('hidden', !shouldShow);
+      if (shouldShow) {
+        document.getElementById('void-current-pass-input').value = '';
+        document.getElementById('void-new-pass-input').value = '';
+        document.getElementById('void-current-pass-input')?.focus();
       }
     }
 
     function saveNewVoidPassword() {
-      const currentPass = getVoidPassword();
-      const curInput = document.getElementById('void-current-pass-input');
-      const newInput = document.getElementById('void-new-pass-input');
-      const enteredCurrent = curInput?.value ?? '';
-      const nextPass = (newInput?.value || '').trim();
+      const currentInput = (document.getElementById('void-current-pass-input')?.value || '').trim();
+      const newInput = (document.getElementById('void-new-pass-input')?.value || '').trim();
+      if (!currentInput) return showToast('Enter current void password', true);
+      if (currentInput !== getVoidPassword()) return showToast('Current void password is incorrect', true);
+      if (!newInput || newInput.length < 2) return showToast('New password must be at least 2 characters', true);
 
-      if (enteredCurrent !== currentPass) {
-        showToast('Wrong current password', true);
-        curInput?.focus();
-        return;
-      }
-      if (!nextPass) {
-        showToast('Enter a new void password', true);
-        newInput?.focus();
-        return;
-      }
-
-      localStorage.setItem(VOID_PASSWORD_KEY, nextPass);
+      localStorage.setItem(VOID_PASSWORD_KEY, newInput);
       const hintEl = document.getElementById('void-password-hint');
-      if (hintEl) hintEl.textContent = 'Custom';
-      saveState();
+      if (hintEl) hintEl.textContent = newInput;
       toggleChangeVoidPasswordBox(false);
+      saveState();
       showToast('Void password updated');
-    }
-
-    function getVoidPassword() {
-      return localStorage.getItem(VOID_PASSWORD_KEY) || '1234';
     }
 
     function openVoidModal(txId) {
       const tx = state.transactions.find((t) => t.id === txId);
       if (!tx || tx.voided) return;
       pendingVoidId = txId;
+
+      const hintEl = document.getElementById('void-password-hint');
+      if (hintEl) hintEl.textContent = getVoidPassword();
+
       const descEl = document.getElementById('void-modal-desc');
+      if (descEl) descEl.textContent = `Void "${tx.title}" (${formatPeso(tx.amount)})? Stock will be restored if applicable.`;
+
       const passInput = document.getElementById('void-password-input');
       const errEl = document.getElementById('void-password-error');
-      const hintEl = document.getElementById('void-password-hint');
-
+      if (passInput) passInput.value = '';
+      if (errEl) errEl.classList.add('hidden');
       toggleChangeVoidPasswordBox(false);
 
-      if (descEl) {
-        descEl.textContent = `Void "${tx.title}" (${formatPeso(tx.amount)})? Stock will be restored for product sales.`;
-      }
-      if (passInput) {
-        passInput.value = '';
-      }
-      if (errEl) {
-        errEl.classList.add('hidden');
-      }
-      if (hintEl) {
-        hintEl.textContent = getVoidPassword() === '1234' ? '1234' : 'Custom';
-      }
-      const btn = document.getElementById('void-confirm-btn');
-      if (btn) btn.onclick = confirmVoidTransaction;
+      const confirmBtn = document.getElementById('void-confirm-btn');
+      if (confirmBtn) confirmBtn.onclick = confirmVoidTransaction;
+
       document.getElementById('void-modal')?.classList.remove('hidden');
       setTimeout(() => passInput?.focus(), 40);
     }
 
     function closeVoidModal() {
       pendingVoidId = null;
-      const passInput = document.getElementById('void-password-input');
-      const errEl = document.getElementById('void-password-error');
-      if (passInput) passInput.value = '';
-      if (errEl) errEl.classList.add('hidden');
       document.getElementById('void-modal')?.classList.add('hidden');
     }
 
     function confirmVoidTransaction() {
-      if (!pendingVoidId) return;
       const passInput = document.getElementById('void-password-input');
       const errEl = document.getElementById('void-password-error');
-      const entered = passInput?.value || '';
-
+      const entered = (passInput?.value || '').trim();
       if (entered !== getVoidPassword()) {
         if (errEl) errEl.classList.remove('hidden');
         passInput?.focus();
-        showToast('Incorrect void password', true);
         return;
       }
 
-      if (errEl) errEl.classList.add('hidden');
       const tx = state.transactions.find((t) => t.id === pendingVoidId);
       if (!tx || tx.voided) return closeVoidModal();
 
       tx.voided = true;
+      tx.voidedAt = new Date().toISOString();
+
+      if (tx.kind === 'gcash') {
+        const amt = Number(tx.amount) || 0;
+        const fee = Number(tx.fee ?? tx.profit) || 0;
+        const appliedDelta = typeof tx.puhunanDelta === 'number'
+          ? tx.puhunanDelta
+          : (tx.gcashType === 'cash_in' ? (amt + fee) : (-amt + fee));
+        state.gcashPuhunan = Math.max(0, (Number(state.gcashPuhunan) || 0) - appliedDelta);
+      }
+
       if (tx.kind === 'sale' && Array.isArray(tx.items)) {
         for (const item of tx.items) {
           const prod = state.products.find((p) => p.id === item.productId);
-          if (prod) prod.stock = (Number(prod.stock) || 0) + (Number(item.qty) || 0);
+          if (prod) {
+            prod.stock = (Number(prod.stock) || 0) + (Number(item.qty) || 0);
+          }
         }
+      }
+
+      const linkedUtang = state.utangRecords.find((u) => u.txId === tx.id);
+      if (linkedUtang) {
+        linkedUtang.paid = true;
+        linkedUtang.note = `${linkedUtang.note} [VOIDED]`;
       }
 
       saveState();
@@ -2231,21 +2343,276 @@
       showToast('Transaction voided');
     }
 
-    // CSV Export / Import & Auto Sync
+    // Metrics & Reports
+    function computeMetrics() {
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setHours(0, 0, 0, 0);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const counters = {
+        store: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0, origTotal: 0, sellTotal: 0 },
+        softdrinks: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0, origTotal: 0, sellTotal: 0 },
+        cigarettes: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0, origTotal: 0, sellTotal: 0 },
+        gcash: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0, origTotal: 0, sellTotal: 0 }
+      };
+
+      for (const p of state.products) {
+        const pos = counters[p.pos] ? p.pos : 'store';
+        const stock = Math.max(0, Number(p.stock) || 0);
+        const cost = Math.max(0, Number(p.cost) || 0);
+        const price = Math.max(0, Number(p.price) || 0);
+        counters[pos].origTotal += cost * stock;
+        counters[pos].sellTotal += price * stock;
+      }
+
+      let grossSales = 0;
+      let grossProfit = 0;
+      let totalExpenses = 0;
+      let weeklySales = 0;
+      let weeklyProfit = 0;
+      let monthlySales = 0;
+      let monthlyProfit = 0;
+
+      for (const tx of state.transactions) {
+        if (!tx || tx.voided) continue;
+        const created = tx.createdAt ? new Date(tx.createdAt) : now;
+        const isWeekly = created >= startOfWeek;
+        const isMonthly = created >= startOfMonth;
+        const amt = Number(tx.amount) || 0;
+        const prof = Number(tx.profit) || 0;
+        const pos = counters[tx.pos] ? tx.pos : 'store';
+
+        if (tx.kind === 'expense') {
+          totalExpenses += amt;
+          continue;
+        }
+
+        if (tx.kind === 'gcash') {
+          const fee = Number(tx.fee ?? tx.profit) || 0;
+          counters.gcash.sales += fee;
+          counters.gcash.profit += fee;
+          if (isWeekly) {
+            counters.gcash.weeklySales += fee;
+            counters.gcash.weeklyProfit += fee;
+          }
+          if (isMonthly) {
+            counters.gcash.monthlySales += fee;
+            counters.gcash.monthlyProfit += fee;
+          }
+          grossProfit += fee;
+          if (isWeekly) weeklyProfit += fee;
+          if (isMonthly) monthlyProfit += fee;
+          continue;
+        }
+
+        // Regular sales (Store, Softdrinks, Cigarettes)
+        counters[pos].sales += amt;
+        counters[pos].profit += prof;
+        if (isWeekly) {
+          counters[pos].weeklySales += amt;
+          counters[pos].weeklyProfit += prof;
+        }
+        if (isMonthly) {
+          counters[pos].monthlySales += amt;
+          counters[pos].monthlyProfit += prof;
+        }
+
+        grossSales += amt;
+        grossProfit += prof;
+        if (isWeekly) {
+          weeklySales += amt;
+          weeklyProfit += prof;
+        }
+        if (isMonthly) {
+          monthlySales += amt;
+          monthlyProfit += prof;
+        }
+      }
+
+      // GCash is excluded from Total Amount in Reports
+      const totalAmount = Math.max(0, grossSales - totalExpenses);
+
+      return {
+        counters,
+        grossSales,
+        grossProfit,
+        totalExpenses,
+        totalAmount,
+        weeklySales,
+        weeklyProfit,
+        monthlySales,
+        monthlyProfit
+      };
+    }
+
+    function updateDashboardKPIs() {
+      const m = computeMetrics();
+
+      for (const pos of ['store', 'softdrinks', 'cigarettes', 'gcash']) {
+        const c = m.counters[pos];
+        const salesEl = document.getElementById(`${pos}-sales-banner`);
+        const profitEl = document.getElementById(`${pos}-profit-banner`);
+        const weekSalesEl = document.getElementById(`${pos}-weekly-sales`);
+        const weekProfitEl = document.getElementById(`${pos}-weekly-profit`);
+        const monthSalesEl = document.getElementById(`${pos}-monthly-sales`);
+        const monthProfitEl = document.getElementById(`${pos}-monthly-profit`);
+        const totalAmtEl = document.getElementById(`total-amount-${pos}`);
+        const origEl = document.getElementById(`${pos}-orig-total`);
+        const sellEl = document.getElementById(`${pos}-sell-total`);
+
+        if (salesEl) salesEl.textContent = formatPeso(c.sales);
+        if (profitEl) profitEl.textContent = formatPeso(c.profit);
+        if (weekSalesEl) weekSalesEl.textContent = formatPeso(c.weeklySales);
+        if (weekProfitEl) weekProfitEl.textContent = formatPeso(c.weeklyProfit);
+        if (monthSalesEl) monthSalesEl.textContent = formatPeso(c.monthlySales);
+        if (monthProfitEl) monthProfitEl.textContent = formatPeso(c.monthlyProfit);
+        if (totalAmtEl) totalAmtEl.textContent = formatPeso(pos === 'gcash' ? c.sales : c.sales);
+        if (origEl) origEl.textContent = formatPeso(c.origTotal);
+        if (sellEl) sellEl.textContent = formatPeso(c.sellTotal);
+      }
+
+      const repGrossSales = document.getElementById('rep-gross-sales');
+      const repGrossProfit = document.getElementById('rep-gross-profit');
+      const repExpenses = document.getElementById('rep-total-expenses');
+      const repTotalAmount = document.getElementById('rep-total-amount');
+      const repWeekSales = document.getElementById('rep-weekly-sales');
+      const repWeekProfit = document.getElementById('rep-weekly-profit');
+      const repMonthSales = document.getElementById('rep-monthly-sales');
+      const repMonthProfit = document.getElementById('rep-monthly-profit');
+
+      if (repGrossSales) repGrossSales.textContent = formatPeso(m.grossSales);
+      if (repGrossProfit) repGrossProfit.textContent = formatPeso(m.grossProfit);
+      if (repExpenses) repExpenses.textContent = formatPeso(m.totalExpenses);
+      if (repTotalAmount) repTotalAmount.textContent = formatPeso(m.totalAmount);
+      if (repWeekSales) repWeekSales.textContent = formatPeso(m.weeklySales);
+      if (repWeekProfit) repWeekProfit.textContent = formatPeso(m.weeklyProfit);
+      if (repMonthSales) repMonthSales.textContent = formatPeso(m.monthlySales);
+      if (repMonthProfit) repMonthProfit.textContent = formatPeso(m.monthlyProfit);
+    }
+
+    function setReportFilter(filter) {
+      selectedReportFilter = filter;
+      renderReports();
+    }
+
+    function renderReports() {
+      updateDashboardKPIs();
+      const m = computeMetrics();
+
+      const cardsEl = document.getElementById('rep-counter-cards');
+      if (cardsEl) {
+        const labels = [
+          { key: 'store', name: 'Store' },
+          { key: 'softdrinks', name: 'Softdrinks' },
+          { key: 'cigarettes', name: 'Cigarettes' },
+          { key: 'gcash', name: 'GCash Fees' }
+        ];
+        cardsEl.innerHTML = labels.map((item) => {
+          const c = m.counters[item.key];
+          return `
+            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+              <p class="text-[10px] font-extrabold uppercase text-slate-500">${item.name}</p>
+              <p class="text-sm font-black text-slate-900 mt-0.5">${formatPeso(c.sales)}</p>
+              <p class="text-[11px] font-bold text-emerald-700 mt-0.5">Kita: ${formatPeso(c.profit)}</p>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const filters = [
+        { id: 'all', label: 'All' },
+        { id: 'store', label: 'Store' },
+        { id: 'softdrinks', label: 'Drinks' },
+        { id: 'cigarettes', label: 'Yosi' },
+        { id: 'gcash', label: 'GCash' },
+        { id: 'expense', label: 'Expenses' }
+      ];
+      const filterBar = document.getElementById('report-filters');
+      if (filterBar) {
+        filterBar.innerHTML = filters.map((f) => `
+          <button type="button" onclick="setReportFilter('${f.id}')"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
+              selectedReportFilter === f.id
+                ? 'bg-brand-purple text-white'
+                : 'bg-white text-slate-600 border border-slate-200'
+            }">
+            ${f.label}
+          </button>
+        `).join('');
+      }
+
+      const filteredTx = state.transactions.filter((tx) => {
+        if (!tx) return false;
+        if (selectedReportFilter === 'all') return true;
+        if (selectedReportFilter === 'expense') return tx.kind === 'expense';
+        return tx.pos === selectedReportFilter;
+      });
+
+      const ledgerEl = document.getElementById('transactions-ledger');
+      if (!ledgerEl) return;
+      if (!filteredTx.length) {
+        ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No transactions yet.</div>`;
+        return;
+      }
+
+      ledgerEl.innerHTML = filteredTx.map((tx) => {
+        const dt = tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+        const isExp = tx.kind === 'expense';
+        const isGcash = tx.kind === 'gcash';
+        const displayAmt = isGcash ? (Number(tx.fee ?? tx.profit) || 0) : (Number(tx.amount) || 0);
+
+        return `
+          <div class="bg-white rounded-3xl p-3.5 shadow-card border border-slate-100 flex items-center justify-between gap-3 ${tx.voided ? 'opacity-60' : ''}">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                  tx.voided
+                    ? 'bg-slate-200 text-slate-600'
+                    : isExp
+                      ? 'bg-rose-100 text-rose-700'
+                      : isGcash
+                        ? 'bg-sky-100 text-sky-700'
+                        : 'bg-purple-100 text-brand-purple'
+                }">${tx.voided ? 'VOIDED' : escapeHtml(tx.pos || tx.kind)}</span>
+                ${tx.paymentMethod ? `<span class="text-[10px] font-bold text-slate-500">${escapeHtml(tx.paymentMethod)}</span>` : ''}
+                ${dt ? `<span class="text-[10px] font-semibold text-slate-400">${escapeHtml(dt)}</span>` : ''}
+              </div>
+              <p class="text-xs font-black text-slate-900 truncate mt-1 ${tx.voided ? 'line-through' : ''}">${escapeHtml(tx.title)}</p>
+              <p class="text-[11px] font-bold ${isExp ? 'text-rose-600' : 'text-emerald-700'} mt-0.5">
+                ${isExp ? `Expense: -${formatPeso(displayAmt)}` : `${isGcash ? 'Fee' : 'Amount'}: ${formatPeso(displayAmt)} • Kita: ${formatPeso(tx.profit)}`}
+              </p>
+            </div>
+            ${!tx.voided ? `
+              <button type="button" onclick="openVoidModal('${tx.id}')"
+                class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-extrabold shrink-0">
+                Void
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Export / Import JSON & Auto-Sync Toggle
     function exportBackupJSON() {
       try {
-        const jsonStr = JSON.stringify(buildSyncEnvelope(), null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+        const dataStr = JSON.stringify(buildSyncEnvelope(), null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `sarisari-store-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `sarisari-pos-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
         showToast('Exported JSON backup');
       } catch (err) {
         console.error('Export JSON error:', err);
-        showToast('Export JSON failed', true);
+        showToast('Failed to export JSON', true);
       }
     }
 
@@ -2253,11 +2620,9 @@
       const file = event?.target?.files?.[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = (e) => {
         try {
-          const text = String(reader.result || '').trim();
-          if (!text) return showToast('JSON file is empty', true);
-          const parsed = JSON.parse(text);
+          const parsed = JSON.parse(String(e.target?.result || ''));
           const nowIso = new Date().toISOString();
           state = mergeIncomingState(parsed);
           if (typeof parsed.voidPassword === 'string' && parsed.voidPassword.trim()) {
@@ -2286,345 +2651,50 @@
       autoSyncEnabled = !autoSyncEnabled;
       localStorage.setItem(AUTOSYNC_KEY, String(autoSyncEnabled));
       const btn = document.getElementById('autosync-toggle-btn');
-      const status = document.getElementById('autosync-status-text');
       if (btn) {
         btn.textContent = autoSyncEnabled ? 'Auto Sync: ON' : 'Auto Sync: OFF';
         btn.className = autoSyncEnabled
           ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
           : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
       }
-      if (status) status.textContent = autoSyncEnabled ? 'Synced' : 'Manual Only';
-      if (autoSyncEnabled) saveState();
-      showToast(autoSyncEnabled ? 'Auto Sync enabled' : 'Auto Sync paused');
-    }
-
-    // Metrics & Reports
-    function computeMetrics() {
-      const now = Date.now();
-      const weekMs = 7 * 24 * 60 * 60 * 1000;
-      const monthMs = 30 * 24 * 60 * 60 * 1000;
-
-      const counters = {
-        store: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
-        softdrinks: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
-        cigarettes: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
-        gcash: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 }
-      };
-
-      let totalBenta = 0;
-      let totalKita = 0;
-      let totalExpenses = 0;
-      let weeklyBenta = 0;
-      let weeklyKita = 0;
-      let monthlyBenta = 0;
-      let monthlyKita = 0;
-      let gcashAmountSum = 0;
-
-      for (const tx of state.transactions) {
-        if (tx.voided) continue;
-        const amt = Number(tx.amount) || 0;
-        const prof = Number(tx.profit) || 0;
-        const ts = new Date(tx.createdAt || now).getTime();
-        const isWeek = now - ts <= weekMs;
-        const isMonth = now - ts <= monthMs;
-
-        if (tx.kind === 'expense') {
-          totalExpenses += amt;
-        } else if (tx.kind === 'gcash') {
-          counters.gcash.sales += prof;
-          counters.gcash.profit += prof;
-          gcashAmountSum += amt;
-          if (isWeek) {
-            counters.gcash.weeklySales += prof;
-            counters.gcash.weeklyProfit += prof;
-          }
-          if (isMonth) {
-            counters.gcash.monthlySales += prof;
-            counters.gcash.monthlyProfit += prof;
-          }
-        } else if (tx.kind === 'sale') {
-          const c = counters[tx.pos] || counters.store;
-          c.sales += amt;
-          c.profit += prof;
-          totalBenta += amt;
-          totalKita += prof;
-          if (isWeek) {
-            c.weeklySales += amt;
-            c.weeklyProfit += prof;
-            weeklyBenta += amt;
-            weeklyKita += prof;
-          }
-          if (isMonth) {
-            c.monthlySales += amt;
-            c.monthlyProfit += prof;
-            monthlyBenta += amt;
-            monthlyKita += prof;
-          }
-        }
+      if (autoSyncEnabled) {
+        saveState();
+        pullFromCloud(false);
+        startCloudPolling();
+        showToast('Auto Sync enabled');
+      } else {
+        clearInterval(cloudPollInterval);
+        showToast('Auto Sync paused');
       }
-
-      const totalAmount = totalBenta - totalExpenses;
-
-      const navTotals = {
-        store: { orig: 0, sell: 0 },
-        softdrinks: { orig: 0, sell: 0 },
-        cigarettes: { orig: 0, sell: 0 }
-      };
-      for (const p of state.products) {
-        if (!navTotals[p.pos]) continue;
-        const stock = Math.max(0, Number(p.stock) || 0);
-        const cost = Math.max(0, Number(p.cost) || 0);
-        const price = Math.max(0, Number(p.price) || 0);
-        navTotals[p.pos].orig += cost * stock;
-        navTotals[p.pos].sell += price * stock;
-      }
-
-      return {
-        counters,
-        navTotals,
-        totalBenta,
-        totalKita,
-        totalExpenses,
-        totalAmount,
-        weeklyBenta,
-        weeklyKita,
-        monthlyBenta,
-        monthlyKita
-      };
-    }
-
-    function updateDashboardKPIs() {
-      const m = computeMetrics();
-
-      const setTxt = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = formatPeso(val);
-      };
-
-      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
-        const nt = m.navTotals?.[pos] || { orig: 0, sell: 0 };
-        setTxt(`${pos}-orig-total`, nt.orig);
-        setTxt(`${pos}-sell-total`, nt.sell);
-      }
-
-      setTxt('store-sales-banner', m.counters.store.sales);
-      setTxt('store-profit-banner', m.counters.store.profit);
-      setTxt('store-weekly-sales', m.counters.store.weeklySales);
-      setTxt('store-weekly-profit', m.counters.store.weeklyProfit);
-      setTxt('store-monthly-sales', m.counters.store.monthlySales);
-      setTxt('store-monthly-profit', m.counters.store.monthlyProfit);
-      setTxt('total-amount-store', m.totalAmount);
-
-      setTxt('softdrinks-sales-banner', m.counters.softdrinks.sales);
-      setTxt('softdrinks-profit-banner', m.counters.softdrinks.profit);
-      setTxt('softdrinks-weekly-sales', m.counters.softdrinks.weeklySales);
-      setTxt('softdrinks-weekly-profit', m.counters.softdrinks.weeklyProfit);
-      setTxt('softdrinks-monthly-sales', m.counters.softdrinks.monthlySales);
-      setTxt('softdrinks-monthly-profit', m.counters.softdrinks.monthlyProfit);
-      setTxt('total-amount-softdrinks', m.totalAmount);
-
-      setTxt('cigarettes-sales-banner', m.counters.cigarettes.sales);
-      setTxt('cigarettes-profit-banner', m.counters.cigarettes.profit);
-      setTxt('cigarettes-weekly-sales', m.counters.cigarettes.weeklySales);
-      setTxt('cigarettes-weekly-profit', m.counters.cigarettes.weeklyProfit);
-      setTxt('cigarettes-monthly-sales', m.counters.cigarettes.monthlySales);
-      setTxt('cigarettes-monthly-profit', m.counters.cigarettes.monthlyProfit);
-      setTxt('total-amount-cigarettes', m.totalAmount);
-
-      setTxt('gcash-sales-banner', m.counters.gcash.sales);
-      setTxt('gcash-profit-banner', m.counters.gcash.profit);
-      setTxt('gcash-weekly-sales', m.counters.gcash.weeklySales);
-      setTxt('gcash-weekly-profit', m.counters.gcash.weeklyProfit);
-      setTxt('gcash-monthly-sales', m.counters.gcash.monthlySales);
-      setTxt('gcash-monthly-profit', m.counters.gcash.monthlyProfit);
-      setTxt('total-amount-gcash', m.totalAmount);
-    }
-
-    function setReportFilter(f) {
-      selectedReportFilter = f;
-      renderReports();
-    }
-
-    function renderReports() {
-      const m = computeMetrics();
-      const setTxt = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = formatPeso(val);
-      };
-
-      setTxt('rep-gross-sales', m.totalBenta);
-      setTxt('rep-gross-profit', m.totalKita);
-      setTxt('rep-total-expenses', m.totalExpenses);
-      setTxt('rep-total-amount', m.totalAmount);
-      setTxt('rep-weekly-sales', m.weeklyBenta);
-      setTxt('rep-weekly-profit', m.weeklyKita);
-      setTxt('rep-monthly-sales', m.monthlyBenta);
-      setTxt('rep-monthly-profit', m.monthlyKita);
-
-      const cardsEl = document.getElementById('rep-counter-cards');
-      if (cardsEl) {
-        const defs = [
-          { key: 'store', label: 'Store', salesLabel: 'Benta' },
-          { key: 'softdrinks', label: 'Softdrinks', salesLabel: 'Benta' },
-          { key: 'cigarettes', label: 'Yosi', salesLabel: 'Benta' },
-          { key: 'gcash', label: 'GCash', salesLabel: 'Kita / Fee' }
-        ];
-        cardsEl.innerHTML = defs.map((d) => {
-          const c = m.counters[d.key];
-          return `
-            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-              <p class="text-[11px] font-black text-slate-800">${d.label}</p>
-              <p class="text-xs font-black text-brand-purple mt-1">${d.salesLabel}: ${formatPeso(c.sales)}</p>
-              <p class="text-[11px] font-bold text-emerald-700">Kita: ${formatPeso(c.profit)}</p>
-            </div>
-          `;
-        }).join('');
-      }
-
-      const filtersEl = document.getElementById('report-filters');
-      if (filtersEl) {
-        const filters = [
-          { id: 'all', label: 'All' },
-          { id: 'store', label: 'Store' },
-          { id: 'softdrinks', label: 'Drinks' },
-          { id: 'cigarettes', label: 'Yosi' },
-          { id: 'gcash', label: 'GCash' },
-          { id: 'expense', label: 'Expenses' }
-        ];
-        filtersEl.innerHTML = filters.map((f) => `
-          <button type="button" onclick="setReportFilter('${f.id}')"
-            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
-              selectedReportFilter === f.id
-                ? 'bg-brand-purple text-white'
-                : 'bg-white text-slate-600 border border-slate-200'
-            }">
-            ${f.label}
-          </button>
-        `).join('');
-      }
-
-      const ledgerEl = document.getElementById('transactions-ledger');
-      if (!ledgerEl) return;
-
-      const list = state.transactions.filter((tx) => {
-        if (selectedReportFilter === 'all') return true;
-        if (selectedReportFilter === 'expense') return tx.kind === 'expense';
-        return tx.pos === selectedReportFilter;
-      });
-
-      if (!list.length) {
-        ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No transactions yet.</div>`;
-        return;
-      }
-
-      ledgerEl.innerHTML = list.map((tx) => {
-        const dt = new Date(tx.createdAt || Date.now()).toLocaleString('en-PH', {
-          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
-        const isExp = tx.kind === 'expense';
-        return `
-          <div class="bg-white rounded-2xl p-3.5 shadow-card border ${tx.voided ? 'border-slate-200 opacity-60' : 'border-slate-100'} flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                  isExp ? 'bg-rose-100 text-rose-700' : 'bg-purple-100 text-brand-purple'
-                }">${escapeHtml(tx.pos || tx.kind)}</span>
-                ${tx.paymentMethod ? `<span class="text-[10px] font-bold text-slate-500">${escapeHtml(tx.paymentMethod)}</span>` : ''}
-                ${tx.voided ? `<span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">VOIDED</span>` : ''}
-              </div>
-              <p class="text-xs font-black text-slate-900 mt-1 truncate ${tx.voided ? 'line-through' : ''}">${escapeHtml(tx.title)}</p>
-              <p class="text-[10px] font-semibold text-slate-400">${dt}</p>
-            </div>
-            <div class="text-right shrink-0 space-y-1">
-              <p class="text-sm font-black ${isExp ? 'text-rose-600' : 'text-slate-900'}">${isExp ? '-' : ''}${formatPeso(tx.amount)}</p>
-              ${!isExp ? `<p class="text-[10px] font-extrabold text-emerald-700">Kita: ${formatPeso(tx.profit)}</p>` : ''}
-              ${!tx.voided ? `
-                <button type="button" onclick="openVoidModal('${tx.id}')" class="text-[10px] font-extrabold text-rose-600 hover:underline">
-                  Void
-                </button>
-              ` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
     }
 
     function renderAll() {
       renderStoreCatalog();
       renderSoftdrinksCatalog();
       renderCigarettesCatalog();
+      renderGcashPuhunan();
       updateDashboardKPIs();
       updateCartBar();
-      if (currentTab === 'utang') {
-        renderUtangTab();
-      }
-      if (currentTab === 'reports') {
-        renderReports();
-      }
+      if (currentTab === 'utang') renderUtangTab();
+      if (currentTab === 'reports') renderReports();
     }
 
-    // Enter-key navigation across form fields & modals
-    document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter') return;
-      const target = e.target;
-      if (!target || !['INPUT', 'SELECT'].includes(target.tagName)) return;
-      if (target.type === 'search') return;
-
-      const container = target.closest('form') || target.closest('section') || target.closest('#cart-modal');
-      if (!container) return;
-
-      const focusables = Array.from(
-        container.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([disabled]), select:not([disabled])')
-      ).filter((el) => el.offsetParent !== null);
-
-      const idx = focusables.indexOf(target);
-      if (idx > -1 && idx < focusables.length - 1) {
-        e.preventDefault();
-        focusables[idx + 1].focus();
-        if (typeof focusables[idx + 1].select === 'function') focusables[idx + 1].select();
-      } else if (idx === focusables.length - 1) {
-        if (container.id === 'tab-gcash') {
-          e.preventDefault();
-          recordGcashTransaction();
-        } else if (container.id === 'tab-utang') {
-          e.preventDefault();
-          addManualUtang();
-        } else if (container.id === 'cart-modal') {
-          e.preventDefault();
-          completeCartCheckout();
-        } else if (target.id === 'void-password-input') {
-          e.preventDefault();
-          confirmVoidTransaction();
-        }
-      }
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
+    window.onload = function () {
       loadState();
       const syncBtn = document.getElementById('autosync-toggle-btn');
-      const statusEl = document.getElementById('autosync-status-text');
-      const code = getSyncCode();
       if (syncBtn) {
         syncBtn.textContent = autoSyncEnabled ? 'Auto Sync: ON' : 'Auto Sync: OFF';
         syncBtn.className = autoSyncEnabled
           ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
           : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
       }
-      if (statusEl) {
-        statusEl.textContent = code ? `Synced (${code})` : (autoSyncEnabled ? 'Synced' : 'Manual Only');
-      }
+      switchTab('store');
       renderAll();
-      if (code && autoSyncEnabled) {
+      if (getSyncCode() && autoSyncEnabled) {
         pullFromCloud(false);
         startCloudPolling();
       }
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && autoSyncEnabled && getSyncCode()) {
-        pullFromCloud(false);
-      }
-    });
+    };
   </script>
 </body>
 </html>
