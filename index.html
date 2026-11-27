@@ -41,7 +41,6 @@
       color: #0F172A;
       overflow-x: hidden;
     }
-    /* Prevent mobile auto-zoom on inputs */
     input, select, textarea {
       font-size: 16px !important;
     }
@@ -98,12 +97,12 @@
       </div>
 
       <div class="flex items-center gap-1.5">
-        <button id="header-add-btn" onclick="openEditorModal(currentTab === 'softdrinks' ? 'softdrinks' : currentTab === 'cigarettes' ? 'cigarettes' : 'store')"
+        <button id="header-add-btn" type="button" onclick="openEditorModal(currentTab === 'softdrinks' ? 'softdrinks' : currentTab === 'cigarettes' ? 'cigarettes' : 'store')"
           class="px-3 py-1.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs font-extrabold shadow-sm transition flex items-center gap-1">
           <span>+</span>
           <span>Add Product</span>
         </button>
-        <button onclick="openExpenseModal()"
+        <button type="button" onclick="openExpenseModal()"
           class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 active:scale-95 text-rose-600 border border-rose-200 text-xs font-extrabold transition flex items-center gap-1">
           <span>-</span>
           <span>Expense</span>
@@ -116,7 +115,6 @@
 
       <!-- TAB 1: STORE POS -->
       <section id="tab-store" class="space-y-3.5">
-        <!-- Store Dark Banner -->
         <div class="bg-brand-dark text-white rounded-3xl p-4 shadow-card space-y-3">
           <div class="flex items-start justify-between gap-2">
             <div>
@@ -149,7 +147,12 @@
           </div>
         </div>
 
-        <!-- Search & Category Pills -->
+        <div id="store-low-stock-alert" onclick="openLowStockModal('store')" role="button" tabindex="0"
+          class="hidden cursor-pointer bg-amber-50 hover:bg-amber-100/80 active:scale-99 border border-amber-300 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 transition">
+          <p id="store-low-stock-text" class="text-xs font-extrabold text-amber-900"></p>
+          <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 shrink-0">View All</span>
+        </div>
+
         <div class="space-y-2.5">
           <div class="relative">
             <input id="store-search" type="search" oninput="renderStoreCatalog()" placeholder="Search store items (rice, noodles, soap...)"
@@ -158,7 +161,6 @@
           <div id="store-categories" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5"></div>
         </div>
 
-        <!-- Product Grid -->
         <div id="store-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4"></div>
       </section>
 
@@ -194,6 +196,12 @@
               <p class="font-extrabold text-white mt-0.5"><span id="softdrinks-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="softdrinks-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
+        </div>
+
+        <div id="softdrinks-low-stock-alert" onclick="openLowStockModal('softdrinks')" role="button" tabindex="0"
+          class="hidden cursor-pointer bg-amber-50 hover:bg-amber-100/80 active:scale-99 border border-amber-300 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 transition">
+          <p id="softdrinks-low-stock-text" class="text-xs font-extrabold text-amber-900"></p>
+          <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 shrink-0">View All</span>
         </div>
 
         <div class="relative">
@@ -236,6 +244,12 @@
               <p class="font-extrabold text-white mt-0.5"><span id="cigarettes-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="cigarettes-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
+        </div>
+
+        <div id="cigarettes-low-stock-alert" onclick="openLowStockModal('cigarettes')" role="button" tabindex="0"
+          class="hidden cursor-pointer bg-amber-50 hover:bg-amber-100/80 active:scale-99 border border-amber-300 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 transition">
+          <p id="cigarettes-low-stock-text" class="text-xs font-extrabold text-amber-900"></p>
+          <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 shrink-0">View All</span>
         </div>
 
         <div class="relative">
@@ -336,7 +350,71 @@
         </div>
       </section>
 
-      <!-- TAB 5: REPORTS & LEDGER -->
+      <!-- TAB 5: UTANG TRACKER -->
+      <section id="tab-utang" class="hidden space-y-3.5">
+        <div class="bg-brand-dark text-white rounded-3xl p-4 shadow-card space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200">
+                Utang / Credit List
+              </span>
+              <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
+                <span id="utang-unpaid-banner" class="text-2xl font-black tracking-tight text-amber-300">₱0.00</span>
+                <span class="text-xs font-semibold text-slate-300">Unpaid Utang</span>
+              </div>
+              <p class="text-xs font-semibold text-emerald-300 mt-0.5">
+                Paid / Bayad Na: <span id="utang-paid-banner">₱0.00</span>
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Accounts</p>
+              <p id="utang-count-banner" class="text-sm font-black text-white">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-3">
+          <h2 class="text-sm font-black text-slate-900">Record Utang (Manual / Customer)</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Customer Name</label>
+              <input id="utang-customer-input" type="text" placeholder="e.g. Ate Maria"
+                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Items / Note</label>
+              <input id="utang-note-input" type="text" placeholder="e.g. Bigas, Sardinas"
+                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-semibold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Amount (₱)</label>
+              <input id="utang-amount-input" type="number" step="0.01" min="1" placeholder="0.00"
+                class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+            </div>
+          </div>
+          <button type="button" onclick="addManualUtang()"
+            class="w-full py-2.5 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-black shadow-sm transition">
+            + Add Utang Record
+          </button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input id="utang-search" type="search" oninput="renderUtangTab()" placeholder="Search customer name or item..."
+            class="flex-1 bg-white rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 placeholder-slate-400 border border-slate-200/80 focus:outline-none focus:border-brand-purple" />
+          <div class="flex items-center gap-1.5">
+            <button type="button" id="utang-filter-unpaid" onclick="setUtangFilter('unpaid')"
+              class="px-3 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition">Unpaid</button>
+            <button type="button" id="utang-filter-paid" onclick="setUtangFilter('paid')"
+              class="px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition">Paid</button>
+            <button type="button" id="utang-filter-all" onclick="setUtangFilter('all')"
+              class="px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition">All</button>
+          </div>
+        </div>
+
+        <div id="utang-list" class="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0"></div>
+      </section>
+
+      <!-- TAB 6: REPORTS & LEDGER -->
       <section id="tab-reports" class="hidden space-y-3.5">
         <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-3.5">
           <div class="flex items-center justify-between gap-2 flex-wrap">
@@ -360,7 +438,6 @@
             </div>
           </div>
 
-          <!-- Top KPIs -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
             <div class="bg-purple-50/80 rounded-2xl p-3">
               <p class="text-[10px] font-extrabold uppercase text-purple-700">Total Benta (Sales)</p>
@@ -380,7 +457,6 @@
             </div>
           </div>
 
-          <!-- Weekly & Monthly Sales + Kita -->
           <div class="pt-1 border-t border-slate-100">
             <div class="flex items-center justify-between mb-2">
               <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Weekly &amp; Monthly Benta &amp; Kita</p>
@@ -406,7 +482,6 @@
             </div>
           </div>
 
-          <!-- Per-Counter Breakdown -->
           <div class="pt-1 border-t border-slate-100">
             <div class="flex items-center justify-between mb-2">
               <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Benta &amp; Kita per Counter</p>
@@ -435,36 +510,42 @@
     </div>
 
     <!-- BOTTOM NAVIGATION -->
-    <nav class="liquid-glass-dock fixed bottom-2 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-md md:max-w-2xl rounded-3xl md:bottom-3 px-2 py-1.5 z-30 grid grid-cols-5 gap-1">
+    <nav class="liquid-glass-dock fixed bottom-2 left-1/2 -translate-x-1/2 w-[calc(100%-1rem)] max-w-md md:max-w-2xl rounded-3xl md:bottom-3 px-1.5 py-1.5 z-30 grid grid-cols-6 gap-1">
       <button type="button" id="nav-store" onclick="switchTab('store')" class="flex flex-col items-center py-1.5 rounded-2xl text-brand-purple font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 10l1-5h16l1 5M5 10v10h14V10M9 20v-6h6v6" />
         </svg>
-        <span class="text-xs font-black">Store</span>
+        <span class="text-[11px] font-black">Store</span>
       </button>
       <button type="button" id="nav-softdrinks" onclick="switchTab('softdrinks')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 3h8l-1 4H9L8 3zm1 4h6l-1 13a2 2 0 01-2 1.8h0A2 2 0 0110 20L9 7z" />
         </svg>
-        <span class="text-xs font-black">Drinks</span>
+        <span class="text-[11px] font-black">Drinks</span>
       </button>
       <button type="button" id="nav-cigarettes" onclick="switchTab('cigarettes')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 17h14v3H3v-3zm17 0h1v3h-1v-3zM18 13c0-1.5 2-2 2-3.5S18 7 18 5.5" />
         </svg>
-        <span class="text-xs font-black">Yosi</span>
+        <span class="text-[11px] font-black">Yosi</span>
       </button>
       <button type="button" id="nav-gcash" onclick="switchTab('gcash')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2m-3-3h7m0 0l-2.5-2.5M21 12l-2.5 2.5" />
         </svg>
-        <span class="text-xs font-black">GCash</span>
+        <span class="text-[11px] font-black">GCash</span>
+      </button>
+      <button type="button" id="nav-utang" onclick="switchTab('utang')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h4m5-11H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2z" />
+        </svg>
+        <span class="text-[11px] font-black">Utang</span>
       </button>
       <button type="button" id="nav-reports" onclick="switchTab('reports')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90">
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9m6 10V5m6 14v-7m4 7H2" />
         </svg>
-        <span class="text-xs font-black">Reports</span>
+        <span class="text-[11px] font-black">Reports</span>
       </button>
     </nav>
 
@@ -480,7 +561,7 @@
       </div>
     </div>
 
-    <!-- PRODUCT EDITOR MODAL (Add / Edit) -->
+    <!-- PRODUCT EDITOR MODAL -->
     <div id="editor-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[92vh] overflow-y-auto">
         <div class="flex items-center justify-between">
@@ -572,7 +653,7 @@
           <div class="grid grid-cols-2 gap-2.5">
             <div>
               <label class="block text-[11px] font-bold text-slate-600 mb-1">Payment Method</label>
-              <select id="cart-payment-method" class="w-full rounded-2xl border border-slate-200 px-3 py-2 font-bold text-slate-900 bg-white">
+              <select id="cart-payment-method" onchange="toggleCartUtangCustomer()" class="w-full rounded-2xl border border-slate-200 px-3 py-2 font-bold text-slate-900 bg-white">
                 <option value="Cash">Cash</option>
                 <option value="GCash">GCash</option>
                 <option value="Utang">Utang</option>
@@ -583,6 +664,11 @@
               <input id="cart-cash-tendered" type="number" step="0.01" min="0" oninput="updateCartChangePreview()" placeholder="Auto"
                 class="w-full rounded-2xl border border-slate-200 px-3 py-2 font-bold text-slate-900" />
             </div>
+          </div>
+          <div id="cart-utang-customer-wrap" class="hidden">
+            <label class="block text-[11px] font-bold text-amber-700 mb-1">Customer Name (for Utang)</label>
+            <input id="cart-utang-customer" type="text" placeholder="Enter customer name..."
+              class="w-full rounded-2xl border border-amber-300 bg-amber-50/40 px-3 py-2 font-bold text-slate-900" />
           </div>
           <p id="cart-change-preview" class="text-xs font-extrabold text-emerald-700"></p>
           <div class="flex items-center gap-2 pt-1">
@@ -650,14 +736,29 @@
       </div>
     </div>
 
+    <!-- LOW STOCK PRODUCTS MODAL -->
+    <div id="low-stock-modal" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[88vh] overflow-y-auto">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h3 id="low-stock-modal-title" class="text-base font-black text-slate-900">Low Stock Products</h3>
+            <p id="low-stock-modal-subtitle" class="text-[11px] font-semibold text-slate-500">Items at or below alert threshold</p>
+          </div>
+          <button type="button" onclick="closeLowStockModal()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button type="button" id="low-stock-scope-counter" onclick="renderLowStockModal(lowStockModalPos, false)"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition">This Counter</button>
+          <button type="button" id="low-stock-scope-all" onclick="renderLowStockModal(lowStockModalPos, true)"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition">All Counters</button>
+        </div>
+        <div id="low-stock-modal-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    /**
-     * Sari-Sari Store POS & Ledger Application
-     * Single-file client-side app with localStorage persistence, CSV export/import,
-     * multi-counter POS (Store, Softdrinks, Cigarettes, GCash), and voidable ledger.
-     */
     const STORAGE_KEY = 'sarisari_pos_state_v1';
     const BACKUP_KEY = 'sarisari_pos_backup_v1';
     const AUTOSYNC_KEY = 'sarisari_pos_autosync_v1';
@@ -677,252 +778,330 @@
     let state = {
       products: [],
       carts: { store: [], softdrinks: [], cigarettes: [] },
-      transactions: []
+      transactions: [],
+      utangs: []
     };
 
     let currentTab = 'store';
     let selectedStoreCategory = 'All';
     let selectedReportFilter = 'all';
+    let selectedUtangFilter = 'unpaid';
     let currentGcashType = 'cash_in';
+    let lowStockModalPos = 'store';
+    let lowStockModalShowAll = false;
+    let autoSyncEnabled = localStorage.getItem(AUTOSYNC_KEY) !== 'false';
+    let toastTimeout = null;
     let activeCartPos = 'store';
     let pendingVoidId = null;
-    let autoSyncEnabled = true;
 
-    function formatPeso(amount) {
-      const num = Number(amount) || 0;
-      return '₱' + num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    function formatPeso(val) {
+      const num = Number(val) || 0;
+      return `₱${num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
-    function showToast(message, isError = false) {
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(msg, isAlert = false) {
+      const banner = document.getElementById('toast-banner');
+      const inner = document.getElementById('toast-inner');
+      if (!banner || !inner) return;
+      inner.textContent = msg;
+      inner.className = `rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center ${
+        isAlert ? 'bg-amber-400 text-slate-950' : 'bg-slate-900 text-white'
+      }`;
+      banner.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 2400);
+    }
+
+    function saveState() {
       try {
-        const banner = document.getElementById('toast-banner');
-        const inner = document.getElementById('toast-inner');
-        if (!banner || !inner) return;
-        inner.textContent = message;
-        inner.className = `rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center ${
-          isError ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'
-        }`;
-        banner.classList.remove('hidden');
-        clearTimeout(window.__toastTimer);
-        window.__toastTimer = setTimeout(() => {
-          banner.classList.add('hidden');
-        }, 2400);
+        const serialized = JSON.stringify(state);
+        localStorage.setItem(STORAGE_KEY, serialized);
+        if (autoSyncEnabled) {
+          localStorage.setItem(BACKUP_KEY, serialized);
+          const syncText = document.getElementById('autosync-status-text');
+          if (syncText) syncText.textContent = 'Synced';
+        }
       } catch (err) {
-        console.error('Toast error:', err);
+        console.error('Save state error:', err);
       }
     }
 
     function loadState() {
       try {
-        const savedSync = localStorage.getItem(AUTOSYNC_KEY);
-        if (savedSync !== null) {
-          autoSyncEnabled = savedSync === 'true';
-        }
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(BACKUP_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
           state = {
-            products: Array.isArray(parsed.products) ? parsed.products : [...DEFAULT_PRODUCTS],
+            products: Array.isArray(parsed.products) && parsed.products.length ? parsed.products : [...DEFAULT_PRODUCTS],
             carts: {
               store: Array.isArray(parsed.carts?.store) ? parsed.carts.store : [],
               softdrinks: Array.isArray(parsed.carts?.softdrinks) ? parsed.carts.softdrinks : [],
               cigarettes: Array.isArray(parsed.carts?.cigarettes) ? parsed.carts.cigarettes : []
             },
-            transactions: Array.isArray(parsed.transactions) ? parsed.transactions : []
+            transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [],
+            utangs: Array.isArray(parsed.utangs) ? parsed.utangs : []
           };
         } else {
-          state = {
-            products: [...DEFAULT_PRODUCTS],
-            carts: { store: [], softdrinks: [], cigarettes: [] },
-            transactions: []
-          };
-          saveState();
+          state.products = [...DEFAULT_PRODUCTS];
         }
       } catch (err) {
-        console.error('Failed to load state:', err);
-        state = {
-          products: [...DEFAULT_PRODUCTS],
-          carts: { store: [], softdrinks: [], cigarettes: [] },
-          transactions: []
-        };
+        console.error('Load state error:', err);
+        state.products = [...DEFAULT_PRODUCTS];
       }
-    }
-
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        if (autoSyncEnabled) {
-          localStorage.setItem(BACKUP_KEY, JSON.stringify({
-            updatedAt: new Date().toISOString(),
-            payload: state
-          }));
-          const statusEl = document.getElementById('autosync-status-text');
-          if (statusEl) statusEl.textContent = 'Auto-synced';
-        }
-      } catch (err) {
-        console.error('Failed to save state:', err);
-        showToast('Storage full or unavailable', true);
-      }
-    }
-
-    function toggleAutoSync() {
-      autoSyncEnabled = !autoSyncEnabled;
-      localStorage.setItem(AUTOSYNC_KEY, String(autoSyncEnabled));
-      const btn = document.getElementById('autosync-toggle-btn');
-      if (btn) {
-        btn.textContent = `Auto Sync: ${autoSyncEnabled ? 'ON' : 'OFF'}`;
-        btn.className = autoSyncEnabled
-          ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
-          : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
-      }
-      if (autoSyncEnabled) saveState();
-      showToast(`Auto Sync ${autoSyncEnabled ? 'enabled' : 'disabled'}`);
     }
 
     function switchTab(tabName) {
+      const validTabs = ['store', 'softdrinks', 'cigarettes', 'gcash', 'utang', 'reports'];
+      if (!validTabs.includes(tabName)) return;
       currentTab = tabName;
-      const tabs = ['store', 'softdrinks', 'cigarettes', 'gcash', 'reports'];
-      tabs.forEach((t) => {
+
+      validTabs.forEach((t) => {
         const sec = document.getElementById(`tab-${t}`);
-        const nav = document.getElementById(`nav-${t}`);
         if (sec) sec.classList.toggle('hidden', t !== tabName);
-        if (nav) {
-          nav.classList.remove('nav-btn-float');
-          void nav.offsetWidth;
-          nav.className = t === tabName
-            ? 'flex flex-col items-center py-1.5 rounded-xl text-white font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight'
-            : 'flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90';
+
+        const navBtn = document.getElementById(`nav-${t}`);
+        if (navBtn) {
+          if (t === tabName) {
+            navBtn.className = 'flex flex-col items-center py-1.5 rounded-2xl text-brand-purple font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight';
+          } else {
+            navBtn.className = 'flex flex-col items-center py-1.5 rounded-xl text-slate-500 hover:bg-purple-50/70 font-bold transition active:scale-90';
+          }
         }
       });
 
       const titles = {
         store: 'Store POS',
-        softdrinks: 'Softdrinks Counter',
-        cigarettes: 'Cigarettes / Yosi Counter',
+        softdrinks: 'Softdrinks POS',
+        cigarettes: 'Cigarettes / Yosi POS',
         gcash: 'GCash & E-Load',
+        utang: 'Utang Tracker',
         reports: 'Reports & Ledger'
       };
-      const sub = document.getElementById('header-subtitle');
-      if (sub) sub.textContent = titles[tabName] || 'Sari-Sari Counter';
+      const subEl = document.getElementById('header-subtitle');
+      if (subEl) subEl.textContent = titles[tabName] || 'Store POS';
 
       renderAll();
     }
 
-    function renderProductMedia(product) {
-      const safeName = product.name || 'Item';
-      const fallback = `https://placehold.co/300x200/f1f5f9/475569?text=${encodeURIComponent(safeName.slice(0, 14))}`;
-      const src = product.image && product.image.trim() ? product.image.trim() : fallback;
-      return `<img src="${src}" alt="${safeName}" onerror="this.onerror=null;this.src='${fallback}'" class="w-full h-24 object-contain rounded-2xl bg-slate-50 p-1.5" />`;
+    // Low Stock Helpers & Modal
+    function isLowStock(product) {
+      const stock = Number(product?.stock ?? 0);
+      const threshold = Number(product?.lowStockThreshold ?? 5);
+      return stock <= threshold;
     }
 
-    function renderStoreCatalog() {
-      const grid = document.getElementById('store-grid');
-      const catBar = document.getElementById('store-categories');
-      const searchVal = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
-      if (!grid || !catBar) return;
-
-      const storeProds = state.products.filter((p) => p.pos === 'store');
-      const cats = ['All', ...new Set(storeProds.map((p) => p.category || 'General'))];
-
-      catBar.innerHTML = cats.map((cat) => {
-        const active = selectedStoreCategory === cat;
-        return `<button type="button" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')"
-          class="px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition ${
-            active ? 'bg-brand-purple text-white' : 'bg-white text-slate-600 border border-slate-200/80'
-          }">${cat}</button>`;
-      }).join('');
-
-      const filtered = storeProds.filter((p) => {
-        const matchCat = selectedStoreCategory === 'All' || (p.category || 'General') === selectedStoreCategory;
-        const matchSearch = !searchVal || p.name.toLowerCase().includes(searchVal) || (p.category || '').toLowerCase().includes(searchVal);
-        return matchCat && matchSearch;
+    function getLowStockProducts(pos = null) {
+      return state.products.filter((p) => {
+        if (pos && p.pos !== pos) return false;
+        return isLowStock(p);
       });
-
-      renderProductGrid(grid, filtered);
     }
 
-    function selectCategory(cat) {
-      selectedStoreCategory = cat;
-      renderStoreCatalog();
-    }
-
-    function renderSoftdrinksCatalog() {
-      const grid = document.getElementById('softdrinks-grid');
-      const searchVal = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
-      if (!grid) return;
-      const items = state.products.filter((p) => p.pos === 'softdrinks' && (!searchVal || p.name.toLowerCase().includes(searchVal)));
-      renderProductGrid(grid, items);
-    }
-
-    function renderCigarettesCatalog() {
-      const grid = document.getElementById('cigarettes-grid');
-      const searchVal = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
-      if (!grid) return;
-      const items = state.products.filter((p) => p.pos === 'cigarettes' && (!searchVal || p.name.toLowerCase().includes(searchVal)));
-      renderProductGrid(grid, items);
-    }
-
-    function isProductLowStock(product) {
-      const stock = Number(product.stock) || 0;
-      const threshold = product.lowStockThreshold !== undefined && product.lowStockThreshold !== null
-        ? Number(product.lowStockThreshold)
-        : 5;
-      return stock > 0 && stock <= threshold;
-    }
-
-    function renderLowStockBanner(items) {
-      const lowItems = items.filter((p) => (Number(p.stock) || 0) <= (p.lowStockThreshold !== undefined ? Number(p.lowStockThreshold) : 5));
-      if (!lowItems.length) return '';
-      const names = lowItems.slice(0, 4).map((p) => `${p.name} (${p.stock})`).join(', ');
-      const extra = lowItems.length > 4 ? ` +${lowItems.length - 4} more` : '';
-      return `
-        <div class="col-span-full bg-amber-50 border border-amber-200 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase shrink-0">Low Stock (${lowItems.length})</span>
-            <p class="text-xs font-extrabold text-amber-900 truncate">${names}${extra}</p>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderProductGrid(container, items) {
+    function renderLowStockBanner(pos) {
+      const banner = document.getElementById(`${pos}-low-stock-alert`);
+      const textEl = document.getElementById(`${pos}-low-stock-text`);
+      if (!banner || !textEl) return;
+      const items = getLowStockProducts(pos);
       if (!items.length) {
-        container.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No products found.</div>`;
+        banner.classList.add('hidden');
+        return;
+      }
+      const names = items.slice(0, 3).map((i) => `${i.name} (${i.stock})`).join(', ');
+      const extra = items.length > 3 ? ` +${items.length - 3} more` : '';
+      textEl.textContent = `Low Stock Alert (${items.length}): ${names}${extra}`;
+      banner.classList.remove('hidden');
+    }
+
+    function openLowStockModal(pos = 'store') {
+      lowStockModalPos = pos;
+      renderLowStockModal(pos, false);
+      document.getElementById('low-stock-modal')?.classList.remove('hidden');
+    }
+
+    function closeLowStockModal() {
+      document.getElementById('low-stock-modal')?.classList.add('hidden');
+    }
+
+    function renderLowStockModal(pos, showAll) {
+      lowStockModalShowAll = Boolean(showAll);
+      const btnCounter = document.getElementById('low-stock-scope-counter');
+      const btnAll = document.getElementById('low-stock-scope-all');
+      const titleEl = document.getElementById('low-stock-modal-title');
+      const listEl = document.getElementById('low-stock-modal-list');
+
+      if (btnCounter && btnAll) {
+        btnCounter.className = `px-3 py-1.5 rounded-2xl text-xs font-extrabold transition ${
+          !lowStockModalShowAll ? 'bg-brand-purple text-white' : 'bg-slate-100 text-slate-700'
+        }`;
+        btnAll.className = `px-3 py-1.5 rounded-2xl text-xs font-extrabold transition ${
+          lowStockModalShowAll ? 'bg-brand-purple text-white' : 'bg-slate-100 text-slate-700'
+        }`;
+      }
+
+      const items = getLowStockProducts(lowStockModalShowAll ? null : pos);
+      if (titleEl) {
+        titleEl.textContent = lowStockModalShowAll
+          ? `All Low Stock Products (${items.length})`
+          : `${(pos || 'store').toUpperCase()} Low Stock (${items.length})`;
+      }
+
+      if (!listEl) return;
+      if (!items.length) {
+        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-4 text-center text-xs font-bold text-slate-500">No low stock items found.</div>`;
         return;
       }
 
-      const alertBannerHtml = renderLowStockBanner(items);
+      listEl.innerHTML = items.map((p) => `
+        <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(p.name)}</p>
+            <p class="text-[11px] font-bold text-amber-800">
+              Stock: <span class="font-black">${Number(p.stock || 0)}</span> • Alert ≤ ${Number(p.lowStockThreshold ?? 5)} • <span class="uppercase">${escapeHtml(p.pos)}</span>
+            </p>
+          </div>
+          <button type="button" onclick="closeLowStockModal(); openEditorModal('${p.pos}', '${p.id}')"
+            class="px-3 py-1.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark text-white text-[11px] font-extrabold shrink-0">
+            Restock / Edit
+          </button>
+        </div>
+      `).join('');
+    }
 
-      container.innerHTML = alertBannerHtml + items.map((p) => {
-        const outOfStock = Number(p.stock) <= 0;
-        const lowStock = isProductLowStock(p);
-        const threshold = p.lowStockThreshold !== undefined ? Number(p.lowStockThreshold) : 5;
+    // Utang Tracker Functions
+    function setUtangFilter(filter) {
+      selectedUtangFilter = filter;
+      ['unpaid', 'paid', 'all'].forEach((f) => {
+        const btn = document.getElementById(`utang-filter-${f}`);
+        if (!btn) return;
+        btn.className = f === filter
+          ? 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
+          : 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition';
+      });
+      renderUtangTab();
+    }
+
+    function addManualUtang() {
+      const custInp = document.getElementById('utang-customer-input');
+      const noteInp = document.getElementById('utang-note-input');
+      const amtInp = document.getElementById('utang-amount-input');
+      const customer = (custInp?.value || '').trim();
+      const note = (noteInp?.value || '').trim();
+      const amount = parseFloat(amtInp?.value);
+
+      if (!customer) return showToast('Enter customer name', true);
+      if (Number.isNaN(amount) || amount <= 0) return showToast('Enter valid utang amount', true);
+
+      state.utangs.unshift({
+        id: `utg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        customer,
+        note: note || 'Utang item',
+        amount,
+        paid: false,
+        createdAt: new Date().toISOString()
+      });
+
+      if (custInp) custInp.value = '';
+      if (noteInp) noteInp.value = '';
+      if (amtInp) amtInp.value = '';
+
+      saveState();
+      renderUtangTab();
+      showToast(`Added utang for ${customer}`);
+    }
+
+    function toggleUtangPaid(utangId) {
+      const u = state.utangs.find((item) => item.id === utangId);
+      if (!u) return;
+      u.paid = !u.paid;
+      u.paidAt = u.paid ? new Date().toISOString() : null;
+      saveState();
+      renderUtangTab();
+      showToast(u.paid ? `Marked ${u.customer} as Paid` : `Marked ${u.customer} as Unpaid`);
+    }
+
+    function deleteUtang(utangId) {
+      state.utangs = state.utangs.filter((item) => item.id !== utangId);
+      saveState();
+      renderUtangTab();
+      showToast('Utang record deleted');
+    }
+
+    function renderUtangTab() {
+      let unpaidSum = 0;
+      let paidSum = 0;
+      let unpaidCount = 0;
+
+      for (const u of state.utangs) {
+        const amt = Number(u.amount) || 0;
+        if (u.paid) {
+          paidSum += amt;
+        } else {
+          unpaidSum += amt;
+          unpaidCount += 1;
+        }
+      }
+
+      const unpaidEl = document.getElementById('utang-unpaid-banner');
+      const paidEl = document.getElementById('utang-paid-banner');
+      const countEl = document.getElementById('utang-count-banner');
+      if (unpaidEl) unpaidEl.textContent = formatPeso(unpaidSum);
+      if (paidEl) paidEl.textContent = formatPeso(paidSum);
+      if (countEl) countEl.textContent = String(unpaidCount);
+
+      const searchVal = (document.getElementById('utang-search')?.value || '').trim().toLowerCase();
+      const listEl = document.getElementById('utang-list');
+      if (!listEl) return;
+
+      const filtered = state.utangs.filter((u) => {
+        if (selectedUtangFilter === 'unpaid' && u.paid) return false;
+        if (selectedUtangFilter === 'paid' && !u.paid) return false;
+        if (!searchVal) return true;
+        return (u.customer || '').toLowerCase().includes(searchVal)
+          || (u.note || '').toLowerCase().includes(searchVal);
+      });
+
+      if (!filtered.length) {
+        listEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No utang records match.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map((u) => {
+        const dt = new Date(u.createdAt || Date.now()).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
         return `
-          <div class="bg-white rounded-3xl p-3 shadow-card border ${
-            outOfStock ? 'border-rose-200' : lowStock ? 'border-amber-300 bg-amber-50/20' : 'border-slate-100'
-          } flex flex-col justify-between gap-2">
-            <div onclick="openDetailModal('${p.id}')" class="cursor-pointer space-y-1.5">
-              ${renderProductMedia(p)}
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-[10px] font-bold text-slate-400 truncate">${p.category || 'Item'}</span>
-                <span class="text-[10px] font-extrabold ${
-                  outOfStock ? 'text-rose-600' : lowStock ? 'text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full' : 'text-slate-500'
-                }">${outOfStock ? 'Out of Stock' : lowStock ? `Low: ${p.stock}/${threshold}` : `Stk: ${p.stock}`}</span>
+          <div class="bg-white rounded-2xl p-3.5 shadow-card border ${u.paid ? 'border-emerald-200/80 bg-emerald-50/20' : 'border-amber-200/80'} flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(u.customer)}</p>
+                <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                  u.paid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                }">${u.paid ? 'Paid' : 'Unpaid'}</span>
               </div>
-              <h3 class="text-xs font-extrabold text-slate-900 line-clamp-2 leading-snug">${p.name}</h3>
+              <p class="text-[11px] font-semibold text-slate-600 truncate mt-0.5">${escapeHtml(u.note || 'Utang')}</p>
+              <p class="text-[10px] font-semibold text-slate-400 mt-0.5">${dt}</p>
             </div>
-            <div class="flex items-center justify-between gap-1 pt-1">
-              <span class="text-sm font-black text-brand-purple">${formatPeso(p.price)}</span>
-              <div class="flex items-center gap-1">
-                <button type="button" onclick="openEditorModal('${p.pos}', '${p.id}')"
-                  class="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-[10px] font-extrabold text-slate-700">
-                  Edit
-                </button>
-                <button type="button" ${outOfStock ? 'disabled' : ''} onclick="addToCart('${p.id}')"
+            <div class="text-right shrink-0 space-y-1.5">
+              <p class="text-sm font-black ${u.paid ? 'text-emerald-700 line-through' : 'text-amber-700'}">${formatPeso(u.amount)}</p>
+              <div class="flex items-center justify-end gap-1">
+                <button type="button" onclick="toggleUtangPaid('${u.id}')"
                   class="px-2.5 py-1 rounded-xl ${
-                    outOfStock ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-brand-purple hover:bg-brand-purpleDark text-white'
+                    u.paid ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                   } text-[10px] font-extrabold">
-                  + Cart
+                  ${u.paid ? 'Undo' : 'Mark Paid'}
+                </button>
+                <button type="button" onclick="deleteUtang('${u.id}')"
+                  class="px-2 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-extrabold">
+                  Delete
                 </button>
               </div>
             </div>
@@ -931,59 +1110,172 @@
       }).join('');
     }
 
-    function openDetailModal(productId) {
+    // Product Catalog Rendering
+    function selectStoreCategory(cat) {
+      selectedStoreCategory = cat || 'All';
+      renderStoreCatalog();
+    }
+
+    function renderProductCard(p) {
+      const stock = Number(p.stock || 0);
+      const low = isLowStock(p);
+      const out = stock <= 0;
+      const imgSrc = p.image || `https://placehold.co/300x200/ede9fe/5b21b6?text=${encodeURIComponent(p.name || 'Item')}`;
+      return `
+        <div class="bg-white rounded-3xl p-2.5 shadow-card border ${out ? 'border-rose-200' : low ? 'border-amber-300' : 'border-slate-100'} flex flex-col justify-between gap-2">
+          <div>
+            <div class="relative rounded-2xl overflow-hidden bg-slate-100 aspect-[4/3] cursor-pointer" onclick="openProductDetail('${p.id}')">
+              <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.name)}" onerror="this.src='https://placehold.co/300x200/ede9fe/5b21b6?text=Item'" class="w-full h-full object-cover" />
+              <span class="absolute top-1.5 left-1.5 text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                out ? 'bg-rose-600 text-white' : low ? 'bg-amber-400 text-slate-950' : 'bg-slate-900/75 text-white'
+              }">
+                ${out ? 'Out' : low ? `Low: ${stock}` : `${stock} left`}
+              </span>
+              <button type="button" onclick="event.stopPropagation(); openEditorModal('${p.pos}', '${p.id}')" title="Edit Product"
+                class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-800 shadow-xs flex items-center justify-center text-xs font-black">
+                ✎
+              </button>
+            </div>
+            <p class="text-xs font-black text-slate-900 mt-2 line-clamp-2 leading-snug cursor-pointer" onclick="openProductDetail('${p.id}')">${escapeHtml(p.name)}</p>
+            <p class="text-[10px] font-semibold text-slate-400 truncate">${escapeHtml(p.category || 'General')}</p>
+          </div>
+
+          <div class="flex items-center justify-between gap-1.5 pt-1">
+            <span class="text-sm font-black text-brand-purple">${formatPeso(p.price)}</span>
+            <button type="button" ${out ? 'disabled' : ''} onclick="addToCart('${p.id}', 1)"
+              class="px-2.5 py-1.5 rounded-xl text-[11px] font-black transition ${
+                out
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white shadow-xs'
+              }">
+              ${out ? 'Sold Out' : '+ Add'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStoreCatalog() {
+      renderLowStockBanner('store');
+      const catEl = document.getElementById('store-categories');
+      const gridEl = document.getElementById('store-grid');
+      const searchVal = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
+      const storeItems = state.products.filter((p) => p.pos === 'store');
+
+      if (catEl) {
+        const cats = ['All', ...Array.from(new Set(storeItems.map((p) => p.category).filter(Boolean)))];
+        if (!cats.includes(selectedStoreCategory)) selectedStoreCategory = 'All';
+        catEl.innerHTML = cats.map((c) => `
+          <button type="button" onclick="selectStoreCategory('${escapeHtml(c)}')"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
+              selectedStoreCategory === c
+                ? 'bg-brand-purple text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
+            }">
+            ${escapeHtml(c)}
+          </button>
+        `).join('');
+      }
+
+      if (!gridEl) return;
+      const filtered = storeItems.filter((p) => {
+        const matchCat = selectedStoreCategory === 'All' || p.category === selectedStoreCategory;
+        const matchSearch = !searchVal
+          || (p.name || '').toLowerCase().includes(searchVal)
+          || (p.category || '').toLowerCase().includes(searchVal);
+        return matchCat && matchSearch;
+      });
+
+      gridEl.innerHTML = filtered.length
+        ? filtered.map(renderProductCard).join('')
+        : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No store products found.</div>`;
+    }
+
+    function renderSoftdrinksCatalog() {
+      renderLowStockBanner('softdrinks');
+      const gridEl = document.getElementById('softdrinks-grid');
+      if (!gridEl) return;
+      const searchVal = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
+      const filtered = state.products.filter((p) => {
+        if (p.pos !== 'softdrinks') return false;
+        return !searchVal || (p.name || '').toLowerCase().includes(searchVal) || (p.category || '').toLowerCase().includes(searchVal);
+      });
+      gridEl.innerHTML = filtered.length
+        ? filtered.map(renderProductCard).join('')
+        : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No softdrinks found.</div>`;
+    }
+
+    function renderCigarettesCatalog() {
+      renderLowStockBanner('cigarettes');
+      const gridEl = document.getElementById('cigarettes-grid');
+      if (!gridEl) return;
+      const searchVal = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
+      const filtered = state.products.filter((p) => {
+        if (p.pos !== 'cigarettes') return false;
+        return !searchVal || (p.name || '').toLowerCase().includes(searchVal) || (p.category || '').toLowerCase().includes(searchVal);
+      });
+      gridEl.innerHTML = filtered.length
+        ? filtered.map(renderProductCard).join('')
+        : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No cigarettes/yosi items found.</div>`;
+    }
+
+    // Product Detail & Editor Modals
+    function openProductDetail(productId) {
       const p = state.products.find((item) => item.id === productId);
-      if (!p) return;
       const modal = document.getElementById('detail-modal');
-      const box = document.getElementById('detail-content');
+      const content = document.getElementById('detail-content');
+      if (!p || !modal || !content) return;
+
+      const stock = Number(p.stock || 0);
       const profitPerUnit = Math.max(0, (Number(p.price) || 0) - (Number(p.cost) || 0));
-      const threshold = p.lowStockThreshold !== undefined ? Number(p.lowStockThreshold) : 5;
-      const isLow = (Number(p.stock) || 0) <= threshold;
-      box.innerHTML = `
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold uppercase text-brand-purple">${p.pos} • ${p.category || 'Item'}</span>
-          <button type="button" onclick="closeDetailModal()" class="text-xs font-extrabold bg-slate-100 px-2.5 py-1 rounded-lg text-slate-600">Close</button>
+      const imgSrc = p.image || `https://placehold.co/400x240/ede9fe/5b21b6?text=${encodeURIComponent(p.name)}`;
+
+      content.innerHTML = `
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-purple-100 text-brand-purple">${escapeHtml(p.pos)} • ${escapeHtml(p.category || 'Item')}</span>
+          <button type="button" onclick="closeProductDetail()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
         </div>
-        ${renderProductMedia(p)}
+        <div class="rounded-2xl overflow-hidden bg-slate-100 aspect-video">
+          <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.name)}" onerror="this.src='https://placehold.co/400x240/ede9fe/5b21b6?text=Item'" class="w-full h-full object-cover" />
+        </div>
         <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h3 class="text-base font-black text-slate-900">${p.name}</h3>
-            ${isLow ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase">Low Stock Alert (&le;${threshold})</span>` : ''}
+          <h3 class="text-lg font-black text-slate-900">${escapeHtml(p.name)}</h3>
+          <div class="flex items-center gap-3 mt-1 text-xs font-bold text-slate-600 flex-wrap">
+            <span class="text-brand-purple font-black text-base">${formatPeso(p.price)}</span>
+            <span>Cost: ${formatPeso(p.cost)}</span>
+            <span class="text-emerald-700">Kita/unit: ${formatPeso(profitPerUnit)}</span>
+            <span>Stock: <strong>${stock}</strong> (Alert ≤${p.lowStockThreshold ?? 5})</span>
           </div>
-          <p class="text-xs font-semibold text-slate-500 mt-0.5">Stock: ${p.stock} (Alert at: ${threshold}) • Cost: ${formatPeso(p.cost)} • Kita/unit: ${formatPeso(profitPerUnit)}</p>
         </div>
-        <div class="flex items-center justify-between pt-2">
-          <span class="text-xl font-black text-brand-purple">${formatPeso(p.price)}</span>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="closeDetailModal(); deleteProductWithConfirm('${p.id}');"
-              class="px-3 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-extrabold">
-              Delete
-            </button>
-            <button type="button" onclick="addToCart('${p.id}'); closeDetailModal();"
-              class="px-4 py-2.5 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-black">
-              Add to Cart
-            </button>
-          </div>
+        <div class="flex items-center gap-2 pt-1">
+          <button type="button" onclick="closeProductDetail(); openEditorModal('${p.pos}', '${p.id}')"
+            class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold">
+            Edit
+          </button>
+          <button type="button" ${stock <= 0 ? 'disabled' : ''} onclick="addToCart('${p.id}', 1); closeProductDetail();"
+            class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark disabled:bg-slate-300 text-white text-sm font-black shadow-sm">
+            ${stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+          </button>
         </div>
       `;
       modal.classList.remove('hidden');
     }
 
-    function closeDetailModal() {
+    function closeProductDetail() {
       document.getElementById('detail-modal')?.classList.add('hidden');
     }
 
     function openEditorModal(defaultPos = 'store', productId = null) {
       const modal = document.getElementById('editor-modal');
-      const title = document.getElementById('editor-title');
+      const titleEl = document.getElementById('editor-title');
       const deleteBtn = document.getElementById('editor-delete-btn');
-      document.getElementById('editor-id').value = productId || '';
+      if (!modal) return;
 
       if (productId) {
         const p = state.products.find((item) => item.id === productId);
         if (!p) return;
-        title.textContent = 'Edit Product';
-        if (deleteBtn) deleteBtn.classList.remove('hidden');
+        if (titleEl) titleEl.textContent = 'Edit Product';
+        document.getElementById('editor-id').value = p.id;
         document.getElementById('editor-pos').value = p.pos || defaultPos;
         document.getElementById('editor-name').value = p.name || '';
         document.getElementById('editor-category').value = p.category || '';
@@ -992,88 +1284,63 @@
         document.getElementById('editor-stock').value = p.stock ?? 0;
         document.getElementById('editor-low-stock').value = p.lowStockThreshold ?? 5;
         document.getElementById('editor-image').value = p.image || '';
+        if (deleteBtn) deleteBtn.classList.remove('hidden');
       } else {
-        title.textContent = 'Add Product';
-        if (deleteBtn) deleteBtn.classList.add('hidden');
-        document.getElementById('editor-pos').value = defaultPos;
+        if (titleEl) titleEl.textContent = 'Add Product';
+        document.getElementById('editor-id').value = '';
+        document.getElementById('editor-pos').value = defaultPos || 'store';
         document.getElementById('editor-name').value = '';
-        document.getElementById('editor-category').value = defaultPos === 'softdrinks' ? 'Softdrinks' : defaultPos === 'cigarettes' ? 'Sticks' : 'General';
+        document.getElementById('editor-category').value = defaultPos === 'softdrinks' ? 'Softdrinks' : defaultPos === 'cigarettes' ? 'Sticks' : 'Pantry';
         document.getElementById('editor-price').value = '';
         document.getElementById('editor-cost').value = '';
-        document.getElementById('editor-stock').value = '10';
+        document.getElementById('editor-stock').value = '';
         document.getElementById('editor-low-stock').value = '5';
         document.getElementById('editor-image').value = '';
+        if (deleteBtn) deleteBtn.classList.add('hidden');
       }
+
       modal.classList.remove('hidden');
-    }
-
-    function deleteProductFromEditor() {
-      const id = document.getElementById('editor-id')?.value.trim();
-      if (!id) return;
-      deleteProductWithConfirm(id, () => closeEditorModal());
-    }
-
-    function deleteProductWithConfirm(productId, onAfterDelete = null) {
-      const prod = state.products.find((p) => p.id === productId);
-      if (!prod) return showToast('Product not found', true);
-
-      const modal = document.getElementById('void-modal');
-      const titleEl = modal?.querySelector('h3');
-      const descEl = document.getElementById('void-modal-desc');
-      const btn = document.getElementById('void-confirm-btn');
-
-      if (titleEl) titleEl.textContent = 'Delete Product';
-      if (descEl) descEl.textContent = `Delete "${prod.name}"? Tatanggalin din ito sa cart kung naroon.`;
-      if (btn) {
-        btn.textContent = 'Delete Product';
-        btn.onclick = () => {
-          try {
-            state.products = state.products.filter((p) => p.id !== productId);
-            ['store', 'softdrinks', 'cigarettes'].forEach((pos) => {
-              state.carts[pos] = (state.carts[pos] || []).filter((c) => c.productId !== productId);
-            });
-            saveState();
-            closeVoidModal();
-            if (typeof onAfterDelete === 'function') onAfterDelete();
-            renderAll();
-            showToast('Product deleted');
-          } catch (err) {
-            console.error('Delete product error:', err);
-            showToast('Failed to delete product', true);
-          }
-        };
-      }
-      if (modal) modal.classList.remove('hidden');
+      setTimeout(() => document.getElementById('editor-name')?.focus(), 40);
     }
 
     function closeEditorModal() {
       document.getElementById('editor-modal')?.classList.add('hidden');
     }
 
-    function saveProductFromForm(e) {
-      e.preventDefault();
+    function saveProductFromForm(event) {
+      event.preventDefault();
       try {
-        const id = document.getElementById('editor-id').value.trim();
-        const pos = document.getElementById('editor-pos').value;
-        const name = document.getElementById('editor-name').value.trim();
-        const category = document.getElementById('editor-category').value.trim() || 'General';
-        const price = Math.max(0, parseFloat(document.getElementById('editor-price').value) || 0);
-        const cost = Math.max(0, parseFloat(document.getElementById('editor-cost').value) || 0);
-        const stock = Math.max(0, parseInt(document.getElementById('editor-stock').value, 10) || 0);
-        const lowStockThreshold = Math.max(0, parseInt(document.getElementById('editor-low-stock').value, 10) || 0);
-        const image = document.getElementById('editor-image').value.trim();
+        const id = (document.getElementById('editor-id')?.value || '').trim();
+        const pos = document.getElementById('editor-pos')?.value || 'store';
+        const name = (document.getElementById('editor-name')?.value || '').trim();
+        const category = (document.getElementById('editor-category')?.value || '').trim() || 'General';
+        const price = Math.max(0, parseFloat(document.getElementById('editor-price')?.value) || 0);
+        const cost = Math.max(0, parseFloat(document.getElementById('editor-cost')?.value) || 0);
+        const stock = Math.max(0, parseInt(document.getElementById('editor-stock')?.value, 10) || 0);
+        const lowStockThreshold = Math.max(0, parseInt(document.getElementById('editor-low-stock')?.value, 10) || 0);
+        const image = (document.getElementById('editor-image')?.value || '').trim();
 
         if (!name) return showToast('Enter product name', true);
 
         if (id) {
           const idx = state.products.findIndex((p) => p.id === id);
-          if (idx !== -1) {
-            state.products[idx] = { ...state.products[idx], pos, name, category, price, cost, stock, lowStockThreshold, image };
+          if (idx > -1) {
+            state.products[idx] = {
+              ...state.products[idx],
+              pos,
+              name,
+              category,
+              price,
+              cost,
+              stock,
+              lowStockThreshold,
+              image
+            };
+            showToast('Product updated');
           }
-          showToast('Product updated');
         } else {
           state.products.unshift({
-            id: 'p-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+            id: `p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             pos,
             name,
             category,
@@ -1091,273 +1358,257 @@
         renderAll();
       } catch (err) {
         console.error('Save product error:', err);
-        showToast('Could not save product', true);
+        showToast('Failed to save product', true);
       }
     }
 
-    function addToCart(productId) {
-      try {
-        const p = state.products.find((item) => item.id === productId);
-        if (!p) return showToast('Product not found', true);
-        if (Number(p.stock) <= 0) return showToast('Out of stock', true);
-
-        const pos = ['store', 'softdrinks', 'cigarettes'].includes(p.pos) ? p.pos : 'store';
-        const cart = state.carts[pos] || [];
-        const existing = cart.find((c) => c.productId === p.id);
-        const currentQty = existing ? existing.qty : 0;
-
-        if (currentQty + 1 > Number(p.stock)) {
-          return showToast(`Only ${p.stock} in stock`, true);
-        }
-
-        if (existing) {
-          existing.qty += 1;
-          existing.name = p.name;
-          existing.price = Number(p.price) || 0;
-          existing.cost = Number(p.cost) || 0;
-        } else {
-          cart.push({
-            productId: p.id,
-            pos,
-            name: p.name,
-            price: Number(p.price) || 0,
-            cost: Number(p.cost) || 0,
-            qty: 1
-          });
-        }
-        state.carts[pos] = cart;
-        activeCartPos = pos;
-        saveState();
-        updateCartBar();
-        showToast(`${p.name} added to cart`);
-      } catch (err) {
-        console.error('Add to cart error:', err);
-        showToast('Failed to add item', true);
+    function deleteProductFromEditor() {
+      const id = (document.getElementById('editor-id')?.value || '').trim();
+      if (!id) return;
+      state.products = state.products.filter((p) => p.id !== id);
+      for (const k of ['store', 'softdrinks', 'cigarettes']) {
+        state.carts[k] = (state.carts[k] || []).filter((c) => c.productId !== id);
       }
+      saveState();
+      closeEditorModal();
+      renderAll();
+      showToast('Product deleted');
     }
 
+    // Cart & Checkout
     function getActiveCartPos() {
-      if (['store', 'softdrinks', 'cigarettes'].includes(currentTab)) {
-        if ((state.carts[currentTab] || []).length > 0) return currentTab;
-      }
-      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
-        if ((state.carts[pos] || []).length > 0) return pos;
-      }
-      return ['store', 'softdrinks', 'cigarettes'].includes(currentTab) ? currentTab : 'store';
+      if (['store', 'softdrinks', 'cigarettes'].includes(currentTab)) return currentTab;
+      return activeCartPos || 'store';
     }
 
-    function getTotalCartCount() {
-      return ['store', 'softdrinks', 'cigarettes'].reduce((sum, pos) => {
-        return sum + (state.carts[pos] || []).reduce((s, item) => s + (Number(item.qty) || 0), 0);
-      }, 0);
+    function addToCart(productId, qty = 1) {
+      const p = state.products.find((item) => item.id === productId);
+      if (!p) return;
+      const pos = ['store', 'softdrinks', 'cigarettes'].includes(p.pos) ? p.pos : 'store';
+      activeCartPos = pos;
+      const cart = state.carts[pos] || [];
+      const existing = cart.find((c) => c.productId === productId);
+      const currentQty = existing ? existing.qty : 0;
+      const maxStock = Number(p.stock || 0);
+
+      if (currentQty + qty > maxStock) {
+        return showToast(`Only ${maxStock} left in stock`, true);
+      }
+
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        cart.push({ productId, qty });
+      }
+      state.carts[pos] = cart;
+      saveState();
+      updateCartBar();
+      showToast(`Added ${p.name}`);
     }
 
-    function getTotalCartAmount() {
-      return ['store', 'softdrinks', 'cigarettes'].reduce((sum, pos) => {
-        return sum + (state.carts[pos] || []).reduce((s, item) => s + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
-      }, 0);
+    function updateCartQty(pos, productId, delta) {
+      const cart = state.carts[pos] || [];
+      const idx = cart.findIndex((c) => c.productId === productId);
+      if (idx === -1) return;
+      const p = state.products.find((item) => item.id === productId);
+      const nextQty = cart[idx].qty + delta;
+      if (nextQty <= 0) {
+        cart.splice(idx, 1);
+      } else if (p && nextQty > Number(p.stock || 0)) {
+        return showToast(`Max stock is ${p.stock}`, true);
+      } else {
+        cart[idx].qty = nextQty;
+      }
+      state.carts[pos] = cart;
+      saveState();
+      updateCartBar();
+      renderCartModalItems(pos);
+    }
+
+    function clearCurrentCart() {
+      const pos = activeCartPos || getActiveCartPos();
+      state.carts[pos] = [];
+      saveState();
+      updateCartBar();
+      renderCartModalItems(pos);
     }
 
     function updateCartBar() {
       const bar = document.getElementById('floating-cart-bar');
-      const countEl = document.getElementById('cart-badge-count');
-      const totalEl = document.getElementById('cart-badge-total');
-      const count = getTotalCartCount();
-      const total = getTotalCartAmount();
-      if (!bar || !countEl || !totalEl) return;
+      const badgeCount = document.getElementById('cart-badge-count');
+      const badgeTotal = document.getElementById('cart-badge-total');
+      if (!bar || !badgeCount || !badgeTotal) return;
 
-      if (count > 0 && currentTab !== 'reports') {
-        bar.classList.remove('hidden');
-        countEl.textContent = String(count);
-        totalEl.textContent = formatPeso(total);
-      } else {
-        bar.classList.add('hidden');
+      const pos = getActiveCartPos();
+      activeCartPos = pos;
+      const cart = state.carts[pos] || [];
+      let count = 0;
+      let total = 0;
+
+      for (const item of cart) {
+        const p = state.products.find((pr) => pr.id === item.productId);
+        if (p) {
+          count += item.qty;
+          total += (Number(p.price) || 0) * item.qty;
+        }
       }
+
+      if (!['store', 'softdrinks', 'cigarettes'].includes(currentTab) || count === 0) {
+        bar.classList.add('hidden');
+        return;
+      }
+
+      badgeCount.textContent = String(count);
+      badgeTotal.textContent = formatPeso(total);
+      bar.classList.remove('hidden');
     }
 
-    function openCartDrawer(pos = null) {
-      const targetPos = pos || getActiveCartPos();
-      activeCartPos = targetPos;
-      renderCartModal();
-      document.getElementById('cart-modal')?.classList.remove('hidden');
+    function openCartDrawer(pos = 'store') {
+      activeCartPos = ['store', 'softdrinks', 'cigarettes'].includes(pos) ? pos : 'store';
+      const modal = document.getElementById('cart-modal');
+      const title = document.getElementById('cart-modal-title');
+      if (title) title.textContent = `${activeCartPos.toUpperCase()} Cart & Checkout`;
+      document.getElementById('cart-payment-method').value = 'Cash';
+      document.getElementById('cart-cash-tendered').value = '';
+      document.getElementById('cart-utang-customer').value = '';
+      toggleCartUtangCustomer();
+      renderCartModalItems(activeCartPos);
+      if (modal) modal.classList.remove('hidden');
     }
 
     function closeCartDrawer() {
       document.getElementById('cart-modal')?.classList.add('hidden');
     }
 
-    function renderCartModal() {
-      const list = document.getElementById('cart-items-list');
-      const title = document.getElementById('cart-modal-title');
-      const subtitle = document.getElementById('cart-modal-subtitle');
-      const totalEl = document.getElementById('cart-summary-total');
-
-      // Collect items across counters so nothing is missed
-      const allItems = [];
-      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
-        (state.carts[pos] || []).forEach((item, idx) => {
-          allItems.push({ ...item, pos, idx });
-        });
-      }
-
-      if (title) title.textContent = 'Cart & Checkout';
-      if (subtitle) subtitle.textContent = `${allItems.length} item line(s) ready`;
-
-      if (!allItems.length) {
-        if (list) {
-          list.innerHTML = `<div class="bg-slate-50 rounded-2xl p-4 text-center text-xs font-bold text-slate-500">Cart is empty. Tap "+ Cart" on any product.</div>`;
-        }
-        if (totalEl) totalEl.textContent = formatPeso(0);
-        updateCartChangePreview();
-        return;
-      }
-
-      let grandTotal = 0;
-      list.innerHTML = allItems.map((item) => {
-        const lineTotal = (Number(item.price) || 0) * (Number(item.qty) || 0);
-        grandTotal += lineTotal;
-        return `
-          <div class="flex items-center justify-between gap-2 bg-slate-50 rounded-2xl p-2.5 border border-slate-100">
-            <div class="min-w-0">
-              <p class="text-xs font-extrabold text-slate-900 truncate">${item.name}</p>
-              <p class="text-[10px] font-semibold text-slate-500">${item.pos.toUpperCase()} • ${formatPeso(item.price)} each</p>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="changeCartQty('${item.pos}', ${item.idx}, -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">-</button>
-              <span class="text-xs font-black w-5 text-center">${item.qty}</span>
-              <button type="button" onclick="changeCartQty('${item.pos}', ${item.idx}, 1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">+</button>
-              <span class="text-xs font-black text-slate-900 ml-1">${formatPeso(lineTotal)}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      if (totalEl) totalEl.textContent = formatPeso(grandTotal);
+    function toggleCartUtangCustomer() {
+      const method = document.getElementById('cart-payment-method')?.value;
+      const wrap = document.getElementById('cart-utang-customer-wrap');
+      if (wrap) wrap.classList.toggle('hidden', method !== 'Utang');
       updateCartChangePreview();
     }
 
-    function changeCartQty(pos, idx, delta) {
+    function getCartSubtotal(pos) {
       const cart = state.carts[pos] || [];
-      const item = cart[idx];
-      if (!item) return;
-
-      const prod = state.products.find((p) => p.id === item.productId);
-      const maxStock = prod ? Number(prod.stock) : 9999;
-      const nextQty = (Number(item.qty) || 0) + delta;
-
-      if (nextQty <= 0) {
-        cart.splice(idx, 1);
-      } else if (nextQty > maxStock) {
-        return showToast(`Max stock is ${maxStock}`, true);
-      } else {
-        item.qty = nextQty;
+      let total = 0;
+      let profit = 0;
+      const details = [];
+      for (const item of cart) {
+        const p = state.products.find((pr) => pr.id === item.productId);
+        if (p) {
+          const lineAmt = (Number(p.price) || 0) * item.qty;
+          const lineCost = (Number(p.cost) || 0) * item.qty;
+          total += lineAmt;
+          profit += Math.max(0, lineAmt - lineCost);
+          details.push({ productId: p.id, name: p.name, qty: item.qty, price: Number(p.price) || 0, cost: Number(p.cost) || 0 });
+        }
       }
-
-      state.carts[pos] = cart;
-      saveState();
-      updateCartBar();
-      renderCartModal();
-    }
-
-    function clearCurrentCart() {
-      state.carts = { store: [], softdrinks: [], cigarettes: [] };
-      saveState();
-      updateCartBar();
-      renderCartModal();
-      showToast('Cart cleared');
+      return { total, profit, details };
     }
 
     function updateCartChangePreview() {
       const preview = document.getElementById('cart-change-preview');
-      const tenderedRaw = document.getElementById('cart-cash-tendered')?.value;
-      const total = getTotalCartAmount();
+      const method = document.getElementById('cart-payment-method')?.value;
+      const tendered = parseFloat(document.getElementById('cart-cash-tendered')?.value);
+      const { total } = getCartSubtotal(activeCartPos);
       if (!preview) return;
-      if (tenderedRaw === '' || tenderedRaw === undefined) {
+      if (method === 'Cash' && !Number.isNaN(tendered) && tendered >= total && total > 0) {
+        preview.textContent = `Change: ${formatPeso(tendered - total)}`;
+      } else {
         preview.textContent = '';
+      }
+    }
+
+    function renderCartModalItems(pos) {
+      const listEl = document.getElementById('cart-items-list');
+      const totalEl = document.getElementById('cart-summary-total');
+      const cart = state.carts[pos] || [];
+      const { total } = getCartSubtotal(pos);
+      if (totalEl) totalEl.textContent = formatPeso(total);
+      updateCartChangePreview();
+      if (!listEl) return;
+
+      if (!cart.length) {
+        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-4 text-center text-xs font-bold text-slate-500">Cart is empty.</div>`;
         return;
       }
-      const tendered = parseFloat(tenderedRaw) || 0;
-      const change = tendered - total;
-      preview.textContent = change >= 0 ? `Change: ${formatPeso(change)}` : `Kulabo / Kulang: ${formatPeso(Math.abs(change))}`;
-      preview.className = change >= 0 ? 'text-xs font-extrabold text-emerald-700' : 'text-xs font-extrabold text-rose-600';
+
+      listEl.innerHTML = cart.map((item) => {
+        const p = state.products.find((pr) => pr.id === item.productId);
+        if (!p) return '';
+        const lineTotal = (Number(p.price) || 0) * item.qty;
+        return `
+          <div class="bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(p.name)}</p>
+              <p class="text-[11px] font-bold text-slate-500">${formatPeso(p.price)} × ${item.qty} = <span class="text-brand-purple font-black">${formatPeso(lineTotal)}</span></p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="updateCartQty('${pos}', '${p.id}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-slate-700">-</button>
+              <span class="text-xs font-black w-5 text-center">${item.qty}</span>
+              <button type="button" onclick="updateCartQty('${pos}', '${p.id}', 1)" class="w-7 h-7 rounded-xl bg-brand-purple text-white font-black">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function completeCartCheckout() {
       try {
-        const entries = [];
-        for (const pos of ['store', 'softdrinks', 'cigarettes']) {
-          for (const item of (state.carts[pos] || [])) {
-            entries.push({ ...item, pos });
-          }
+        const pos = activeCartPos || getActiveCartPos();
+        const { total, profit, details } = getCartSubtotal(pos);
+        if (!details.length || total <= 0) return showToast('Cart is empty', true);
+
+        const paymentMethod = document.getElementById('cart-payment-method')?.value || 'Cash';
+        const customerName = (document.getElementById('cart-utang-customer')?.value || '').trim();
+
+        if (paymentMethod === 'Utang' && !customerName) {
+          return showToast('Enter customer name for Utang', true);
         }
-        if (!entries.length) {
-          return showToast('Cart is empty', true);
-        }
 
-        const method = document.getElementById('cart-payment-method')?.value || 'Cash';
-        const nowIso = new Date().toISOString();
-        const lowStockTriggered = [];
-
-        // Group sales by counter so each counter gets a clean transaction entry
-        const grouped = {};
-        for (const item of entries) {
-          const pos = item.pos || 'store';
-          const qty = Math.max(1, Number(item.qty) || 1);
-          const price = Number(item.price) || 0;
-          const cost = Number(item.cost) || 0;
-          const amount = price * qty;
-          const profit = Math.max(0, (price - cost) * qty);
-
-          const prod = state.products.find((p) => p.id === item.productId);
+        const lowAlerts = [];
+        for (const d of details) {
+          const prod = state.products.find((pr) => pr.id === d.productId);
           if (prod) {
-            prod.stock = Math.max(0, (Number(prod.stock) || 0) - qty);
-            const threshold = prod.lowStockThreshold !== undefined ? Number(prod.lowStockThreshold) : 5;
-            if (prod.stock <= threshold) {
-              lowStockTriggered.push(`${prod.name} (${prod.stock} left)`);
-            }
+            prod.stock = Math.max(0, (Number(prod.stock) || 0) - d.qty);
+            if (isLowStock(prod)) lowAlerts.push(`${prod.name} (${prod.stock})`);
           }
-
-          if (!grouped[pos]) {
-            grouped[pos] = {
-              pos,
-              items: [],
-              amount: 0,
-              profit: 0
-            };
-          }
-          grouped[pos].items.push({ productId: item.productId, name: item.name, qty, price, cost });
-          grouped[pos].amount += amount;
-          grouped[pos].profit += profit;
         }
 
-        Object.values(grouped).forEach((grp, idx) => {
-          const summaryTitle = grp.items.map((i) => `${i.name} x${i.qty}`).join(', ');
-          state.transactions.unshift({
-            id: `tx-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
-            kind: 'sale',
-            pos: grp.pos,
-            title: summaryTitle,
-            amount: grp.amount,
-            profit: grp.profit,
-            paymentMethod: method,
-            items: grp.items,
-            voided: false,
-            createdAt: nowIso
-          });
+        const titleSummary = details.map((d) => `${d.name} x${d.qty}`).join(', ');
+        state.transactions.unshift({
+          id: `tx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          kind: 'sale',
+          pos,
+          title: titleSummary,
+          amount: total,
+          profit,
+          paymentMethod,
+          customerName: paymentMethod === 'Utang' ? customerName : '',
+          voided: false,
+          createdAt: new Date().toISOString(),
+          items: details
         });
 
-        state.carts = { store: [], softdrinks: [], cigarettes: [] };
-        const tenderedInput = document.getElementById('cart-cash-tendered');
-        if (tenderedInput) tenderedInput.value = '';
+        if (paymentMethod === 'Utang') {
+          state.utangs.unshift({
+            id: `utg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            customer: customerName,
+            note: titleSummary,
+            amount: total,
+            paid: false,
+            createdAt: new Date().toISOString()
+          });
+        }
 
+        state.carts[pos] = [];
         saveState();
         closeCartDrawer();
         renderAll();
 
-        if (lowStockTriggered.length > 0) {
-          showToast(`Sale completed! Low stock: ${lowStockTriggered.join(', ')}`, true);
+        if (lowAlerts.length) {
+          showToast(`Sale complete! Low stock: ${lowAlerts.join(', ')}`, true);
         } else {
-          showToast('Sale completed!');
+          showToast(`Sale complete (${formatPeso(total)})`);
         }
       } catch (err) {
         console.error('Checkout error:', err);
@@ -1365,7 +1616,7 @@
       }
     }
 
-    // GCash & E-Load Helpers
+    // GCash & E-Load
     function setGcashType(type) {
       currentGcashType = type;
       ['cash_in', 'cash_out', 'eload'].forEach((t) => {
@@ -1375,6 +1626,7 @@
           ? 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition'
           : 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
       });
+      autoSuggestGcashFee();
     }
 
     function setGcashAmount(val) {
@@ -1388,26 +1640,15 @@
     function autoSuggestGcashFee() {
       const amt = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
       const feeInp = document.getElementById('gcash-fee');
-      if (!feeInp) return;
-      if (amt <= 0) {
-        feeInp.value = '';
-        return;
-      }
-      if (currentGcashType === 'eload') {
-        feeInp.value = amt >= 50 ? '5' : '3';
-      } else {
-        const suggested = Math.max(10, Math.ceil(amt / 500) * 10);
-        feeInp.value = String(suggested);
-      }
+      if (!feeInp || amt <= 0) return;
+      const suggested = Math.max(5, Math.ceil(amt / 500) * 10);
+      feeInp.value = suggested.toFixed(2);
     }
 
     function clearGcashForm() {
-      const amt = document.getElementById('gcash-amount');
-      const fee = document.getElementById('gcash-fee');
-      const note = document.getElementById('gcash-note');
-      if (amt) amt.value = '';
-      if (fee) fee.value = '';
-      if (note) note.value = '';
+      document.getElementById('gcash-amount').value = '';
+      document.getElementById('gcash-fee').value = '';
+      document.getElementById('gcash-note').value = '';
     }
 
     function recordGcashTransaction() {
@@ -1415,64 +1656,57 @@
         const amount = Math.max(0, parseFloat(document.getElementById('gcash-amount')?.value) || 0);
         const fee = Math.max(0, parseFloat(document.getElementById('gcash-fee')?.value) || 0);
         const note = (document.getElementById('gcash-note')?.value || '').trim();
+        if (amount <= 0) return showToast('Enter valid GCash / E-Load amount', true);
 
-        if (amount <= 0) {
-          return showToast('Enter a valid GCash amount', true);
-        }
-
-        const typeLabels = {
-          cash_in: 'GCash Cash In',
-          cash_out: 'GCash Cash Out',
-          eload: 'E-Load'
-        };
-        const baseTitle = `${typeLabels[currentGcashType] || 'GCash'} (${formatPeso(amount)})`;
-        const fullTitle = note ? `${baseTitle} - ${note}` : baseTitle;
+        const typeLabels = { cash_in: 'GCash Cash In', cash_out: 'GCash Cash Out', eload: 'E-Load' };
+        const label = `${typeLabels[currentGcashType] || 'GCash'}${note ? ` (${note})` : ''}`;
 
         state.transactions.unshift({
-          id: `tx-gcash-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          kind: 'sale',
+          id: `tx-gc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          kind: 'gcash',
           pos: 'gcash',
-          title: fullTitle,
-          amount: amount,
+          title: label,
+          amount,
           profit: fee,
           paymentMethod: 'GCash',
           voided: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          items: []
         });
 
-        saveState();
         clearGcashForm();
+        saveState();
         renderAll();
-        showToast('GCash entry recorded!');
+        showToast(`Recorded ${label}`);
       } catch (err) {
-        console.error('GCash record error:', err);
-        showToast('Failed to record GCash', true);
+        console.error('GCash error:', err);
+        showToast('Failed to record GCash entry', true);
       }
     }
 
-    // Expense Modal & Recording
+    // Expenses
     function openExpenseModal() {
-      const counterSel = document.getElementById('expense-counter');
-      if (counterSel && ['store', 'softdrinks', 'cigarettes', 'gcash'].includes(currentTab)) {
-        counterSel.value = currentTab;
+      const sel = document.getElementById('expense-counter');
+      if (sel && ['store', 'softdrinks', 'cigarettes', 'gcash'].includes(currentTab)) {
+        sel.value = currentTab;
       }
+      document.getElementById('expense-desc').value = '';
+      document.getElementById('expense-amount').value = '';
       document.getElementById('expense-modal')?.classList.remove('hidden');
+      setTimeout(() => document.getElementById('expense-desc')?.focus(), 40);
     }
 
     function closeExpenseModal() {
       document.getElementById('expense-modal')?.classList.add('hidden');
     }
 
-    function recordExpense(e) {
-      e.preventDefault();
+    function recordExpense(event) {
+      event.preventDefault();
       try {
         const pos = document.getElementById('expense-counter')?.value || 'general';
         const desc = (document.getElementById('expense-desc')?.value || '').trim();
         const amount = Math.max(0, parseFloat(document.getElementById('expense-amount')?.value) || 0);
-
-        if (!desc || amount <= 0) {
-          return showToast('Enter valid expense details', true);
-        }
+        if (!desc || amount <= 0) return showToast('Enter description and valid amount', true);
 
         state.transactions.unshift({
           id: `tx-exp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -1483,39 +1717,32 @@
           profit: 0,
           paymentMethod: 'Cash',
           voided: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          items: []
         });
 
-        document.getElementById('expense-desc').value = '';
-        document.getElementById('expense-amount').value = '';
         saveState();
         closeExpenseModal();
         renderAll();
         showToast('Expense recorded');
       } catch (err) {
-        console.error('Record expense error:', err);
-        showToast('Failed to save expense', true);
+        console.error('Expense error:', err);
+        showToast('Failed to record expense', true);
       }
     }
 
-    // Void Transaction Modal
+    // Void Transaction
     function openVoidModal(txId) {
       const tx = state.transactions.find((t) => t.id === txId);
       if (!tx || tx.voided) return;
       pendingVoidId = txId;
-
-      const modal = document.getElementById('void-modal');
-      const titleEl = modal?.querySelector('h3');
       const descEl = document.getElementById('void-modal-desc');
-      const btn = document.getElementById('void-confirm-btn');
-
-      if (titleEl) titleEl.textContent = 'Confirm Void Transaction';
-      if (descEl) descEl.textContent = `Void "${tx.title}" (${formatPeso(tx.amount)})? Ibabalik nito ang stock kung product sale.`;
-      if (btn) {
-        btn.textContent = 'Void Transaction';
-        btn.onclick = confirmVoidTransaction;
+      if (descEl) {
+        descEl.textContent = `Void "${tx.title}" (${formatPeso(tx.amount)})? Stock will be restored for product sales.`;
       }
-      modal?.classList.remove('hidden');
+      const btn = document.getElementById('void-confirm-btn');
+      if (btn) btn.onclick = confirmVoidTransaction;
+      document.getElementById('void-modal')?.classList.remove('hidden');
     }
 
     function closeVoidModal() {
@@ -1525,277 +1752,37 @@
 
     function confirmVoidTransaction() {
       if (!pendingVoidId) return;
-      try {
-        const tx = state.transactions.find((t) => t.id === pendingVoidId);
-        if (tx && !tx.voided) {
-          tx.voided = true;
-          if (tx.kind === 'sale' && Array.isArray(tx.items)) {
-            for (const item of tx.items) {
-              const prod = state.products.find((p) => p.id === item.productId);
-              if (prod) {
-                prod.stock = (Number(prod.stock) || 0) + (Number(item.qty) || 0);
-              }
-            }
-          }
-        }
-        saveState();
-        closeVoidModal();
-        renderAll();
-        showToast('Transaction voided');
-      } catch (err) {
-        console.error('Void error:', err);
-        showToast('Failed to void transaction', true);
-      }
-    }
+      const tx = state.transactions.find((t) => t.id === pendingVoidId);
+      if (!tx || tx.voided) return closeVoidModal();
 
-    // Metrics Computation (GCash sales & fees excluded from overall Total Benta & Total Kita)
-    function computeMetrics() {
-      const counters = {
-        store: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
-        softdrinks: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
-        cigarettes: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
-        gcash: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 }
-      };
-
-      let grossSales = 0;
-      let grossProfit = 0;
-      let totalExpenses = 0;
-      let weeklySales = 0;
-      let weeklyProfit = 0;
-      let monthlySales = 0;
-      let monthlyProfit = 0;
-
-      const now = new Date();
-      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-
-      for (const tx of state.transactions) {
-        if (tx.voided) continue;
-        const amt = Number(tx.amount) || 0;
-        const prof = Number(tx.profit) || 0;
-        const txDate = new Date(tx.createdAt || now);
-        const isWeekly = txDate >= sevenDaysAgo;
-        const isMonthly = txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
-
-        if (tx.kind === 'expense') {
-          totalExpenses += amt;
-          continue;
-        }
-
-        const pos = counters[tx.pos] ? tx.pos : 'store';
-        if (pos === 'gcash') {
-          // GCash counter tracks service fees (kita) separately without adding to overall Total Benta/Kita
-          counters.gcash.sales += prof;
-          counters.gcash.profit += prof;
-          if (isWeekly) {
-            counters.gcash.weeklySales += prof;
-            counters.gcash.weeklyProfit += prof;
-          }
-          if (isMonthly) {
-            counters.gcash.monthlySales += prof;
-            counters.gcash.monthlyProfit += prof;
-          }
-        } else {
-          counters[pos].sales += amt;
-          counters[pos].profit += prof;
-          grossSales += amt;
-          grossProfit += prof;
-
-          if (isWeekly) {
-            counters[pos].weeklySales += amt;
-            counters[pos].weeklyProfit += prof;
-            weeklySales += amt;
-            weeklyProfit += prof;
-          }
-          if (isMonthly) {
-            counters[pos].monthlySales += amt;
-            counters[pos].monthlyProfit += prof;
-            monthlySales += amt;
-            monthlyProfit += prof;
-          }
+      tx.voided = true;
+      if (tx.kind === 'sale' && Array.isArray(tx.items)) {
+        for (const item of tx.items) {
+          const prod = state.products.find((p) => p.id === item.productId);
+          if (prod) prod.stock = (Number(prod.stock) || 0) + (Number(item.qty) || 0);
         }
       }
 
-      const totalAmount = (grossSales + grossProfit + counters.gcash.profit) - totalExpenses;
-      return {
-        counters,
-        grossSales,
-        grossProfit,
-        totalExpenses,
-        totalAmount,
-        weeklySales,
-        weeklyProfit,
-        monthlySales,
-        monthlyProfit
-      };
+      saveState();
+      closeVoidModal();
+      renderAll();
+      showToast('Transaction voided');
     }
 
-    function updateDashboardKPIs() {
-      const m = computeMetrics();
-
-      // Update per-counter banners
-      ['store', 'softdrinks', 'cigarettes', 'gcash'].forEach((pos) => {
-        const c = m.counters[pos];
-        const sEl = document.getElementById(`${pos}-sales-banner`);
-        const pEl = document.getElementById(`${pos}-profit-banner`);
-        const wSEl = document.getElementById(`${pos}-weekly-sales`);
-        const wPEl = document.getElementById(`${pos}-weekly-profit`);
-        const mSEl = document.getElementById(`${pos}-monthly-sales`);
-        const mPEl = document.getElementById(`${pos}-monthly-profit`);
-        const tAmtEl = document.getElementById(`total-amount-${pos}`);
-
-        if (sEl) sEl.textContent = formatPeso(c.sales);
-        if (pEl) pEl.textContent = formatPeso(c.profit);
-        if (wSEl) wSEl.textContent = formatPeso(c.weeklySales);
-        if (wPEl) wPEl.textContent = formatPeso(c.weeklyProfit);
-        if (mSEl) mSEl.textContent = formatPeso(c.monthlySales);
-        if (mPEl) mPEl.textContent = formatPeso(c.monthlyProfit);
-        if (tAmtEl) tAmtEl.textContent = formatPeso(m.totalAmount);
-      });
-
-      // Update Reports KPIs
-      const setText = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val;
-      };
-      setText('rep-gross-sales', formatPeso(m.grossSales));
-      setText('rep-gross-profit', formatPeso(m.grossProfit));
-      setText('rep-total-expenses', formatPeso(m.totalExpenses));
-      setText('rep-total-amount', formatPeso(m.totalAmount));
-      setText('rep-weekly-sales', formatPeso(m.weeklySales));
-      setText('rep-weekly-profit', formatPeso(m.weeklyProfit));
-      setText('rep-monthly-sales', formatPeso(m.monthlySales));
-      setText('rep-monthly-profit', formatPeso(m.monthlyProfit));
-    }
-
-    function renderReports() {
-      updateDashboardKPIs();
-      const m = computeMetrics();
-      const cardsEl = document.getElementById('rep-counter-cards');
-      const filterBar = document.getElementById('report-filters');
-      const ledgerEl = document.getElementById('transactions-ledger');
-
-      const labels = {
-        store: 'Store',
-        softdrinks: 'Softdrinks',
-        cigarettes: 'Cigarettes / Yosi',
-        gcash: 'GCash'
-      };
-
-      if (cardsEl) {
-        cardsEl.innerHTML = ['store', 'softdrinks', 'cigarettes', 'gcash'].map((pos) => {
-          const c = m.counters[pos];
-          if (pos === 'gcash') {
-            return `
-              <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1">
-                <p class="text-[11px] font-black text-slate-800">${labels[pos]}</p>
-                <p class="text-xs font-extrabold text-emerald-700">Kita: ${formatPeso(c.profit)}</p>
-                <p class="text-[10px] font-semibold text-slate-500">Wk Kita: ${formatPeso(c.weeklyProfit)} • Mo Kita: ${formatPeso(c.monthlyProfit)}</p>
-              </div>
-            `;
-          }
-          return `
-            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1">
-              <p class="text-[11px] font-black text-slate-800">${labels[pos]}</p>
-              <p class="text-xs font-extrabold text-brand-purple">Benta: ${formatPeso(c.sales)}</p>
-              <p class="text-[11px] font-bold text-emerald-700">Kita: ${formatPeso(c.profit)}</p>
-              <p class="text-[10px] font-semibold text-slate-500">Wk: ${formatPeso(c.weeklySales)} • Mo: ${formatPeso(c.monthlySales)}</p>
-            </div>
-          `;
-        }).join('');
-      }
-
-      const filters = [
-        { id: 'all', label: 'All' },
-        { id: 'store', label: 'Store' },
-        { id: 'softdrinks', label: 'Softdrinks' },
-        { id: 'cigarettes', label: 'Yosi' },
-        { id: 'gcash', label: 'GCash' },
-        { id: 'expense', label: 'Expenses' }
-      ];
-
-      if (filterBar) {
-        filterBar.innerHTML = filters.map((f) => {
-          const active = selectedReportFilter === f.id;
-          return `<button type="button" onclick="setReportFilter('${f.id}')"
-            class="px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition ${
-              active ? 'bg-brand-purple text-white' : 'bg-white text-slate-600 border border-slate-200/80'
-            }">${f.label}</button>`;
-        }).join('');
-      }
-
-      if (ledgerEl) {
-        const filteredTx = state.transactions.filter((tx) => {
-          if (selectedReportFilter === 'all') return true;
-          if (selectedReportFilter === 'expense') return tx.kind === 'expense';
-          return tx.pos === selectedReportFilter;
-        });
-
-        if (!filteredTx.length) {
-          ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No transactions yet.</div>`;
-          return;
-        }
-
-        ledgerEl.innerHTML = filteredTx.map((tx) => {
-          const isExpense = tx.kind === 'expense';
-          const dt = new Date(tx.createdAt || Date.now()).toLocaleString('en-PH', {
-            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-          });
-          return `
-            <div class="bg-white rounded-2xl p-3.5 shadow-card border border-slate-100 flex items-center justify-between gap-3 ${tx.voided ? 'opacity-55' : ''}">
-              <div class="min-w-0">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                    isExpense ? 'bg-rose-100 text-rose-700' : 'bg-purple-100 text-purple-700'
-                  }">${tx.pos || tx.kind}</span>
-                  <span class="text-[10px] font-semibold text-slate-400">${dt}</span>
-                  ${tx.voided ? '<span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">VOIDED</span>' : ''}
-                </div>
-                <p class="text-xs font-extrabold text-slate-900 mt-1 truncate ${tx.voided ? 'line-through' : ''}">${tx.title}</p>
-                ${!isExpense ? `<p class="text-[11px] font-bold text-emerald-700">Kita: ${formatPeso(tx.profit)}</p>` : ''}
-              </div>
-              <div class="text-right shrink-0 space-y-1">
-                <p class="text-sm font-black ${isExpense ? 'text-rose-600' : 'text-slate-900'} ${tx.voided ? 'line-through' : ''}">
-                  ${isExpense ? '-' : ''}${formatPeso(tx.amount)}
-                </p>
-                ${!tx.voided ? `
-                  <button type="button" onclick="openVoidModal('${tx.id}')"
-                    class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-extrabold">
-                    Void
-                  </button>
-                ` : ''}
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    function setReportFilter(filterId) {
-      selectedReportFilter = filterId;
-      renderReports();
-    }
-
-    // CSV Export & Import
+    // CSV Export / Import & Auto Sync
     function exportTransactionsCSV() {
       try {
         const headers = ['id', 'kind', 'pos', 'title', 'amount', 'profit', 'paymentMethod', 'voided', 'createdAt'];
-        const rows = state.transactions.map((tx) => headers.map((h) => {
-          const val = String(tx[h] ?? '').replace(/"/g, '""');
-          return `"${val}"`;
-        }).join(','));
+        const rows = state.transactions.map((t) => headers.map((h) => `"${String(t[h] ?? '').replace(/"/g, '""')}"`).join(','));
         const csv = [headers.join(','), ...rows].join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `sarisari-ledger-${new Date().toISOString().slice(0, 10)}.csv`;
-        document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        showToast('CSV exported');
+        showToast('Exported CSV');
       } catch (err) {
         console.error('Export CSV error:', err);
         showToast('Export failed', true);
@@ -1803,43 +1790,65 @@
     }
 
     function importTransactionsCSV(event) {
-      const file = event.target?.files?.[0];
+      const file = event?.target?.files?.[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = () => {
         try {
-          const text = String(e.target?.result || '');
-          const lines = text.split(/\r?\n/).filter((l) => l.trim());
-          if (lines.length < 2) return showToast('CSV has no data rows', true);
+          const text = String(reader.result || '');
+          const lines = text.split(/\r?\n/).filter(Boolean);
+          if (lines.length < 2) return showToast('CSV has no rows', true);
 
+          const parseRow = (line) => {
+            const out = [];
+            let cur = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+              const ch = line[i];
+              if (ch === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                  cur += '"';
+                  i++;
+                } else {
+                  inQuotes = !inQuotes;
+                }
+              } else if (ch === ',' && !inQuotes) {
+                out.push(cur);
+                cur = '';
+              } else {
+                cur += ch;
+              }
+            }
+            out.push(cur);
+            return out;
+          };
+
+          const headers = parseRow(lines[0]);
           let imported = 0;
           for (let i = 1; i < lines.length; i++) {
-            const cols = lines[i].match(/("([^"]|"")*"|[^,]+)/g) || [];
-            const clean = (idx) => (cols[idx] || '').replace(/^"|"$/g, '').replace(/""/g, '').trim();
-            const title = clean(3);
-            const amount = parseFloat(clean(4)) || 0;
-            if (!title || amount <= 0) continue;
-
-            const id = clean(0) || ('tx-imp-' + Date.now() + '-' + i);
-            if (state.transactions.some((t) => t.id === id)) continue;
-
-            state.transactions.push({
-              id,
-              kind: clean(1) || 'sale',
-              pos: clean(2) || 'store',
-              title,
+            const cols = parseRow(lines[i]);
+            const rec = {};
+            headers.forEach((h, idx) => { rec[h] = cols[idx] ?? ''; });
+            const amount = parseFloat(rec.amount) || 0;
+            if (!rec.title && amount <= 0) continue;
+            state.transactions.unshift({
+              id: rec.id || `tx-imp-${Date.now()}-${i}`,
+              kind: rec.kind || 'sale',
+              pos: rec.pos || 'store',
+              title: rec.title || 'Imported Entry',
               amount,
-              profit: parseFloat(clean(5)) || 0,
-              paymentMethod: clean(6) || 'Cash',
-              voided: clean(7) === 'true',
-              createdAt: clean(8) || new Date().toISOString()
+              profit: parseFloat(rec.profit) || 0,
+              paymentMethod: rec.paymentMethod || 'Cash',
+              voided: String(rec.voided).toLowerCase() === 'true',
+              createdAt: rec.createdAt || new Date().toISOString(),
+              items: []
             });
             imported++;
           }
 
           saveState();
           renderAll();
-          showToast(`Imported ${imported} transaction(s)`);
+          showToast(`Imported ${imported} entries`);
         } catch (err) {
           console.error('Import CSV error:', err);
           showToast('Invalid CSV file', true);
@@ -1850,48 +1859,295 @@
       reader.readAsText(file);
     }
 
+    function toggleAutoSync() {
+      autoSyncEnabled = !autoSyncEnabled;
+      localStorage.setItem(AUTOSYNC_KEY, String(autoSyncEnabled));
+      const btn = document.getElementById('autosync-toggle-btn');
+      const status = document.getElementById('autosync-status-text');
+      if (btn) {
+        btn.textContent = autoSyncEnabled ? 'Auto Sync: ON' : 'Auto Sync: OFF';
+        btn.className = autoSyncEnabled
+          ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
+          : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
+      }
+      if (status) status.textContent = autoSyncEnabled ? 'Synced' : 'Manual Only';
+      if (autoSyncEnabled) saveState();
+      showToast(autoSyncEnabled ? 'Auto Sync enabled' : 'Auto Sync paused');
+    }
+
+    // Metrics & Reports
+    function computeMetrics() {
+      const now = Date.now();
+      const weekMs = 7 * 24 * 60 * 60 * 1000;
+      const monthMs = 30 * 24 * 60 * 60 * 1000;
+
+      const counters = {
+        store: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
+        softdrinks: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
+        cigarettes: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 },
+        gcash: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0 }
+      };
+
+      let totalBenta = 0;
+      let totalKita = 0;
+      let totalExpenses = 0;
+      let weeklyBenta = 0;
+      let weeklyKita = 0;
+      let monthlyBenta = 0;
+      let monthlyKita = 0;
+      let gcashAmountSum = 0;
+
+      for (const tx of state.transactions) {
+        if (tx.voided) continue;
+        const amt = Number(tx.amount) || 0;
+        const prof = Number(tx.profit) || 0;
+        const ts = new Date(tx.createdAt || now).getTime();
+        const isWeek = now - ts <= weekMs;
+        const isMonth = now - ts <= monthMs;
+
+        if (tx.kind === 'expense') {
+          totalExpenses += amt;
+        } else if (tx.kind === 'gcash') {
+          counters.gcash.sales += prof;
+          counters.gcash.profit += prof;
+          gcashAmountSum += amt;
+          if (isWeek) {
+            counters.gcash.weeklySales += prof;
+            counters.gcash.weeklyProfit += prof;
+          }
+          if (isMonth) {
+            counters.gcash.monthlySales += prof;
+            counters.gcash.monthlyProfit += prof;
+          }
+        } else if (tx.kind === 'sale') {
+          const c = counters[tx.pos] || counters.store;
+          c.sales += amt;
+          c.profit += prof;
+          totalBenta += amt;
+          totalKita += prof;
+          if (isWeek) {
+            c.weeklySales += amt;
+            c.weeklyProfit += prof;
+            weeklyBenta += amt;
+            weeklyKita += prof;
+          }
+          if (isMonth) {
+            c.monthlySales += amt;
+            c.monthlyProfit += prof;
+            monthlyBenta += amt;
+            monthlyKita += prof;
+          }
+        }
+      }
+
+      const totalAmount = totalBenta + counters.gcash.profit + gcashAmountSum - totalExpenses;
+      return {
+        counters,
+        totalBenta,
+        totalKita,
+        totalExpenses,
+        totalAmount,
+        weeklyBenta,
+        weeklyKita,
+        monthlyBenta,
+        monthlyKita
+      };
+    }
+
+    function updateDashboardKPIs() {
+      const m = computeMetrics();
+
+      const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = formatPeso(val);
+      };
+
+      setTxt('store-sales-banner', m.counters.store.sales);
+      setTxt('store-profit-banner', m.counters.store.profit);
+      setTxt('store-weekly-sales', m.counters.store.weeklySales);
+      setTxt('store-weekly-profit', m.counters.store.weeklyProfit);
+      setTxt('store-monthly-sales', m.counters.store.monthlySales);
+      setTxt('store-monthly-profit', m.counters.store.monthlyProfit);
+      setTxt('total-amount-store', m.totalAmount);
+
+      setTxt('softdrinks-sales-banner', m.counters.softdrinks.sales);
+      setTxt('softdrinks-profit-banner', m.counters.softdrinks.profit);
+      setTxt('softdrinks-weekly-sales', m.counters.softdrinks.weeklySales);
+      setTxt('softdrinks-weekly-profit', m.counters.softdrinks.weeklyProfit);
+      setTxt('softdrinks-monthly-sales', m.counters.softdrinks.monthlySales);
+      setTxt('softdrinks-monthly-profit', m.counters.softdrinks.monthlyProfit);
+      setTxt('total-amount-softdrinks', m.totalAmount);
+
+      setTxt('cigarettes-sales-banner', m.counters.cigarettes.sales);
+      setTxt('cigarettes-profit-banner', m.counters.cigarettes.profit);
+      setTxt('cigarettes-weekly-sales', m.counters.cigarettes.weeklySales);
+      setTxt('cigarettes-weekly-profit', m.counters.cigarettes.weeklyProfit);
+      setTxt('cigarettes-monthly-sales', m.counters.cigarettes.monthlySales);
+      setTxt('cigarettes-monthly-profit', m.counters.cigarettes.monthlyProfit);
+      setTxt('total-amount-cigarettes', m.totalAmount);
+
+      setTxt('gcash-sales-banner', m.counters.gcash.sales);
+      setTxt('gcash-profit-banner', m.counters.gcash.profit);
+      setTxt('gcash-weekly-sales', m.counters.gcash.weeklySales);
+      setTxt('gcash-weekly-profit', m.counters.gcash.weeklyProfit);
+      setTxt('gcash-monthly-sales', m.counters.gcash.monthlySales);
+      setTxt('gcash-monthly-profit', m.counters.gcash.monthlyProfit);
+      setTxt('total-amount-gcash', m.totalAmount);
+    }
+
+    function setReportFilter(f) {
+      selectedReportFilter = f;
+      renderReports();
+    }
+
+    function renderReports() {
+      const m = computeMetrics();
+      const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = formatPeso(val);
+      };
+
+      setTxt('rep-gross-sales', m.totalBenta);
+      setTxt('rep-gross-profit', m.totalKita);
+      setTxt('rep-total-expenses', m.totalExpenses);
+      setTxt('rep-total-amount', m.totalAmount);
+      setTxt('rep-weekly-sales', m.weeklyBenta);
+      setTxt('rep-weekly-profit', m.weeklyKita);
+      setTxt('rep-monthly-sales', m.monthlyBenta);
+      setTxt('rep-monthly-profit', m.monthlyKita);
+
+      const cardsEl = document.getElementById('rep-counter-cards');
+      if (cardsEl) {
+        const defs = [
+          { key: 'store', label: 'Store', salesLabel: 'Benta' },
+          { key: 'softdrinks', label: 'Softdrinks', salesLabel: 'Benta' },
+          { key: 'cigarettes', label: 'Yosi', salesLabel: 'Benta' },
+          { key: 'gcash', label: 'GCash', salesLabel: 'Kita / Fee' }
+        ];
+        cardsEl.innerHTML = defs.map((d) => {
+          const c = m.counters[d.key];
+          return `
+            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+              <p class="text-[11px] font-black text-slate-800">${d.label}</p>
+              <p class="text-xs font-black text-brand-purple mt-1">${d.salesLabel}: ${formatPeso(c.sales)}</p>
+              <p class="text-[11px] font-bold text-emerald-700">Kita: ${formatPeso(c.profit)}</p>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const filtersEl = document.getElementById('report-filters');
+      if (filtersEl) {
+        const filters = [
+          { id: 'all', label: 'All' },
+          { id: 'store', label: 'Store' },
+          { id: 'softdrinks', label: 'Drinks' },
+          { id: 'cigarettes', label: 'Yosi' },
+          { id: 'gcash', label: 'GCash' },
+          { id: 'expense', label: 'Expenses' }
+        ];
+        filtersEl.innerHTML = filters.map((f) => `
+          <button type="button" onclick="setReportFilter('${f.id}')"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
+              selectedReportFilter === f.id
+                ? 'bg-brand-purple text-white'
+                : 'bg-white text-slate-600 border border-slate-200'
+            }">
+            ${f.label}
+          </button>
+        `).join('');
+      }
+
+      const ledgerEl = document.getElementById('transactions-ledger');
+      if (!ledgerEl) return;
+
+      const list = state.transactions.filter((tx) => {
+        if (selectedReportFilter === 'all') return true;
+        if (selectedReportFilter === 'expense') return tx.kind === 'expense';
+        return tx.pos === selectedReportFilter;
+      });
+
+      if (!list.length) {
+        ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500 border border-slate-100">No transactions yet.</div>`;
+        return;
+      }
+
+      ledgerEl.innerHTML = list.map((tx) => {
+        const dt = new Date(tx.createdAt || Date.now()).toLocaleString('en-PH', {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        const isExp = tx.kind === 'expense';
+        return `
+          <div class="bg-white rounded-2xl p-3.5 shadow-card border ${tx.voided ? 'border-slate-200 opacity-60' : 'border-slate-100'} flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                  isExp ? 'bg-rose-100 text-rose-700' : 'bg-purple-100 text-brand-purple'
+                }">${escapeHtml(tx.pos || tx.kind)}</span>
+                ${tx.paymentMethod ? `<span class="text-[10px] font-bold text-slate-500">${escapeHtml(tx.paymentMethod)}</span>` : ''}
+                ${tx.voided ? `<span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">VOIDED</span>` : ''}
+              </div>
+              <p class="text-xs font-black text-slate-900 mt-1 truncate ${tx.voided ? 'line-through' : ''}">${escapeHtml(tx.title)}</p>
+              <p class="text-[10px] font-semibold text-slate-400">${dt}</p>
+            </div>
+            <div class="text-right shrink-0 space-y-1">
+              <p class="text-sm font-black ${isExp ? 'text-rose-600' : 'text-slate-900'}">${isExp ? '-' : ''}${formatPeso(tx.amount)}</p>
+              ${!isExp ? `<p class="text-[10px] font-extrabold text-emerald-700">Kita: ${formatPeso(tx.profit)}</p>` : ''}
+              ${!tx.voided ? `
+                <button type="button" onclick="openVoidModal('${tx.id}')" class="text-[10px] font-extrabold text-rose-600 hover:underline">
+                  Void
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     function renderAll() {
       renderStoreCatalog();
       renderSoftdrinksCatalog();
       renderCigarettesCatalog();
       updateDashboardKPIs();
       updateCartBar();
+      if (currentTab === 'utang') {
+        renderUtangTab();
+      }
       if (currentTab === 'reports') {
         renderReports();
       }
     }
 
-    // Cross-tab storage listener for Auto Sync
-    window.addEventListener('storage', (e) => {
-      if (!autoSyncEnabled) return;
-      if (e.key === STORAGE_KEY && e.newValue) {
-        loadState();
-        renderAll();
-      }
-    });
-
-    // Move focus to the next visible field when pressing Enter inside forms/modals
+    // Enter-key navigation across form fields & modals
     document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+      if (e.key !== 'Enter') return;
       const target = e.target;
       if (!target || !['INPUT', 'SELECT'].includes(target.tagName)) return;
-      if (target.type === 'submit' || target.type === 'button' || target.type === 'search') return;
+      if (target.type === 'search') return;
 
-      const container = target.closest('form, #tab-gcash, #detail-modal, #cart-modal, #expense-modal, #editor-modal, #void-modal') || document;
-      const fields = Array.from(container.querySelectorAll('input, select, textarea, button[type="submit"]')).filter((el) => {
-        if (el.disabled || el.type === 'hidden' || el.type === 'file') return false;
-        const rect = el.getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0 && getComputedStyle(el).visibility !== 'hidden';
-      });
+      const container = target.closest('form') || target.closest('section') || target.closest('#cart-modal');
+      if (!container) return;
 
-      const idx = fields.indexOf(target);
-      if (idx !== -1 && idx < fields.length - 1) {
-        const nextEl = fields[idx + 1];
-        if (nextEl.tagName === 'BUTTON' && nextEl.type === 'submit') {
-          return;
-        }
+      const focusables = Array.from(
+        container.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([disabled]), select:not([disabled])')
+      ).filter((el) => el.offsetParent !== null);
+
+      const idx = focusables.indexOf(target);
+      if (idx > -1 && idx < focusables.length - 1) {
         e.preventDefault();
-        nextEl.focus();
+        focusables[idx + 1].focus();
+        if (typeof focusables[idx + 1].select === 'function') focusables[idx + 1].select();
+      } else if (idx === focusables.length - 1) {
+        if (container.id === 'tab-gcash') {
+          e.preventDefault();
+          recordGcashTransaction();
+        } else if (container.id === 'tab-utang') {
+          e.preventDefault();
+          addManualUtang();
+        } else if (container.id === 'cart-modal') {
+          e.preventDefault();
+          completeCartCheckout();
+        }
       }
     });
 
@@ -1899,10 +2155,7 @@
       loadState();
       const syncBtn = document.getElementById('autosync-toggle-btn');
       if (syncBtn) {
-        syncBtn.textContent = `Auto Sync: ${autoSyncEnabled ? 'ON' : 'OFF'}`;
-        syncBtn.className = autoSyncEnabled
-          ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
-          : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
+        syncBtn.textContent = autoSyncEnabled ? 'Auto Sync: ON' : 'Auto Sync: OFF';
       }
       renderAll();
     });
