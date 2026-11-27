@@ -97,6 +97,14 @@
       </div>
 
       <div class="flex items-center gap-1.5">
+        <button type="button" onclick="openBarcodeScanner('pos')"
+          class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 active:scale-95 text-slate-900 border border-slate-200 text-xs font-extrabold transition flex items-center gap-1"
+          title="Scan Barcode">
+          <svg class="w-3.5 h-3.5 text-brand-purple" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h2v12H4V6zm4 0h1v12H8V6zm3 0h2v12h-2V6zm4 0h1v12h-1V6zm3 0h2v12h-2V6z" />
+          </svg>
+          <span>Scan</span>
+        </button>
         <button id="header-add-btn" type="button" onclick="openEditorModal(currentTab === 'softdrinks' ? 'softdrinks' : currentTab === 'cigarettes' ? 'cigarettes' : 'store')"
           class="px-3 py-1.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs font-extrabold shadow-sm transition flex items-center gap-1">
           <span>+</span>
@@ -123,29 +131,29 @@
               </span>
               <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
                 <span id="store-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
-                <span class="text-xs font-semibold text-slate-300">Total Benta</span>
+                <span class="text-xs font-semibold text-slate-300">Total Sales</span>
               </div>
               <p class="text-xs font-semibold text-emerald-300 mt-0.5">
-                Kita: <span id="store-profit-banner">₱0.00</span>
+                Profit: <span id="store-profit-banner">₱0.00</span>
               </p>
             </div>
             <div class="text-right">
               <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
               <p id="total-amount-store" class="text-sm font-black text-teal-300">₱0.00</p>
               <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] leading-tight">
-                <p class="text-slate-300 font-semibold">Orig: <span id="store-orig-total" class="font-black text-white">₱0.00</span></p>
-                <p class="text-emerald-300 font-semibold">Tubo: <span id="store-sell-total" class="font-black text-emerald-200">₱0.00</span></p>
+                <p class="text-slate-300 font-semibold">Cost: <span id="store-orig-total" class="font-black text-white">₱0.00</span></p>
+                <p class="text-emerald-300 font-semibold">Retail: <span id="store-sell-total" class="font-black text-emerald-200">₱0.00</span></p>
               </div>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Weekly Benta / Kita</p>
+              <p class="text-slate-400 font-semibold">Weekly Sales / Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="store-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="store-weekly-profit">₱0.00</span></span></p>
             </div>
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Monthly Benta / Kita</p>
+              <p class="text-slate-400 font-semibold">Monthly Sales / Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="store-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="store-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
@@ -178,29 +186,29 @@
               </span>
               <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
                 <span id="softdrinks-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
-                <span class="text-xs font-semibold text-slate-300">Total Benta</span>
+                <span class="text-xs font-semibold text-slate-300">Total Sales</span>
               </div>
               <p class="text-xs font-semibold text-emerald-300 mt-0.5">
-                Kita: <span id="softdrinks-profit-banner">₱0.00</span>
+                Profit: <span id="softdrinks-profit-banner">₱0.00</span>
               </p>
             </div>
             <div class="text-right">
               <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
               <p id="total-amount-softdrinks" class="text-sm font-black text-teal-300">₱0.00</p>
               <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] leading-tight">
-                <p class="text-slate-300 font-semibold">Orig: <span id="softdrinks-orig-total" class="font-black text-white">₱0.00</span></p>
-                <p class="text-emerald-300 font-semibold">Tubo: <span id="softdrinks-sell-total" class="font-black text-emerald-200">₱0.00</span></p>
+                <p class="text-slate-300 font-semibold">Cost: <span id="softdrinks-orig-total" class="font-black text-white">₱0.00</span></p>
+                <p class="text-emerald-300 font-semibold">Retail: <span id="softdrinks-sell-total" class="font-black text-emerald-200">₱0.00</span></p>
               </div>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Weekly Benta / Kita</p>
+              <p class="text-slate-400 font-semibold">Weekly Sales / Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="softdrinks-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="softdrinks-weekly-profit">₱0.00</span></span></p>
             </div>
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Monthly Benta / Kita</p>
+              <p class="text-slate-400 font-semibold">Monthly Sales / Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="softdrinks-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="softdrinks-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
@@ -226,33 +234,33 @@
           <div class="flex items-start justify-between gap-2">
             <div>
               <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200">
-                Cigarettes / Yosi Counter
+                Cigarettes Counter
               </span>
               <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
                 <span id="cigarettes-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
-                <span class="text-xs font-semibold text-slate-300">Total Benta</span>
+                <span class="text-xs font-semibold text-slate-300">Total Sales</span>
               </div>
               <p class="text-xs font-semibold text-emerald-300 mt-0.5">
-                Kita: <span id="cigarettes-profit-banner">₱0.00</span>
+                Profit: <span id="cigarettes-profit-banner">₱0.00</span>
               </p>
             </div>
             <div class="text-right">
               <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
               <p id="total-amount-cigarettes" class="text-sm font-black text-teal-300">₱0.00</p>
               <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] leading-tight">
-                <p class="text-slate-300 font-semibold">Orig: <span id="cigarettes-orig-total" class="font-black text-white">₱0.00</span></p>
-                <p class="text-emerald-300 font-semibold">Tubo: <span id="cigarettes-sell-total" class="font-black text-emerald-200">₱0.00</span></p>
+                <p class="text-slate-300 font-semibold">Cost: <span id="cigarettes-orig-total" class="font-black text-white">₱0.00</span></p>
+                <p class="text-emerald-300 font-semibold">Retail: <span id="cigarettes-sell-total" class="font-black text-emerald-200">₱0.00</span></p>
               </div>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Weekly Benta / Kita</p>
+              <p class="text-slate-400 font-semibold">Weekly Sales / Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="cigarettes-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="cigarettes-weekly-profit">₱0.00</span></span></p>
             </div>
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Monthly Benta / Kita</p>
+              <p class="text-slate-400 font-semibold">Monthly Sales / Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="cigarettes-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ <span id="cigarettes-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
@@ -282,7 +290,7 @@
               </span>
               <div class="mt-1.5 flex items-baseline gap-2 flex-wrap">
                 <span id="gcash-sales-banner" class="text-2xl font-black tracking-tight">₱0.00</span>
-                <span class="text-xs font-semibold text-slate-300">Total Kita</span>
+                <span class="text-xs font-semibold text-slate-300">Total Profit</span>
               </div>
               <p class="text-xs font-semibold text-emerald-300 mt-0.5">
                 Service Fee Earned: <span id="gcash-profit-banner">₱0.00</span>
@@ -292,18 +300,18 @@
               <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Amount</p>
               <p id="total-amount-gcash" class="text-sm font-black text-teal-300">₱0.00</p>
               <div class="mt-1.5 bg-white/10 rounded-xl px-2.5 py-1 text-[10px] leading-tight">
-                <p class="text-sky-200 font-semibold">Puhunan: <span id="gcash-puhunan-banner" class="font-black text-white">₱0.00</span></p>
+                <p class="text-sky-200 font-semibold">Capital: <span id="gcash-puhunan-banner" class="font-black text-white">₱0.00</span></p>
               </div>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Weekly Kita</p>
+              <p class="text-slate-400 font-semibold">Weekly Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="gcash-weekly-sales">₱0.00</span> <span class="text-emerald-300">/ Fee <span id="gcash-weekly-profit">₱0.00</span></span></p>
             </div>
             <div class="bg-white/5 rounded-2xl px-3 py-2">
-              <p class="text-slate-400 font-semibold">Monthly Kita</p>
+              <p class="text-slate-400 font-semibold">Monthly Profit</p>
               <p class="font-extrabold text-white mt-0.5"><span id="gcash-monthly-sales">₱0.00</span> <span class="text-emerald-300">/ Fee <span id="gcash-monthly-profit">₱0.00</span></span></p>
             </div>
           </div>
@@ -312,12 +320,12 @@
         <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-2.5">
           <div class="flex items-center justify-between gap-2">
             <div>
-              <h2 class="text-xs font-black text-slate-900">GCash Puhunan</h2>
+              <h2 class="text-xs font-black text-slate-900">GCash Capital</h2>
               <p class="text-[11px] font-semibold text-slate-500">Current: <span id="gcash-puhunan-display" class="font-black text-sky-700">₱0.00</span></p>
             </div>
           </div>
           <div class="flex items-center gap-1.5">
-            <input id="gcash-puhunan-input" type="number" step="0.01" min="0" placeholder="Puhunan (₱)"
+            <input id="gcash-puhunan-input" type="number" step="0.01" min="0" placeholder="Capital (₱)"
               class="min-w-0 flex-1 rounded-xl border border-slate-200 px-2.5 py-2 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
             <button type="button" onclick="setGcashPuhunan()"
               class="px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-98 text-white text-[11px] font-extrabold transition shrink-0">
@@ -399,7 +407,7 @@
                 <span class="text-xs font-semibold text-slate-300">Unpaid Utang</span>
               </div>
               <p class="text-xs font-semibold text-emerald-300 mt-0.5">
-                Paid / Bayad Na: <span id="utang-paid-banner">₱0.00</span>
+                Paid Credit: <span id="utang-paid-banner">₱0.00</span>
               </p>
             </div>
             <div class="text-right">
@@ -455,7 +463,7 @@
         <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-3.5">
           <div class="flex items-center justify-between gap-2 flex-wrap">
             <div>
-              <h2 class="text-sm font-black text-slate-900">Sales, Kita &amp; Total Amount</h2>
+              <h2 class="text-sm font-black text-slate-900">Sales, Profit &amp; Total Amount</h2>
               <p class="text-[11px] font-semibold text-slate-500">Expenses deduct from Total Amount only</p>
             </div>
             <div class="flex items-center gap-1.5 flex-wrap">
@@ -488,11 +496,11 @@
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
             <div class="bg-purple-50/80 rounded-2xl p-3">
-              <p class="text-[10px] font-extrabold uppercase text-purple-700">Total Benta (Sales)</p>
+              <p class="text-[10px] font-extrabold uppercase text-purple-700">Total Sales</p>
               <p id="rep-gross-sales" class="text-base font-black text-slate-900 mt-0.5">₱0.00</p>
             </div>
             <div class="bg-emerald-50/80 rounded-2xl p-3">
-              <p class="text-[10px] font-extrabold uppercase text-emerald-700">Total Kita (Profit)</p>
+              <p class="text-[10px] font-extrabold uppercase text-emerald-700">Total Profit</p>
               <p id="rep-gross-profit" class="text-base font-black text-slate-900 mt-0.5">₱0.00</p>
             </div>
             <div class="bg-rose-50/80 rounded-2xl p-3">
@@ -507,24 +515,24 @@
 
           <div class="pt-1 border-t border-slate-100">
             <div class="flex items-center justify-between mb-2">
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Weekly &amp; Monthly Benta &amp; Kita</p>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Weekly &amp; Monthly Sales &amp; Profit</p>
               <span class="text-[10px] font-semibold text-slate-400">Active Entries</span>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
               <div class="bg-purple-50/60 rounded-2xl p-2.5 border border-purple-100/80">
-                <p class="text-[10px] font-extrabold text-purple-700">Weekly Benta</p>
+                <p class="text-[10px] font-extrabold text-purple-700">Weekly Sales</p>
                 <p id="rep-weekly-sales" class="text-xs font-black text-slate-900 mt-0.5">₱0.00</p>
               </div>
               <div class="bg-emerald-50/60 rounded-2xl p-2.5 border border-emerald-100/80">
-                <p class="text-[10px] font-extrabold text-emerald-700">Weekly Kita</p>
+                <p class="text-[10px] font-extrabold text-emerald-700">Weekly Profit</p>
                 <p id="rep-weekly-profit" class="text-xs font-black text-slate-900 mt-0.5">₱0.00</p>
               </div>
               <div class="bg-indigo-50/60 rounded-2xl p-2.5 border border-indigo-100/80">
-                <p class="text-[10px] font-extrabold text-indigo-700">Monthly Benta</p>
+                <p class="text-[10px] font-extrabold text-indigo-700">Monthly Sales</p>
                 <p id="rep-monthly-sales" class="text-xs font-black text-slate-900 mt-0.5">₱0.00</p>
               </div>
               <div class="bg-teal-50/60 rounded-2xl p-2.5 border border-teal-100/80">
-                <p class="text-[10px] font-extrabold text-teal-800">Monthly Kita</p>
+                <p class="text-[10px] font-extrabold text-teal-800">Monthly Profit</p>
                 <p id="rep-monthly-profit" class="text-xs font-black text-slate-900 mt-0.5">₱0.00</p>
               </div>
             </div>
@@ -532,10 +540,21 @@
 
           <div class="pt-1 border-t border-slate-100">
             <div class="flex items-center justify-between mb-2">
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Benta &amp; Kita per Counter</p>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Sales &amp; Profit per Counter</p>
               <span id="autosync-status-text" class="text-[10px] font-semibold text-slate-400">Synced</span>
             </div>
             <div id="rep-counter-cards" class="grid grid-cols-2 md:grid-cols-4 gap-2.5"></div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Product Sales Ranking</p>
+                <h3 class="text-xs font-black text-slate-900">Best-Selling to Slow-Moving</h3>
+              </div>
+              <span id="rep-product-chart-summary" class="text-[10px] font-extrabold text-brand-purple bg-purple-50 px-2.5 py-1 rounded-full">0 items</span>
+            </div>
+            <div id="rep-product-sales-chart" class="space-y-2 bg-slate-50/80 rounded-2xl p-3 border border-slate-100"></div>
           </div>
         </div>
 
@@ -636,6 +655,17 @@
               <label class="block text-[11px] font-bold text-slate-600 mb-1">Category</label>
               <input id="editor-category" type="text" required placeholder="e.g. Drinks, Pantry"
                 class="w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Barcode (optional)</label>
+            <div class="flex items-center gap-1.5">
+              <input id="editor-barcode" type="text" placeholder="Scan or enter barcode number"
+                class="flex-1 rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+              <button type="button" onclick="openBarcodeScanner('editor')"
+                class="px-3 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold shrink-0">
+                Scan
+              </button>
             </div>
           </div>
           <div class="grid grid-cols-3 gap-2">
@@ -888,6 +918,51 @@
       </div>
     </div>
 
+    <!-- BARCODE SCANNER MODAL -->
+    <div id="barcode-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-float max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h3 id="barcode-modal-title" class="text-base font-black text-slate-900">Barcode Scanner</h3>
+            <p id="barcode-modal-subtitle" class="text-[11px] font-semibold text-slate-500">Point camera at barcode or type/scan barcode manually</p>
+          </div>
+          <button type="button" onclick="closeBarcodeScanner()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
+        </div>
+
+        <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-video flex items-center justify-center">
+          <video id="barcode-video" playsinline muted class="w-full h-full object-cover"></video>
+          <div id="barcode-camera-fallback" class="hidden px-4 text-center space-y-1">
+            <p id="barcode-camera-status" class="text-xs font-bold text-slate-300">Camera unavailable on this browser/device.</p>
+            <p class="text-[11px] text-slate-400">You can still enter or use a USB/Bluetooth barcode scanner below.</p>
+          </div>
+          <div class="pointer-events-none absolute inset-x-8 top-1/2 -translate-y-1/2 h-0.5 bg-rose-500/85 shadow-[0_0_12px_rgba(244,63,94,0.9)]"></div>
+        </div>
+
+        <form onsubmit="submitManualBarcode(event)" class="space-y-2.5">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Barcode Value</label>
+            <div class="flex items-center gap-2">
+              <input id="barcode-manual-input" type="text" placeholder="Scan or type barcode..."
+                class="flex-1 rounded-2xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-900 focus:outline-none focus:border-brand-purple" />
+              <button type="submit" class="px-4 py-2.5 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-black shrink-0">
+                Use Code
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div id="barcode-unmatched-box" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-2">
+          <p class="text-xs font-extrabold text-amber-900">
+            No product matched barcode <span id="barcode-unmatched-code" class="font-mono underline"></span>.
+          </p>
+          <button type="button" onclick="createProductFromScannedBarcode()"
+            class="w-full py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-black">
+            + Add New Product with this Barcode
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -916,6 +991,10 @@
     let activeGcashType = 'cash_in';
     let pendingVoidId = null;
     let lowStockModalPos = 'store';
+    let barcodeScannerMode = 'pos';
+    let barcodeStream = null;
+    let barcodeScanFrame = null;
+    let lastScannedBarcode = '';
     let autoSyncEnabled = localStorage.getItem(AUTOSYNC_KEY) !== 'false';
     let cloudSyncTimer = null;
     let cloudPollInterval = null;
@@ -1010,6 +1089,7 @@
         pos: ['store', 'softdrinks', 'cigarettes'].includes(p.pos) ? p.pos : 'store',
         name: String(p.name || 'Unnamed Item'),
         category: String(p.category || 'General'),
+        barcode: String(p.barcode || '').trim(),
         price: Number(p.price) || 0,
         cost: Number(p.cost) || 0,
         stock: Math.max(0, parseInt(p.stock, 10) || 0),
@@ -1543,7 +1623,7 @@
       const q = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
       const filtered = items.filter((p) => {
         const matchCat = selectedStoreCategory === 'All' || p.category === selectedStoreCategory;
-        const matchQ = !q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+        const matchQ = !q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || String(p.barcode || '').toLowerCase().includes(q);
         return matchCat && matchQ;
       });
 
@@ -1558,7 +1638,7 @@
     function renderSoftdrinksCatalog() {
       renderLowStockBanner('softdrinks');
       const q = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
-      const filtered = state.products.filter((p) => p.pos === 'softdrinks' && (!q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)));
+      const filtered = state.products.filter((p) => p.pos === 'softdrinks' && (!q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || String(p.barcode || '').toLowerCase().includes(q)));
       const grid = document.getElementById('softdrinks-grid');
       if (grid) {
         grid.innerHTML = filtered.length
@@ -1570,7 +1650,7 @@
     function renderCigarettesCatalog() {
       renderLowStockBanner('cigarettes');
       const q = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
-      const filtered = state.products.filter((p) => p.pos === 'cigarettes' && (!q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)));
+      const filtered = state.products.filter((p) => p.pos === 'cigarettes' && (!q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || String(p.barcode || '').toLowerCase().includes(q)));
       const grid = document.getElementById('cigarettes-grid');
       if (grid) {
         grid.innerHTML = filtered.length
@@ -1637,6 +1717,7 @@
       document.getElementById('editor-pos').value = existing ? existing.pos : (defaultPos || 'store');
       document.getElementById('editor-name').value = existing ? existing.name : '';
       document.getElementById('editor-category').value = existing ? existing.category : (defaultPos === 'softdrinks' ? 'Drinks' : defaultPos === 'cigarettes' ? 'Sticks' : 'General');
+      document.getElementById('editor-barcode').value = existing ? (existing.barcode || '') : '';
       document.getElementById('editor-price').value = existing ? existing.price : '';
       document.getElementById('editor-cost').value = existing ? existing.cost : '';
       document.getElementById('editor-stock').value = existing ? existing.stock : '10';
@@ -1660,6 +1741,7 @@
       const pos = document.getElementById('editor-pos').value || 'store';
       const name = document.getElementById('editor-name').value.trim();
       const category = document.getElementById('editor-category').value.trim() || 'General';
+      const barcode = (document.getElementById('editor-barcode')?.value || '').trim();
       const price = Math.max(0, parseFloat(document.getElementById('editor-price').value) || 0);
       const cost = Math.max(0, parseFloat(document.getElementById('editor-cost').value) || 0);
       const stock = Math.max(0, parseInt(document.getElementById('editor-stock').value, 10) || 0);
@@ -1674,6 +1756,7 @@
           prod.pos = pos;
           prod.name = name;
           prod.category = category;
+          prod.barcode = barcode;
           prod.price = price;
           prod.cost = cost;
           prod.stock = stock;
@@ -1687,6 +1770,7 @@
           pos,
           name,
           category,
+          barcode,
           price,
           cost,
           stock,
@@ -1936,26 +2020,26 @@
       const inputEl = document.getElementById('gcash-puhunan-input');
       const val = parseFloat(inputEl?.value);
       if (Number.isNaN(val) || val < 0) {
-        return showToast('Enter a valid puhunan amount', true);
+        return showToast('Enter a valid capital amount', true);
       }
       state.gcashPuhunan = val;
       if (inputEl) inputEl.value = '';
       saveState();
       renderGcashPuhunan();
-      showToast(`GCash puhunan set to ${formatPeso(val)}`);
+      showToast(`GCash capital set to ${formatPeso(val)}`);
     }
 
     function addGcashPuhunan() {
       const inputEl = document.getElementById('gcash-puhunan-input');
       const addVal = parseFloat(inputEl?.value);
       if (Number.isNaN(addVal) || addVal <= 0) {
-        return showToast('Enter amount to add to puhunan', true);
+        return showToast('Enter an amount to add to capital', true);
       }
       state.gcashPuhunan = Math.max(0, Number(state.gcashPuhunan) || 0) + addVal;
       if (inputEl) inputEl.value = '';
       saveState();
       renderGcashPuhunan();
-      showToast(`Added ${formatPeso(addVal)} to GCash puhunan`);
+      showToast(`Added ${formatPeso(addVal)} to GCash capital`);
     }
 
     function setGcashType(type) {
@@ -2019,7 +2103,7 @@
         : (fee - amount);
       const nextPuhunan = currentPuhunan + puhunanDelta;
       if (nextPuhunan < 0) {
-        return showToast('Insufficient GCash puhunan for this transaction', true);
+        return showToast('Insufficient GCash capital for this transaction', true);
       }
       state.gcashPuhunan = nextPuhunan;
 
@@ -2055,18 +2139,18 @@
     // Utang Management
     function addManualUtang() {
       const customerName = (document.getElementById('utang-customer-input')?.value || '').trim();
-      const note = (document.getElementById('utang-note-input')?.value || '').trim() || 'Store Utang';
+      const note = (document.getElementById('utang-note-input')?.value || '').trim() || 'Store Credit';
       const amount = parseFloat(document.getElementById('utang-amount-input')?.value) || 0;
 
       if (!customerName) return showToast('Enter customer name', true);
-      if (amount <= 0) return showToast('Enter valid utang amount', true);
+      if (amount <= 0) return showToast('Enter a valid credit amount', true);
 
       const txId = `tx-${Date.now()}`;
       state.transactions.unshift({
         id: txId,
         kind: 'sale',
         pos: 'store',
-        title: `Utang: ${customerName} (${note})`,
+        title: `Credit: ${customerName} (${note})`,
         amount,
         profit: 0,
         paymentMethod: 'Utang',
@@ -2091,7 +2175,7 @@
 
       saveState();
       renderAll();
-      showToast(`Added utang for ${customerName}`);
+      showToast(`Added credit record for ${customerName}`);
     }
 
     function setUtangFilter(filter) {
@@ -2451,91 +2535,104 @@
     function updateDashboardKPIs() {
       const m = computeMetrics();
 
-      for (const pos of ['store', 'softdrinks', 'cigarettes', 'gcash']) {
-        const c = m.counters[pos];
-        const salesEl = document.getElementById(`${pos}-sales-banner`);
-        const profitEl = document.getElementById(`${pos}-profit-banner`);
-        const weekSalesEl = document.getElementById(`${pos}-weekly-sales`);
-        const weekProfitEl = document.getElementById(`${pos}-weekly-profit`);
-        const monthSalesEl = document.getElementById(`${pos}-monthly-sales`);
-        const monthProfitEl = document.getElementById(`${pos}-monthly-profit`);
-        const totalAmtEl = document.getElementById(`total-amount-${pos}`);
-        const origEl = document.getElementById(`${pos}-orig-total`);
-        const sellEl = document.getElementById(`${pos}-sell-total`);
+      const setText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = formatPeso(val);
+      };
 
-        if (salesEl) salesEl.textContent = formatPeso(c.sales);
-        if (profitEl) profitEl.textContent = formatPeso(c.profit);
-        if (weekSalesEl) weekSalesEl.textContent = formatPeso(c.weeklySales);
-        if (weekProfitEl) weekProfitEl.textContent = formatPeso(c.weeklyProfit);
-        if (monthSalesEl) monthSalesEl.textContent = formatPeso(c.monthlySales);
-        if (monthProfitEl) monthProfitEl.textContent = formatPeso(c.monthlyProfit);
-        if (totalAmtEl) totalAmtEl.textContent = formatPeso(pos === 'gcash' ? c.sales : c.sales);
-        if (origEl) origEl.textContent = formatPeso(c.origTotal);
-        if (sellEl) sellEl.textContent = formatPeso(c.sellTotal);
-      }
+      setText('store-sales-banner', m.counters.store.sales);
+      setText('store-profit-banner', m.counters.store.profit);
+      setText('store-weekly-sales', m.counters.store.weeklySales);
+      setText('store-weekly-profit', m.counters.store.weeklyProfit);
+      setText('store-monthly-sales', m.counters.store.monthlySales);
+      setText('store-monthly-profit', m.counters.store.monthlyProfit);
+      setText('total-amount-store', m.counters.store.sales);
+      setText('store-orig-total', m.counters.store.origTotal);
+      setText('store-sell-total', m.counters.store.sellTotal);
 
-      const repGrossSales = document.getElementById('rep-gross-sales');
-      const repGrossProfit = document.getElementById('rep-gross-profit');
-      const repExpenses = document.getElementById('rep-total-expenses');
-      const repTotalAmount = document.getElementById('rep-total-amount');
-      const repWeekSales = document.getElementById('rep-weekly-sales');
-      const repWeekProfit = document.getElementById('rep-weekly-profit');
-      const repMonthSales = document.getElementById('rep-monthly-sales');
-      const repMonthProfit = document.getElementById('rep-monthly-profit');
+      setText('softdrinks-sales-banner', m.counters.softdrinks.sales);
+      setText('softdrinks-profit-banner', m.counters.softdrinks.profit);
+      setText('softdrinks-weekly-sales', m.counters.softdrinks.weeklySales);
+      setText('softdrinks-weekly-profit', m.counters.softdrinks.weeklyProfit);
+      setText('softdrinks-monthly-sales', m.counters.softdrinks.monthlySales);
+      setText('softdrinks-monthly-profit', m.counters.softdrinks.monthlyProfit);
+      setText('total-amount-softdrinks', m.counters.softdrinks.sales);
+      setText('softdrinks-orig-total', m.counters.softdrinks.origTotal);
+      setText('softdrinks-sell-total', m.counters.softdrinks.sellTotal);
 
-      if (repGrossSales) repGrossSales.textContent = formatPeso(m.grossSales);
-      if (repGrossProfit) repGrossProfit.textContent = formatPeso(m.grossProfit);
-      if (repExpenses) repExpenses.textContent = formatPeso(m.totalExpenses);
-      if (repTotalAmount) repTotalAmount.textContent = formatPeso(m.totalAmount);
-      if (repWeekSales) repWeekSales.textContent = formatPeso(m.weeklySales);
-      if (repWeekProfit) repWeekProfit.textContent = formatPeso(m.weeklyProfit);
-      if (repMonthSales) repMonthSales.textContent = formatPeso(m.monthlySales);
-      if (repMonthProfit) repMonthProfit.textContent = formatPeso(m.monthlyProfit);
+      setText('cigarettes-sales-banner', m.counters.cigarettes.sales);
+      setText('cigarettes-profit-banner', m.counters.cigarettes.profit);
+      setText('cigarettes-weekly-sales', m.counters.cigarettes.weeklySales);
+      setText('cigarettes-weekly-profit', m.counters.cigarettes.weeklyProfit);
+      setText('cigarettes-monthly-sales', m.counters.cigarettes.monthlySales);
+      setText('cigarettes-monthly-profit', m.counters.cigarettes.monthlyProfit);
+      setText('total-amount-cigarettes', m.counters.cigarettes.sales);
+      setText('cigarettes-orig-total', m.counters.cigarettes.origTotal);
+      setText('cigarettes-sell-total', m.counters.cigarettes.sellTotal);
+
+      setText('gcash-sales-banner', m.counters.gcash.sales);
+      setText('gcash-profit-banner', m.counters.gcash.profit);
+      setText('gcash-weekly-sales', m.counters.gcash.weeklySales);
+      setText('gcash-weekly-profit', m.counters.gcash.weeklyProfit);
+      setText('gcash-monthly-sales', m.counters.gcash.monthlySales);
+      setText('gcash-monthly-profit', m.counters.gcash.monthlyProfit);
+      setText('total-amount-gcash', m.counters.gcash.sales);
     }
 
     function setReportFilter(filter) {
-      selectedReportFilter = filter;
+      selectedReportFilter = filter || 'all';
       renderReports();
     }
 
     function renderReports() {
-      updateDashboardKPIs();
       const m = computeMetrics();
+      const setText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = formatPeso(val);
+      };
+
+      setText('rep-gross-sales', m.grossSales);
+      setText('rep-gross-profit', m.grossProfit);
+      setText('rep-total-expenses', m.totalExpenses);
+      setText('rep-total-amount', m.totalAmount);
+      setText('rep-weekly-sales', m.weeklySales);
+      setText('rep-weekly-profit', m.weeklyProfit);
+      setText('rep-monthly-sales', m.monthlySales);
+      setText('rep-monthly-profit', m.monthlyProfit);
 
       const cardsEl = document.getElementById('rep-counter-cards');
       if (cardsEl) {
-        const labels = [
-          { key: 'store', name: 'Store' },
-          { key: 'softdrinks', name: 'Softdrinks' },
-          { key: 'cigarettes', name: 'Cigarettes' },
-          { key: 'gcash', name: 'GCash Fees' }
-        ];
-        cardsEl.innerHTML = labels.map((item) => {
-          const c = m.counters[item.key];
-          return `
-            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-              <p class="text-[10px] font-extrabold uppercase text-slate-500">${item.name}</p>
-              <p class="text-sm font-black text-slate-900 mt-0.5">${formatPeso(c.sales)}</p>
-              <p class="text-[11px] font-bold text-emerald-700 mt-0.5">Kita: ${formatPeso(c.profit)}</p>
-            </div>
-          `;
-        }).join('');
+        const labels = {
+          store: 'Store',
+          softdrinks: 'Softdrinks',
+          cigarettes: 'Cigarettes',
+          gcash: 'GCash'
+        };
+        cardsEl.innerHTML = ['store', 'softdrinks', 'cigarettes', 'gcash'].map((k) => `
+          <div class="bg-slate-50 rounded-2xl p-2.5 border border-slate-100">
+            <p class="text-[10px] font-extrabold uppercase text-slate-500">${labels[k]}</p>
+            <p class="text-xs font-black text-slate-900 mt-0.5">${formatPeso(m.counters[k].sales)}</p>
+            <p class="text-[10px] font-bold text-emerald-700">Kita: ${formatPeso(m.counters[k].profit)}</p>
+          </div>
+        `).join('');
       }
 
+      renderProductSalesChart();
+
       const filters = [
-        { id: 'all', label: 'All' },
-        { id: 'store', label: 'Store' },
-        { id: 'softdrinks', label: 'Drinks' },
-        { id: 'cigarettes', label: 'Yosi' },
-        { id: 'gcash', label: 'GCash' },
-        { id: 'expense', label: 'Expenses' }
+        { key: 'all', label: 'All' },
+        { key: 'store', label: 'Store' },
+        { key: 'softdrinks', label: 'Drinks' },
+        { key: 'cigarettes', label: 'Yosi' },
+        { key: 'gcash', label: 'GCash' },
+        { key: 'expense', label: 'Expenses' }
       ];
       const filterBar = document.getElementById('report-filters');
       if (filterBar) {
         filterBar.innerHTML = filters.map((f) => `
-          <button type="button" onclick="setReportFilter('${f.id}')"
+          <button type="button" onclick="setReportFilter('${f.key}')"
             class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
-              selectedReportFilter === f.id
+              selectedReportFilter === f.key
                 ? 'bg-brand-purple text-white'
                 : 'bg-white text-slate-600 border border-slate-200'
             }">
@@ -2554,46 +2651,288 @@
       const ledgerEl = document.getElementById('transactions-ledger');
       if (!ledgerEl) return;
       if (!filteredTx.length) {
-        ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No transactions yet.</div>`;
+        ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No transactions in this filter.</div>`;
         return;
       }
 
       ledgerEl.innerHTML = filteredTx.map((tx) => {
         const dt = tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-        const isExp = tx.kind === 'expense';
-        const isGcash = tx.kind === 'gcash';
-        const displayAmt = isGcash ? (Number(tx.fee ?? tx.profit) || 0) : (Number(tx.amount) || 0);
-
+        const isExpense = tx.kind === 'expense';
         return `
-          <div class="bg-white rounded-3xl p-3.5 shadow-card border border-slate-100 flex items-center justify-between gap-3 ${tx.voided ? 'opacity-60' : ''}">
+          <div class="bg-white rounded-3xl p-3.5 shadow-card border ${tx.voided ? 'border-slate-200 opacity-60' : 'border-slate-100'} flex items-center justify-between gap-2.5">
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                  tx.voided
-                    ? 'bg-slate-200 text-slate-600'
-                    : isExp
-                      ? 'bg-rose-100 text-rose-700'
-                      : isGcash
-                        ? 'bg-sky-100 text-sky-700'
-                        : 'bg-purple-100 text-brand-purple'
-                }">${tx.voided ? 'VOIDED' : escapeHtml(tx.pos || tx.kind)}</span>
-                ${tx.paymentMethod ? `<span class="text-[10px] font-bold text-slate-500">${escapeHtml(tx.paymentMethod)}</span>` : ''}
+                  isExpense ? 'bg-rose-100 text-rose-700' : 'bg-purple-100 text-brand-purple'
+                }">${escapeHtml(tx.pos || 'store')}</span>
+                ${tx.paymentMethod ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${escapeHtml(tx.paymentMethod)}</span>` : ''}
+                ${tx.voided ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">VOIDED</span>` : ''}
                 ${dt ? `<span class="text-[10px] font-semibold text-slate-400">${escapeHtml(dt)}</span>` : ''}
               </div>
-              <p class="text-xs font-black text-slate-900 truncate mt-1 ${tx.voided ? 'line-through' : ''}">${escapeHtml(tx.title)}</p>
-              <p class="text-[11px] font-bold ${isExp ? 'text-rose-600' : 'text-emerald-700'} mt-0.5">
-                ${isExp ? `Expense: -${formatPeso(displayAmt)}` : `${isGcash ? 'Fee' : 'Amount'}: ${formatPeso(displayAmt)} • Kita: ${formatPeso(tx.profit)}`}
-              </p>
+              <p class="text-xs font-black text-slate-900 truncate mt-1 ${tx.voided ? 'line-through' : ''}">${escapeHtml(tx.title || '')}</p>
+              <div class="flex items-center gap-2 mt-0.5 text-[11px] font-bold">
+                <span class="${isExpense ? 'text-rose-600' : 'text-slate-900'}">${isExpense ? '-' : ''}${formatPeso(tx.amount)}</span>
+                ${!isExpense ? `<span class="text-emerald-700">Kita: ${formatPeso(tx.profit)}</span>` : ''}
+              </div>
             </div>
             ${!tx.voided ? `
               <button type="button" onclick="openVoidModal('${tx.id}')"
-                class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-extrabold shrink-0">
+                class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-extrabold shrink-0">
                 Void
               </button>
             ` : ''}
           </div>
         `;
       }).join('');
+    }
+
+    function renderProductSalesChart() {
+      const chartEl = document.getElementById('rep-product-sales-chart');
+      const summaryEl = document.getElementById('rep-product-chart-summary');
+      if (!chartEl) return;
+
+      const statsMap = new Map();
+      for (const p of state.products) {
+        statsMap.set(p.id, {
+          id: p.id,
+          name: p.name,
+          pos: p.pos,
+          unitsSold: 0,
+          salesTotal: 0
+        });
+      }
+
+      for (const tx of state.transactions) {
+        if (!tx || tx.voided || tx.kind !== 'sale' || !Array.isArray(tx.items)) continue;
+        for (const item of tx.items) {
+          const qty = Math.max(0, Number(item.qty) || 0);
+          const price = Math.max(0, Number(item.price) || 0);
+          const lineSales = qty * price;
+          const key = item.productId || item.name;
+          if (!key) continue;
+
+          let entry = statsMap.get(key);
+          if (!entry) {
+            entry = Array.from(statsMap.values()).find((v) => v.name.toLowerCase() === String(item.name || '').toLowerCase());
+          }
+          if (!entry) {
+            entry = {
+              id: key,
+              name: item.name || 'Item',
+              pos: tx.pos || 'store',
+              unitsSold: 0,
+              salesTotal: 0
+            };
+            statsMap.set(key, entry);
+          }
+          entry.unitsSold += qty;
+          entry.salesTotal += lineSales;
+        }
+      }
+
+      const ranked = Array.from(statsMap.values()).sort((a, b) => {
+        if (b.unitsSold !== a.unitsSold) return b.unitsSold - a.unitsSold;
+        if (b.salesTotal !== a.salesTotal) return b.salesTotal - a.salesTotal;
+        return a.name.localeCompare(b.name);
+      });
+
+      if (summaryEl) {
+        summaryEl.textContent = `${ranked.length} products`;
+      }
+
+      if (!ranked.length) {
+        chartEl.innerHTML = `<p class="text-xs font-bold text-slate-400 text-center py-3">No product sales data yet.</p>`;
+        return;
+      }
+
+      const maxUnits = Math.max(1, ...ranked.map((r) => r.unitsSold));
+      chartEl.innerHTML = ranked.map((r, idx) => {
+        const pct = Math.max(0, Math.min(100, Math.round((r.unitsSold / maxUnits) * 100)));
+        const isTop = r.unitsSold > 0 && idx < 3;
+        const barColor = r.unitsSold === 0
+          ? 'bg-slate-300'
+          : isTop
+            ? 'bg-brand-purple'
+            : 'bg-teal-500';
+
+        return `
+          <div class="bg-white rounded-2xl p-2.5 border border-slate-100 space-y-1.5">
+            <div class="flex items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                  r.unitsSold === 0 ? 'bg-slate-100 text-slate-500' : 'bg-purple-100 text-brand-purple'
+                }">#${idx + 1}</span>
+                <p class="font-extrabold text-slate-900 truncate">${escapeHtml(r.name)}</p>
+                <span class="text-[10px] font-bold uppercase text-slate-400 shrink-0">${escapeHtml(r.pos)}</span>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="font-black text-slate-900">${r.unitsSold} sold</span>
+                <span class="text-[11px] font-bold text-emerald-700 ml-1">(${formatPeso(r.salesTotal)})</span>
+              </div>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full rounded-full ${barColor} transition-all duration-300" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Barcode Scanner (Camera BarcodeDetector + Manual/USB Scanner input)
+    function stopBarcodeCamera() {
+      if (barcodeScanFrame) {
+        cancelAnimationFrame(barcodeScanFrame);
+        barcodeScanFrame = null;
+      }
+      if (barcodeStream) {
+        barcodeStream.getTracks().forEach((track) => track.stop());
+        barcodeStream = null;
+      }
+      const video = document.getElementById('barcode-video');
+      if (video) video.srcObject = null;
+    }
+
+    async function startBarcodeCamera() {
+      const video = document.getElementById('barcode-video');
+      const fallback = document.getElementById('barcode-camera-fallback');
+      const statusEl = document.getElementById('barcode-camera-status');
+      if (!video) return;
+
+      stopBarcodeCamera();
+      if (fallback) fallback.classList.add('hidden');
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (statusEl) statusEl.textContent = 'Camera API not supported on this device.';
+        if (fallback) fallback.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        barcodeStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+        video.srcObject = barcodeStream;
+        await video.play();
+
+        if ('BarcodeDetector' in window) {
+          const detector = new window.BarcodeDetector({
+            formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'codabar', 'itf', 'qr_code']
+          });
+
+          const scanLoop = async () => {
+            if (!barcodeStream || video.readyState < 2) {
+              barcodeScanFrame = requestAnimationFrame(scanLoop);
+              return;
+            }
+            try {
+              const codes = await detector.detect(video);
+              if (Array.isArray(codes) && codes.length > 0) {
+                const rawVal = String(codes[0].rawValue || '').trim();
+                if (rawVal) {
+                  handleDetectedBarcode(rawVal);
+                  return;
+                }
+              }
+            } catch (_) {
+              // Ignore transient frame detection errors
+            }
+            barcodeScanFrame = requestAnimationFrame(scanLoop);
+          };
+
+          barcodeScanFrame = requestAnimationFrame(scanLoop);
+        } else {
+          if (statusEl) statusEl.textContent = 'Auto-camera scan not supported; use manual/USB input below.';
+          if (fallback) fallback.classList.remove('hidden');
+        }
+      } catch (err) {
+        console.error('Barcode camera error:', err);
+        if (statusEl) statusEl.textContent = 'Camera permission denied or unavailable.';
+        if (fallback) fallback.classList.remove('hidden');
+      }
+    }
+
+    function openBarcodeScanner(mode = 'pos') {
+      barcodeScannerMode = mode === 'editor' ? 'editor' : 'pos';
+      lastScannedBarcode = '';
+
+      const titleEl = document.getElementById('barcode-modal-title');
+      const subEl = document.getElementById('barcode-modal-subtitle');
+      const unmatchedBox = document.getElementById('barcode-unmatched-box');
+      const inputEl = document.getElementById('barcode-manual-input');
+
+      if (titleEl) {
+        titleEl.textContent = barcodeScannerMode === 'editor' ? 'Scan Product Barcode' : 'Scan Barcode to Sell';
+      }
+      if (subEl) {
+        subEl.textContent = barcodeScannerMode === 'editor'
+          ? 'Scan or enter barcode to fill the product form'
+          : 'Scan or enter barcode to add matching product to cart';
+      }
+      if (unmatchedBox) unmatchedBox.classList.add('hidden');
+      if (inputEl) inputEl.value = '';
+
+      document.getElementById('barcode-modal')?.classList.remove('hidden');
+      startBarcodeCamera();
+      setTimeout(() => inputEl?.focus(), 80);
+    }
+
+    function closeBarcodeScanner() {
+      stopBarcodeCamera();
+      document.getElementById('barcode-modal')?.classList.add('hidden');
+    }
+
+    function handleDetectedBarcode(code) {
+      const cleanCode = String(code || '').trim();
+      if (!cleanCode) return;
+      lastScannedBarcode = cleanCode;
+
+      const inputEl = document.getElementById('barcode-manual-input');
+      if (inputEl) inputEl.value = cleanCode;
+
+      if (barcodeScannerMode === 'editor') {
+        const editorBarcode = document.getElementById('editor-barcode');
+        if (editorBarcode) editorBarcode.value = cleanCode;
+        closeBarcodeScanner();
+        showToast(`Barcode set: ${cleanCode}`);
+        return;
+      }
+
+      const matched = state.products.find((p) => String(p.barcode || '').trim().toLowerCase() === cleanCode.toLowerCase());
+      if (matched) {
+        closeBarcodeScanner();
+        if ((Number(matched.stock) || 0) <= 0) {
+          showToast(`${matched.name} is out of stock`, true);
+          return;
+        }
+        addToCart(matched.id);
+        if (['store', 'softdrinks', 'cigarettes'].includes(matched.pos) && currentTab !== matched.pos) {
+          switchTab(matched.pos);
+        }
+      } else {
+        const unmatchedBox = document.getElementById('barcode-unmatched-box');
+        const codeSpan = document.getElementById('barcode-unmatched-code');
+        if (codeSpan) codeSpan.textContent = cleanCode;
+        if (unmatchedBox) unmatchedBox.classList.remove('hidden');
+        showToast(`Barcode ${cleanCode} not found`, true);
+      }
+    }
+
+    function submitManualBarcode(e) {
+      e.preventDefault();
+      const val = (document.getElementById('barcode-manual-input')?.value || '').trim();
+      if (!val) return showToast('Enter or scan a barcode', true);
+      handleDetectedBarcode(val);
+    }
+
+    function createProductFromScannedBarcode() {
+      const code = lastScannedBarcode || (document.getElementById('barcode-manual-input')?.value || '').trim();
+      const targetPos = ['softdrinks', 'cigarettes'].includes(currentTab) ? currentTab : 'store';
+      closeBarcodeScanner();
+      openEditorModal(targetPos, null);
+      const barcodeInput = document.getElementById('editor-barcode');
+      if (barcodeInput && code) barcodeInput.value = code;
+      document.getElementById('editor-name')?.focus();
     }
 
     // Export / Import JSON & Auto-Sync Toggle
