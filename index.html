@@ -1648,7 +1648,13 @@
 
       state.transactions.forEach((tx) => {
         if (!tx || tx.voided) return;
-        if (filterFn && !filterFn(tx)) return;
+        const txPos = tx.pos || 'general';
+        if (filterFn && !filterFn(tx)) {
+          // Kapag naka-filter sa isang counter (hal. store), isama pa rin ang expense na naka-tag sa counter na iyon
+          if (!(tx.kind === 'expense' && txPos === filterFn._pos)) {
+            return;
+          }
+        }
 
         const parsedDate = tx.createdAt ? new Date(tx.createdAt) : now;
         const isValidDate = !Number.isNaN(parsedDate.getTime());
@@ -1697,9 +1703,15 @@
       };
     }
 
+    function makeCounterFilter(pos) {
+      const fn = (tx) => tx && tx.pos === pos;
+      fn._pos = pos;
+      return fn;
+    }
+
     function renderCounterBanners() {
       ['store', 'softdrinks', 'cigarettes'].forEach((pos) => {
-        const metrics = computeTimeMetrics((tx) => tx.pos === pos);
+        const metrics = computeTimeMetrics(makeCounterFilter(pos));
         const posProducts = state.products.filter((p) => p.pos === pos);
         const origTotal = posProducts.reduce((sum, p) => sum + ((Number(p.cost) || 0) * (Number(p.stock) || 0)), 0);
         const sellTotal = posProducts.reduce((sum, p) => sum + ((Number(p.price) || 0) * (Number(p.stock) || 0)), 0);
@@ -2415,7 +2427,7 @@
     }
 
     function renderGcashTab() {
-      const metrics = computeTimeMetrics((tx) => tx.pos === 'gcash');
+      const metrics = computeTimeMetrics(makeCounterFilter('gcash'));
       const cap = Number(state.gcashPuhunan) || 0;
       const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
       setTxt('gcash-sales-banner', formatCurrency(metrics.dailyProfit));
@@ -2639,7 +2651,7 @@
       const counterCardsEl = document.getElementById('rep-counter-cards');
       if (counterCardsEl) {
         counterCardsEl.innerHTML = counters.map((c) => {
-          const m = computeTimeMetrics((tx) => tx.pos === c.key);
+          const m = computeTimeMetrics(makeCounterFilter(c.key));
           return `
             <div class="bg-slate-50 rounded-2xl p-2.5 border border-slate-200/70">
               <p class="text-[10px] font-extrabold uppercase text-slate-500">${c.label}</p>
