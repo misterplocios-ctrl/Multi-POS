@@ -136,7 +136,6 @@
       color: var(--ui-accent-text) !important;
       border-color: var(--ui-border) !important;
     }
-    /* Adopt best-seller theme color across primary/action buttons */
     button.bg-brand-purple,
     button[class*="bg-brand-purple"],
     .bg-brand-purple,
@@ -169,20 +168,6 @@
       100% {
         opacity: 1;
         transform: translateY(0);
-      }
-    }
-    @keyframes buttonPressBounce {
-      0% {
-        transform: scale(1);
-      }
-      35% {
-        transform: scale(0.9);
-      }
-      70% {
-        transform: scale(1.07);
-      }
-      100% {
-        transform: scale(1);
       }
     }
     @keyframes buttonOpenPop {
@@ -675,27 +660,27 @@
               <p class="text-[11px] font-semibold text-slate-500">Expenses deduct from Total Amount only</p>
             </div>
             <div class="grid grid-cols-2 sm:flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
-            <button type="button" onclick="openCloudSyncModal()"
-              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-brand-purple text-xs font-extrabold transition">
-              Device Sync
-            </button>
-            <button type="button" onclick="exportBackupJSON()"
-              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
-              Export JSON
-            </button>
-            <label class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition cursor-pointer flex items-center justify-center">
-              Import JSON
-              <input type="file" accept=".json,application/json" onchange="importBackupJSON(event)" class="hidden" />
-            </label>
-            <button type="button" onclick="copyJsonBackup()"
-              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
-              Copy JSON
-            </button>
-            <button type="button" onclick="openJsonRestoreModal()"
-              class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
-              Paste JSON
-            </button>
-            <button type="button" id="autosync-toggle-btn" onclick="toggleAutoSync()"
+              <button type="button" onclick="openCloudSyncModal()"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-brand-purple text-xs font-extrabold transition">
+                Device Sync
+              </button>
+              <button type="button" onclick="exportBackupJSON()"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
+                Export JSON
+              </button>
+              <label class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition cursor-pointer flex items-center justify-center">
+                Import JSON
+                <input type="file" accept=".json,application/json" onchange="importBackupJSON(event)" class="hidden" />
+              </label>
+              <button type="button" onclick="copyJsonBackup()"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
+                Copy JSON
+              </button>
+              <button type="button" onclick="openJsonRestoreModal()"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
+                Paste JSON
+              </button>
+              <button type="button" id="autosync-toggle-btn" onclick="toggleAutoSync()"
                 class="min-h-[38px] px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-extrabold transition">
                 Auto Sync: ON
               </button>
@@ -757,6 +742,17 @@
           <div class="pt-2 border-t border-slate-100 space-y-2.5">
             <div class="flex items-center justify-between gap-2">
               <div>
+                <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Today's Ranking</p>
+                <h3 class="text-xs font-black text-slate-900">Daily Top 10 Sales</h3>
+              </div>
+              <span id="rep-daily-top10-summary" class="text-[10px] font-extrabold theme-accent-badge border px-2.5 py-1 rounded-full">0 sold today</span>
+            </div>
+            <div id="rep-daily-top10-chart" class="space-y-2 bg-slate-50/80 rounded-2xl p-3 border border-slate-100"></div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div>
                 <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Product Sales Ranking</p>
                 <h3 class="text-xs font-black text-slate-900">Best-Selling to Slow-Moving</h3>
               </div>
@@ -764,6 +760,17 @@
             </div>
             <div id="rep-product-sales-chart" class="space-y-2 bg-slate-50/80 rounded-2xl p-3 border border-slate-100"></div>
           </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <p id="ledger-scope-label" class="text-xs font-black text-slate-900">Today's Transactions</p>
+            <p class="text-[10px] font-semibold text-slate-500">Previous days' entries are hidden automatically after each day</p>
+          </div>
+          <button type="button" id="toggle-past-ledger-btn" onclick="togglePastLedgerView()"
+            class="min-h-[34px] px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-[11px] font-extrabold shrink-0 transition">
+            Show Past Days
+          </button>
         </div>
 
         <div id="report-filters" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar"></div>
@@ -1255,101 +1262,103 @@
     let currentTab = 'store';
     let selectedStoreCategory = 'All';
     let selectedReportFilter = 'all';
+    let showPastLedger = false;
     let selectedUtangFilter = 'unpaid';
-    let activeGcashType = 'cash_in';
+    let selectedGcashType = 'cash_in';
+    let activeCartPos = 'store';
     let pendingVoidId = null;
+    let barcodeMode = 'pos';
+    let lastUnmatchedBarcode = '';
+    let barcodeStream = null;
+    let barcodeDetectorInterval = null;
+    let zxingCodeReader = null;
     let lowStockModalPos = 'store';
     let lowStockModalAllCounters = false;
     let lowStockModalType = 'low';
-    let barcodeScannerMode = 'pos';
-    let barcodeStream = null;
-    let barcodeScanFrame = null;
-    let zxingReader = null;
-    let lastScannedBarcode = '';
-    let toastTimer = null;
-    let autoSyncEnabled = localStorage.getItem(AUTOSYNC_KEY) !== 'false';
-    let cloudSyncTimer = null;
-    let cloudPollInterval = null;
-    let isSyncingCloud = false;
-    let audioCtx = null;
-    let activeDayKey = '';
+    let autoSyncEnabled = true;
+    let syncTimer = null;
+    let cloudPushTimer = null;
+    let cloudPullInterval = null;
+    let isCloudSyncing = false;
+    let lastLoadedThemeKey = '';
 
-    function getLocalDayKey(dateObj = new Date()) {
-      const y = dateObj.getFullYear();
-      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const d = String(dateObj.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
+    const SEED_PRODUCTS = [
+      { id: 'prod-1', pos: 'store', name: 'Well-Milled Rice (1kg)', category: 'Staples', price: 54, cost: 47, stock: 25, lowStockThreshold: 8, expiryDate: '', barcode: '480000100001', image: '' },
+      { id: 'prod-2', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 16, cost: 13, stock: 36, lowStockThreshold: 10, expiryDate: '', barcode: '480000100002', image: '' },
+      { id: 'prod-3', pos: 'store', name: 'Mega Sardines Green', category: 'Canned Goods', price: 26, cost: 22, stock: 20, lowStockThreshold: 6, expiryDate: '', barcode: '480000100003', image: '' },
+      { id: 'prod-4', pos: 'store', name: 'Argentina Corned Beef 150g', category: 'Canned Goods', price: 38, cost: 33, stock: 14, lowStockThreshold: 5, expiryDate: '', barcode: '480000100004', image: '' },
+      { id: 'prod-5', pos: 'store', name: 'Kopiko Black 3-in-1', category: 'Coffee & Drinks', price: 10, cost: 8, stock: 45, lowStockThreshold: 12, expiryDate: '', barcode: '480000100005', image: '' },
+      { id: 'prod-6', pos: 'store', name: 'Safeguard White 60g', category: 'Toiletries', price: 24, cost: 20, stock: 12, lowStockThreshold: 4, expiryDate: '', barcode: '480000100006', image: '' },
+      { id: 'prod-7', pos: 'softdrinks', name: 'Coca-Cola Mismo 295ml', category: 'Soda', price: 20, cost: 16, stock: 24, lowStockThreshold: 6, expiryDate: '', barcode: '480000200001', image: '' },
+      { id: 'prod-8', pos: 'softdrinks', name: 'Sprite Mismo 295ml', category: 'Soda', price: 20, cost: 16, stock: 18, lowStockThreshold: 6, expiryDate: '', barcode: '480000200002', image: '' },
+      { id: 'prod-9', pos: 'softdrinks', name: 'Royal Tru-Orange Mismo', category: 'Soda', price: 20, cost: 16, stock: 16, lowStockThreshold: 6, expiryDate: '', barcode: '480000200003', image: '' },
+      { id: 'prod-10', pos: 'softdrinks', name: 'C2 Apple Green Tea 230ml', category: 'Juice & Tea', price: 18, cost: 14, stock: 15, lowStockThreshold: 5, expiryDate: '', barcode: '480000200004', image: '' },
+      { id: 'prod-11', pos: 'cigarettes', name: 'Marlboro Red (Stick)', category: 'Stick', price: 10, cost: 8, stock: 60, lowStockThreshold: 15, expiryDate: '', barcode: '480000300001', image: '' },
+      { id: 'prod-12', pos: 'cigarettes', name: 'Mighty Green (Stick)', category: 'Stick', price: 8, cost: 6.5, stock: 50, lowStockThreshold: 15, expiryDate: '', barcode: '480000300002', image: '' },
+      { id: 'prod-13', pos: 'cigarettes', name: 'Winston Red (Pack)', category: 'Pack', price: 165, cost: 152, stock: 8, lowStockThreshold: 3, expiryDate: '', barcode: '480000300003', image: '' }
+    ];
 
-    function checkDailySalesReset(notifyUser = false) {
-      const todayKey = getLocalDayKey(new Date());
-      const savedDay = localStorage.getItem(DAILY_RESET_KEY) || '';
-      if (savedDay !== todayKey) {
-        localStorage.setItem(DAILY_RESET_KEY, todayKey);
-        activeDayKey = todayKey;
-        updateDashboardKPIs();
-        if (currentTab === 'reports') renderReports();
-        if (notifyUser && savedDay) {
-          showToast('New day started — Daily sales reset to ₱0.00');
-        }
-        return true;
+    const PRODUCT_THEMES = [
+      {
+        keywords: ['coke', 'coca-cola', 'coca cola', 'marlboro red', 'winston red', 'sardines', 'argentina', 'corned beef', 'red'],
+        bg: '#FEF2F2',
+        border: '#FECACA',
+        accent: '#DC2626',
+        accentDark: '#B91C1C',
+        accentLight: '#EF4444',
+        accentSoft: '#FEE2E2',
+        accentText: '#B91C1C',
+        glow: 'rgba(220, 38, 38, 0.42)'
+      },
+      {
+        keywords: ['sprite', 'mighty green', 'c2', 'green', 'mountain dew', '7up', 'gulay', 'safeguard'],
+        bg: '#ECFDF5',
+        border: '#A7F3D0',
+        accent: '#059669',
+        accentDark: '#047857',
+        accentLight: '#10B981',
+        accentSoft: '#D1FAE5',
+        accentText: '#047857',
+        glow: 'rgba(5, 150, 105, 0.42)'
+      },
+      {
+        keywords: ['royal', 'orange', 'pancit canton', 'canton', 'kopiko', 'coffee', 'noodles', 'snack'],
+        bg: '#FFF7ED',
+        border: '#FED7AA',
+        accent: '#EA580C',
+        accentDark: '#C2410C',
+        accentLight: '#F97316',
+        accentSoft: '#FFEDD5',
+        accentText: '#C2410C',
+        glow: 'rgba(234, 88, 12, 0.42)'
+      },
+      {
+        keywords: ['pepsi', 'water', 'tubig', 'blue', 'ice', 'milk', 'gatas', 'rice', 'bigas'],
+        bg: '#EFF6FF',
+        border: '#BFDBFE',
+        accent: '#2563EB',
+        accentDark: '#1D4ED8',
+        accentLight: '#3B82F6',
+        accentSoft: '#DBEAFE',
+        accentText: '#1D4ED8',
+        glow: 'rgba(37, 99, 235, 0.42)'
+      },
+      {
+        keywords: ['sting', 'pink', 'strawberry', 'yakult', 'bear brand', 'biscuit'],
+        bg: '#FDF2F8',
+        border: '#FBCFE8',
+        accent: '#DB2777',
+        accentDark: '#BE185D',
+        accentLight: '#EC4899',
+        accentSoft: '#FCE7F3',
+        accentText: '#BE185D',
+        glow: 'rgba(219, 39, 119, 0.45)'
       }
-      activeDayKey = todayKey;
-      return false;
-    }
+    ];
 
-    function playCartBeep() {
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        if (!audioCtx) {
-          audioCtx = new AudioContextClass();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        const now = audioCtx.currentTime;
-
-        // Crisp mall POS checkout confirmation chime + subtle register click
-        const notes = [
-          { freq: 1318.51, start: 0, dur: 0.085, peak: 0.14 },     // E6
-          { freq: 1760.0, start: 0.075, dur: 0.24, peak: 0.17 }     // A6
-        ];
-
-        for (const n of notes) {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(n.freq, now + n.start);
-
-          gain.gain.setValueAtTime(0.0008, now + n.start);
-          gain.gain.exponentialRampToValueAtTime(n.peak, now + n.start + 0.012);
-          gain.gain.exponentialRampToValueAtTime(0.0006, now + n.start + n.dur);
-
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now + n.start);
-          osc.stop(now + n.start + n.dur + 0.02);
-        }
-
-        // Subtle POS terminal / cash drawer click at the end
-        const clickOsc = audioCtx.createOscillator();
-        const clickGain = audioCtx.createGain();
-        clickOsc.type = 'triangle';
-        clickOsc.frequency.setValueAtTime(520, now + 0.21);
-        clickOsc.frequency.exponentialRampToValueAtTime(160, now + 0.265);
-
-        clickGain.gain.setValueAtTime(0.001, now + 0.21);
-        clickGain.gain.exponentialRampToValueAtTime(0.09, now + 0.218);
-        clickGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.27);
-
-        clickOsc.connect(clickGain);
-        clickGain.connect(audioCtx.destination);
-        clickOsc.start(now + 0.21);
-        clickOsc.stop(now + 0.28);
-      } catch (err) {
-        console.warn('Cashier sound error:', err);
-      }
+    function formatCurrency(val) {
+      const num = Number(val) || 0;
+      return '₱' + num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     function escapeHtml(str) {
@@ -1361,82 +1370,161 @@
         .replace(/'/g, '&#39;');
     }
 
-    function isOutOfStock(product) {
-      const stock = Number(product.stock) || 0;
-      return stock <= 0;
-    }
-
-    function isLowStock(product) {
-      const stock = Number(product.stock) || 0;
-      const threshold = Number(product.lowStockThreshold ?? 5);
-      return stock > 0 && stock <= threshold;
-    }
-
-    function formatPeso(num) {
-      const val = Number(num) || 0;
-      return `₱${val.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
-
-    function showToast(msg, isError = false) {
+    function showToast(msg, tone = 'dark') {
       const banner = document.getElementById('toast-banner');
       const inner = document.getElementById('toast-inner');
       if (!banner || !inner) return;
       inner.textContent = msg;
-      inner.className = `rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center ${
-        isError ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'
-      }`;
+      inner.className = 'rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center ' + (
+        tone === 'error' ? 'bg-rose-600 text-white' :
+        tone === 'success' ? 'bg-emerald-600 text-white' :
+        tone === 'warn' ? 'bg-amber-500 text-slate-950' :
+        'bg-slate-900 text-white'
+      );
       banner.classList.remove('hidden');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => {
         banner.classList.add('hidden');
       }, 2400);
     }
 
-    function getDefaultProducts() {
-      return [
-        { id: 'prod-1', pos: 'store', name: 'Bigas Regular (1kg)', category: 'Rice & Pantry', price: 48, cost: 42, stock: 25, lowStockThreshold: 5, image: '' },
-        { id: 'prod-2', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 15, cost: 12.5, stock: 30, lowStockThreshold: 8, image: '' },
-        { id: 'prod-3', pos: 'store', name: 'Safeguard White (60g)', category: 'Bath & Soap', price: 24, cost: 19, stock: 12, lowStockThreshold: 4, image: '' },
-        { id: 'prod-4', pos: 'softdrinks', name: 'Coca-Cola Mismo (295ml)', category: 'Softdrinks', price: 18, cost: 14, stock: 24, lowStockThreshold: 6, image: '' },
-        { id: 'prod-5', pos: 'softdrinks', name: 'Sprite Mismo (295ml)', category: 'Softdrinks', price: 18, cost: 14, stock: 20, lowStockThreshold: 6, image: '' },
-        { id: 'prod-6', pos: 'cigarettes', name: 'Marlboro Red (Stick)', category: 'Sticks', price: 10, cost: 7.5, stock: 40, lowStockThreshold: 10, image: '' },
-        { id: 'prod-7', pos: 'cigarettes', name: 'Winston Red (Stick)', category: 'Sticks', price: 9, cost: 6.5, stock: 35, lowStockThreshold: 10, image: '' }
-      ];
+    let sharedAudioCtx = null;
+    function getAudioContext() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return null;
+      if (!sharedAudioCtx) {
+        sharedAudioCtx = new AudioCtx();
+      }
+      if (sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume().catch(() => {});
+      }
+      return sharedAudioCtx;
     }
 
-    function getSyncCode() {
-      return (localStorage.getItem(SYNC_CODE_KEY) || '').trim();
+    function playCartBeep() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(2400, now);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.24, now + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.115);
+      } catch (e) {}
     }
 
-    function updateCloudSyncDetail(msg) {
-      const el = document.getElementById('cloud-sync-status-detail');
-      if (el) el.textContent = msg;
+    function playCashierSaleSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const notes = [1318.5, 1760, 2637];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const start = now + idx * 0.065;
+          osc.type = idx === 2 ? 'triangle' : 'sine';
+          osc.frequency.setValueAtTime(freq, start);
+          gain.gain.setValueAtTime(0.001, start);
+          gain.gain.exponentialRampToValueAtTime(idx === 2 ? 0.24 : 0.16, start + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + (idx === 2 ? 0.32 : 0.12));
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + (idx === 2 ? 0.34 : 0.13));
+        });
+      } catch (e) {}
     }
 
-    function openCloudSyncModal() {
-      const input = document.getElementById('cloud-sync-code-input');
-      if (input) input.value = getSyncCode();
-      const code = getSyncCode();
-      updateCloudSyncDetail(code ? `Status: Active code "${code}"` : 'Status: No Sync Code set yet');
-      document.getElementById('cloud-sync-modal')?.classList.remove('hidden');
-      setTimeout(() => input?.focus(), 40);
+    function getLocalDayKey(dateObj = new Date()) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
-    function closeCloudSyncModal() {
-      document.getElementById('cloud-sync-modal')?.classList.add('hidden');
+    function checkDailySalesReset(shouldNotify = false) {
+      const todayKey = getLocalDayKey();
+      const lastDay = localStorage.getItem(DAILY_RESET_KEY);
+      if (lastDay && lastDay !== todayKey) {
+        localStorage.setItem(DAILY_RESET_KEY, todayKey);
+        renderAll();
+        if (shouldNotify) {
+          showToast('New day started — Daily Sales reset to ₱0.00!', 'success');
+        }
+      } else if (!lastDay) {
+        localStorage.setItem(DAILY_RESET_KEY, todayKey);
+      }
     }
 
-    function generateSyncCode() {
-      const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
-      const code = `STORE-${rand}`;
-      const input = document.getElementById('cloud-sync-code-input');
-      if (input) input.value = code;
-      updateCloudSyncDetail(`Generated "${code}" — click Connect & Pull Now`);
+    function getBestSellingProduct() {
+      const activeSales = state.transactions.filter((tx) => tx && tx.kind === 'sale' && !tx.voided);
+      if (!activeSales.length) return null;
+      const qtyMap = {};
+      activeSales.forEach((tx) => {
+        (tx.items || []).forEach((it) => {
+          const key = it.productId || it.name;
+          if (!key) return;
+          if (!qtyMap[key]) {
+            qtyMap[key] = { productId: it.productId, name: it.name, qty: 0 };
+          }
+          qtyMap[key].qty += Number(it.qty) || 0;
+        });
+      });
+      const ranked = Object.values(qtyMap).sort((a, b) => b.qty - a.qty);
+      return ranked[0] || null;
     }
 
-    function normalizeState(raw) {
-      const base = {
-        products: Array.isArray(raw?.products) && raw.products.length ? raw.products : getDefaultProducts(),
+    function applyBestSellerUiTheme() {
+      const best = getBestSellingProduct();
+      const pill = document.getElementById('best-seller-ui-pill');
+      let theme = PRODUCT_THEMES[4];
+
+      if (best && best.name) {
+        const lower = best.name.toLowerCase();
+        const found = PRODUCT_THEMES.find((t) => t.keywords.some((kw) => lower.includes(kw)));
+        if (found) {
+          theme = found;
+        } else {
+          let hash = 0;
+          for (let i = 0; i < lower.length; i++) {
+            hash = (hash * 31 + lower.charCodeAt(i)) >>> 0;
+          }
+          theme = PRODUCT_THEMES[hash % PRODUCT_THEMES.length];
+        }
+        if (pill) {
+          pill.textContent = `Top: ${best.name} (${best.qty})`;
+          pill.classList.remove('hidden');
+        }
+      } else if (pill) {
+        pill.classList.add('hidden');
+      }
+
+      const themeKey = `${theme.accent}_${best ? best.name : 'default'}`;
+      if (lastLoadedThemeKey === themeKey) return;
+      lastLoadedThemeKey = themeKey;
+
+      const root = document.documentElement;
+      root.style.setProperty('--ui-bg', theme.bg);
+      root.style.setProperty('--ui-border', theme.border);
+      root.style.setProperty('--ui-accent', theme.accent);
+      root.style.setProperty('--ui-accent-dark', theme.accentDark);
+      root.style.setProperty('--ui-accent-light', theme.accentLight);
+      root.style.setProperty('--ui-accent-soft', theme.accentSoft);
+      root.style.setProperty('--ui-accent-text', theme.accentText);
+      root.style.setProperty('--ui-glow', theme.glow);
+    }
+
+    function sanitizeState(raw) {
+      const clean = {
+        products: Array.isArray(raw?.products) ? raw.products : [],
         carts: {
           store: Array.isArray(raw?.carts?.store) ? raw.carts.store : [],
           softdrinks: Array.isArray(raw?.carts?.softdrinks) ? raw.carts.softdrinks : [],
@@ -1444,746 +1532,674 @@
         },
         transactions: Array.isArray(raw?.transactions) ? raw.transactions : [],
         utangRecords: Array.isArray(raw?.utangRecords) ? raw.utangRecords : [],
-        gcashPuhunan: Math.max(0, Number(raw?.gcashPuhunan) || 0)
+        gcashPuhunan: Number(raw?.gcashPuhunan) || 0
       };
-      base.products = base.products.map((p, idx) => ({
-        id: p.id || `prod-${Date.now()}-${idx}`,
-        pos: ['store', 'softdrinks', 'cigarettes'].includes(p.pos) ? p.pos : 'store',
-        name: String(p.name || 'Unnamed Item'),
-        category: String(p.category || 'General'),
-        barcode: String(p.barcode || '').trim(),
-        expiry: String(p.expiry || '').trim(),
-        price: Number(p.price) || 0,
-        cost: Number(p.cost) || 0,
-        stock: Math.max(0, parseInt(p.stock, 10) || 0),
-        lowStockThreshold: Math.max(0, parseInt(p.lowStockThreshold, 10) ?? 5),
-        image: String(p.image || '')
-      }));
-      return base;
+      if (!clean.products.length && !localStorage.getItem(STORAGE_KEY)) {
+        clean.products = JSON.parse(JSON.stringify(SEED_PRODUCTS));
+      }
+      return clean;
     }
 
-    function saveState() {
+    function saveState(skipCloud = false) {
       try {
-        const nowIso = new Date().toISOString();
-        localStorage.setItem(UPDATED_AT_KEY, nowIso);
-        const payload = buildSyncEnvelope(nowIso);
-        const serialized = JSON.stringify(payload);
+        const serialized = JSON.stringify(state);
         localStorage.setItem(STORAGE_KEY, serialized);
-        if (autoSyncEnabled) {
-          localStorage.setItem(BACKUP_KEY, serialized);
+        localStorage.setItem(BACKUP_KEY, serialized);
+        localStorage.setItem(UPDATED_AT_KEY, String(Date.now()));
+        const statusEl = document.getElementById('autosync-status-text');
+        if (statusEl) {
+          statusEl.textContent = autoSyncEnabled ? 'Saved locally' : 'Auto Sync: OFF';
+        }
+        if (autoSyncEnabled && !skipCloud) {
           scheduleCloudPush();
         }
-      } catch (err) {
-        console.error('Failed to save state:', err);
+      } catch (e) {
+        console.error('Save error', e);
       }
     }
 
     function loadState() {
       try {
         const rawStr = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(BACKUP_KEY);
-        if (!rawStr) {
-          state = normalizeState(null);
-          saveState();
-          return;
-        }
-        const parsed = JSON.parse(rawStr);
-        state = normalizeState(parsed);
-        if (parsed && typeof parsed.voidPassword === 'string' && parsed.voidPassword.trim()) {
-          localStorage.setItem(VOID_PASSWORD_KEY, parsed.voidPassword.trim());
-        }
-        if (parsed && parsed.updatedAt) {
-          localStorage.setItem(UPDATED_AT_KEY, parsed.updatedAt);
-        }
-      } catch (err) {
-        console.error('Failed to load state:', err);
-        state = normalizeState(null);
-      }
-    }
-
-    function buildSyncEnvelope(updatedAt = null) {
-      const ts = updatedAt || localStorage.getItem(UPDATED_AT_KEY) || new Date().toISOString();
-      return {
-        version: 1,
-        updatedAt: ts,
-        voidPassword: getVoidPassword(),
-        products: state.products,
-        carts: state.carts,
-        transactions: state.transactions,
-        utangRecords: state.utangRecords,
-        gcashPuhunan: Math.max(0, Number(state.gcashPuhunan) || 0)
-      };
-    }
-
-    // Merge array records by ID so edits/new items from both devices are preserved cleanly
-    function mergeRecordsById(localArr, remoteArr, getStampFn = null) {
-      const map = new Map();
-      for (const item of (Array.isArray(localArr) ? localArr : [])) {
-        if (!item || !item.id) continue;
-        map.set(item.id, { ...item });
-      }
-      for (const rem of (Array.isArray(remoteArr) ? remoteArr : [])) {
-        if (!rem || !rem.id) continue;
-        const loc = map.get(rem.id);
-        if (!loc) {
-          map.set(rem.id, { ...rem });
-          continue;
-        }
-        if (getStampFn) {
-          const rTs = getStampFn(rem);
-          const lTs = getStampFn(loc);
-          if (rTs >= lTs) {
-            map.set(rem.id, { ...loc, ...rem });
-          }
+        if (rawStr) {
+          state = sanitizeState(JSON.parse(rawStr));
         } else {
-          map.set(rem.id, { ...loc, ...rem });
+          state = sanitizeState({});
+          saveState(true);
         }
+      } catch (e) {
+        state = sanitizeState({});
       }
-      return Array.from(map.values());
-    }
-
-    function mergeIncomingState(payload) {
-      const incoming = normalizeState(payload);
-      const mergedProducts = mergeRecordsById(state.products, incoming.products);
-      const mergedTransactions = mergeRecordsById(
-        state.transactions,
-        incoming.transactions,
-        (t) => Date.parse(t.createdAt || '') || 0
-      ).sort((a, b) => (Date.parse(b.createdAt || '') || 0) - (Date.parse(a.createdAt || '') || 0));
-      const mergedUtang = mergeRecordsById(
-        state.utangRecords,
-        incoming.utangRecords,
-        (u) => Date.parse(u.createdAt || '') || 0
-      ).sort((a, b) => (Date.parse(b.createdAt || '') || 0) - (Date.parse(a.createdAt || '') || 0));
-
-      return normalizeState({
-        products: mergedProducts,
-        carts: incoming.carts.store.length || incoming.carts.softdrinks.length || incoming.carts.cigarettes.length
-          ? incoming.carts
-          : state.carts,
-        transactions: mergedTransactions,
-        utangRecords: mergedUtang,
-        gcashPuhunan: Math.max(Number(state.gcashPuhunan) || 0, Number(incoming.gcashPuhunan) || 0)
-      });
-    }
-
-    function applyCloudPayload(payload, showNotice = false) {
-      if (!payload || typeof payload !== 'object') return false;
-      const remoteTs = Date.parse(payload.updatedAt || '') || 0;
-      const localTs = Date.parse(localStorage.getItem(UPDATED_AT_KEY) || '') || 0;
-      if (!showNotice && remoteTs <= localTs) return false;
-
-      const effectiveTs = new Date(Math.max(Date.now(), remoteTs, localTs)).toISOString();
-      state = mergeIncomingState(payload);
-      if (typeof payload.voidPassword === 'string' && payload.voidPassword.trim()) {
-        localStorage.setItem(VOID_PASSWORD_KEY, payload.voidPassword.trim());
-      }
-      localStorage.setItem(UPDATED_AT_KEY, effectiveTs);
-      const serialized = JSON.stringify(buildSyncEnvelope(effectiveTs));
-      localStorage.setItem(STORAGE_KEY, serialized);
-      if (autoSyncEnabled) {
-        localStorage.setItem(BACKUP_KEY, serialized);
-      }
-      renderAll();
-      if (showNotice) {
-        showToast('Synced & merged latest data');
-      }
-      return true;
-    }
-
-    function copyJsonBackup() {
-      try {
-        const jsonStr = JSON.stringify(buildSyncEnvelope(), null, 2);
-        const ta = document.createElement('textarea');
-        ta.value = jsonStr;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        showToast('JSON backup copied to clipboard');
-      } catch (err) {
-        console.error('Copy JSON error:', err);
-        showToast('Failed to copy JSON', true);
-      }
-    }
-
-    function openJsonRestoreModal() {
-      const ta = document.getElementById('json-restore-textarea');
-      if (ta) ta.value = '';
-      document.getElementById('json-restore-modal')?.classList.remove('hidden');
-      setTimeout(() => ta?.focus(), 40);
-    }
-
-    function closeJsonRestoreModal() {
-      document.getElementById('json-restore-modal')?.classList.add('hidden');
-    }
-
-    function applyJsonBackupFromModal() {
-      const raw = (document.getElementById('json-restore-textarea')?.value || '').trim();
-      if (!raw) return showToast('Paste JSON backup first', true);
-      try {
-        const parsed = JSON.parse(raw);
-        const nowIso = new Date().toISOString();
-        state = mergeIncomingState(parsed);
-        if (typeof parsed.voidPassword === 'string' && parsed.voidPassword.trim()) {
-          localStorage.setItem(VOID_PASSWORD_KEY, parsed.voidPassword.trim());
-        }
-        localStorage.setItem(UPDATED_AT_KEY, nowIso);
-        const serialized = JSON.stringify(buildSyncEnvelope(nowIso));
-        localStorage.setItem(STORAGE_KEY, serialized);
-        if (autoSyncEnabled) {
-          localStorage.setItem(BACKUP_KEY, serialized);
-          scheduleCloudPush();
-        }
-        closeJsonRestoreModal();
-        renderAll();
-        showToast('JSON backup merged & applied');
-      } catch (err) {
-        console.error('JSON parse error:', err);
-        showToast('Invalid JSON format', true);
-      }
-    }
-
-    function scheduleCloudPush() {
-      if (!autoSyncEnabled || !getSyncCode()) return;
-      clearTimeout(cloudSyncTimer);
-      cloudSyncTimer = setTimeout(() => {
-        pushAllToCloud(false);
-      }, 600);
-    }
-
-    async function pushAllToCloud(showToastOnSuccess = false) {
-      const code = getSyncCode();
-      if (!code) {
-        if (showToastOnSuccess) showToast('Set a Sync Code first', true);
-        return;
-      }
-      if (isSyncingCloud) return;
-      isSyncingCloud = true;
-      const statusEl = document.getElementById('autosync-status-text');
-      if (statusEl) statusEl.textContent = 'Syncing...';
-      try {
-        const nowIso = new Date().toISOString();
-        localStorage.setItem(UPDATED_AT_KEY, nowIso);
-        const envelope = buildSyncEnvelope(nowIso);
-        let pushed = false;
-        for (const baseUrl of CLOUD_SYNC_ENDPOINTS) {
-          try {
-            const res = await fetch(`${baseUrl}${encodeURIComponent(code)}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(envelope)
-            });
-            if (res.ok) {
-              pushed = true;
-              break;
-            }
-          } catch (_) {
-            // Try next fallback endpoint
-          }
-        }
-        if (!pushed) throw new Error('All sync endpoints failed');
-        if (statusEl) statusEl.textContent = `Synced (${code})`;
-        updateCloudSyncDetail(`Status: Pushed to "${code}" just now`);
-        if (showToastOnSuccess) showToast('Synced all data to cloud');
-      } catch (err) {
-        console.error('Cloud push error:', err);
-        if (statusEl) statusEl.textContent = 'Offline / Retry';
-        updateCloudSyncDetail('Status: Cloud unreachable. Local backup saved & will retry.');
-        if (showToastOnSuccess) showToast('Cloud sync failed (local saved)', true);
-      } finally {
-        isSyncingCloud = false;
-      }
-    }
-
-    async function pullFromCloud(forceApply = false) {
-      const code = getSyncCode();
-      if (!code || isSyncingCloud) return;
-      isSyncingCloud = true;
-      const statusEl = document.getElementById('autosync-status-text');
-      try {
-        let data = null;
-        let sawNotFound = false;
-        for (const baseUrl of CLOUD_SYNC_ENDPOINTS) {
-          try {
-            const res = await fetch(`${baseUrl}${encodeURIComponent(code)}`, {
-              method: 'GET',
-              cache: 'no-store'
-            });
-            if (res.status === 404) {
-              sawNotFound = true;
-              continue;
-            }
-            if (!res.ok) continue;
-            data = await res.json();
-            if (data && typeof data === 'object') break;
-          } catch (_) {
-            // Try next endpoint
-          }
-        }
-
-        if (!data) {
-          if (sawNotFound && forceApply) {
-            isSyncingCloud = false;
-            await pushAllToCloud(true);
-          }
-          return;
-        }
-
-        const localTs = Date.parse(localStorage.getItem(UPDATED_AT_KEY) || '') || 0;
-        const remoteTs = Date.parse(data?.updatedAt || '') || 0;
-
-        if (forceApply && localTs > remoteTs) {
-          isSyncingCloud = false;
-          await pushAllToCloud(true);
-          return;
-        }
-
-        const applied = applyCloudPayload(data, forceApply);
-        if (statusEl) statusEl.textContent = `Synced (${code})`;
-        updateCloudSyncDetail(`Status: Connected to "${code}"${applied ? ' • Merged' : ' • Up to date'}`);
-      } catch (err) {
-        console.error('Cloud pull error:', err);
-        if (statusEl) statusEl.textContent = 'Offline / Local';
-      } finally {
-        isSyncingCloud = false;
-      }
-    }
-
-    async function saveSyncCodeAndPull() {
-      const input = document.getElementById('cloud-sync-code-input');
-      const code = (input?.value || '').trim();
-      if (!code) {
-        showToast('Enter a Sync Code', true);
-        return;
-      }
-      localStorage.setItem(SYNC_CODE_KEY, code);
-      localStorage.setItem(AUTOSYNC_KEY, 'true');
-      autoSyncEnabled = true;
-      const syncBtn = document.getElementById('autosync-toggle-btn');
-      if (syncBtn) {
-        syncBtn.textContent = 'Auto Sync: ON';
-        syncBtn.className = 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition';
-      }
-      updateCloudSyncDetail(`Status: Connecting to "${code}"...`);
-      await pullFromCloud(true);
-      startCloudPolling();
-    }
-
-    function startCloudPolling() {
-      clearInterval(cloudPollInterval);
-      if (!getSyncCode()) return;
-      cloudPollInterval = setInterval(() => {
-        if (autoSyncEnabled && document.visibilityState === 'visible') {
-          pullFromCloud(false);
-        }
-      }, 8000);
-    }
-
-    function switchTab(tab) {
-      const validTabs = ['store', 'softdrinks', 'cigarettes', 'gcash', 'utang', 'reports'];
-      currentTab = validTabs.includes(tab) ? tab : 'store';
-
-      const subtitles = {
-        store: 'Store POS',
-        softdrinks: 'Softdrinks Counter',
-        cigarettes: 'Cigarettes / Yosi Counter',
-        gcash: 'GCash & E-Load',
-        utang: 'Utang Tracker',
-        reports: 'Reports & Ledger'
-      };
-      const subEl = document.getElementById('header-subtitle');
-      if (subEl) subEl.textContent = subtitles[currentTab] || 'Store POS';
-
-      for (const t of validTabs) {
-        const sec = document.getElementById(`tab-${t}`);
-        if (sec) {
-          const isActive = t === currentTab;
-          sec.classList.toggle('hidden', !isActive);
-          sec.classList.remove('tab-smooth-enter');
-          if (isActive) {
-            void sec.offsetWidth;
-            sec.classList.add('tab-smooth-enter');
-          }
-        }
-        for (const navBtn of [document.getElementById(`nav-${t}`)]) {
-          if (navBtn) {
-            if (t === currentTab) {
-              navBtn.className = 'flex flex-col items-center py-1.5 rounded-2xl text-white font-extrabold transition duration-200 active:scale-90 nav-btn-float nav-btn-active-highlight';
-            } else {
-              navBtn.className = 'flex flex-col items-center py-1.5 rounded-2xl theme-accent-badge font-bold transition duration-200 active:scale-90';
-            }
-          }
-        }
-      }
-
-      updateCartBar();
-      if (currentTab === 'utang') renderUtangTab();
-      if (currentTab === 'reports') renderReports();
+      const savedSync = localStorage.getItem(AUTOSYNC_KEY);
+      autoSyncEnabled = savedSync === null ? true : savedSync === 'true';
     }
 
     function getActiveCartPos() {
-      if (currentTab === 'softdrinks' || currentTab === 'cigarettes' || currentTab === 'store') {
-        return currentTab;
-      }
-      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
-        if ((state.carts[pos] || []).length > 0) return pos;
-      }
+      if (currentTab === 'softdrinks') return 'softdrinks';
+      if (currentTab === 'cigarettes') return 'cigarettes';
       return 'store';
     }
 
-    function updateCartBar() {
-      const bar = document.getElementById('floating-cart-bar');
-      const headerBtn = document.getElementById('header-cart-btn');
-      const headerBadge = document.getElementById('header-cart-badge');
-      const pos = getActiveCartPos();
-      const cart = state.carts[pos] || [];
-      const count = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
-      const total = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
-      const activeTxCount = (state.transactions || []).filter((tx) => tx && !tx.voided).length;
-      const shouldHighlightCart = activeTxCount > 0 || count > 0;
+    function switchTab(tab) {
+      currentTab = tab;
+      const tabs = ['store', 'softdrinks', 'cigarettes', 'gcash', 'utang', 'reports'];
+      tabs.forEach((t) => {
+        const sec = document.getElementById('tab-' + t);
+        const nav = document.getElementById('nav-' + t);
+        if (sec) {
+          if (t === tab) {
+            sec.classList.remove('hidden');
+            sec.classList.remove('tab-smooth-enter');
+            void sec.offsetWidth;
+            sec.classList.add('tab-smooth-enter');
+          } else {
+            sec.classList.add('hidden');
+          }
+        }
+        if (nav) {
+          if (t === tab) {
+            nav.className = 'flex flex-col items-center py-1.5 rounded-2xl text-white font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight';
+          } else {
+            nav.className = 'flex flex-col items-center py-1.5 rounded-2xl theme-accent-badge font-bold transition active:scale-90';
+          }
+        }
+      });
 
-      if (headerBtn) {
-        headerBtn.className = shouldHighlightCart
-          ? 'relative w-10 h-10 rounded-2xl theme-accent-btn active:scale-95 ring-2 ring-white/80 flex items-center justify-center shadow-sm shrink-0 transition'
-          : 'relative w-10 h-10 rounded-2xl bg-white hover:bg-slate-50 active:scale-95 text-slate-600 border border-slate-200/80 flex items-center justify-center shadow-xs shrink-0 transition';
+      const subtitle = document.getElementById('header-subtitle');
+      if (subtitle) {
+        const labels = {
+          store: 'Store POS',
+          softdrinks: 'Softdrinks POS',
+          cigarettes: 'Cigarettes / Yosi POS',
+          gcash: 'GCash & E-Load Ledger',
+          utang: 'Utang / Credit Tracker',
+          reports: 'Reports & Daily Ledger'
+        };
+        subtitle.textContent = labels[tab] || 'Store POS';
       }
 
-      if (headerBadge) {
-        headerBadge.textContent = String(count);
-        headerBadge.classList.toggle('hidden', count <= 0);
-      }
-
-      if (!bar) return;
-      if (['gcash', 'utang', 'reports'].includes(currentTab)) {
-        bar.classList.add('hidden');
-        return;
-      }
-
-      if (count <= 0) {
-        bar.classList.add('hidden');
-        return;
-      }
-      const countEl = document.getElementById('cart-badge-count');
-      const totalEl = document.getElementById('cart-badge-total');
-      if (countEl) countEl.textContent = String(count);
-      if (totalEl) totalEl.textContent = formatPeso(total);
-      bar.classList.remove('hidden');
+      updateCartIndicators();
+      if (tab === 'reports') renderReports();
+      if (tab === 'utang') renderUtangTab();
+      if (tab === 'gcash') renderGcashTab();
     }
 
-    function getExpiryStatus(expiryStr) {
-      const clean = String(expiryStr || '').trim();
-      if (!clean) return null;
-      const parts = clean.split('-').map((n) => parseInt(n, 10));
-      if (parts.length !== 3 || parts.some(Number.isNaN)) {
-        return { label: `Exp: ${clean}`, tone: 'neutral', dateStr: clean };
-      }
-      const expDate = new Date(parts[0], parts[1] - 1, parts[2]);
+    function computeTimeMetrics(filterFn) {
       const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const diffDays = Math.round((expDate.getTime() - today.getTime()) / 86400000);
-      const formatted = expDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      const dayOfWeek = now.getDay();
+      const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0, 0);
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
 
-      if (diffDays < 0) {
-        return { label: `Expired (${formatted})`, tone: 'expired', dateStr: formatted };
-      }
-      if (diffDays <= 7) {
-        return { label: diffDays === 0 ? 'Expires Today' : `Exp in ${diffDays}d (${formatted})`, tone: 'soon', dateStr: formatted };
-      }
-      return { label: `Exp: ${formatted}`, tone: 'ok', dateStr: formatted };
-    }
+      let dailySales = 0;
+      let dailyProfit = 0;
+      let dailyExpenses = 0;
+      let weeklySales = 0;
+      let weeklyProfit = 0;
+      let monthlySales = 0;
+      let monthlyProfit = 0;
 
-    function renderLowStockBanner(pos = 'store') {
-      const outAlertEl = document.getElementById(`${pos}-out-of-stock-alert`);
-      const outTextEl = document.getElementById(`${pos}-out-of-stock-text`);
-      const lowAlertEl = document.getElementById(`${pos}-low-stock-alert`);
-      const lowTextEl = document.getElementById(`${pos}-low-stock-text`);
+      state.transactions.forEach((tx) => {
+        if (!tx || tx.voided) return;
+        if (filterFn && !filterFn(tx)) return;
+        const created = tx.createdAt ? new Date(tx.createdAt) : now;
+        const sales = Number(tx.sales) || 0;
+        const profit = Number(tx.profit) || 0;
+        const expense = tx.kind === 'expense' ? (Number(tx.amount) || 0) : 0;
 
-      const outItems = state.products.filter((p) => p.pos === pos && isOutOfStock(p));
-      if (outAlertEl && outTextEl) {
-        if (!outItems.length) {
-          outAlertEl.classList.add('hidden');
-        } else {
-          const sample = outItems.slice(0, 2).map((p) => p.name).join(', ');
-          const extra = outItems.length > 2 ? ` +${outItems.length - 2} more` : '';
-          outTextEl.textContent = `Out of Stock (${outItems.length}): ${sample}${extra}`;
-          outAlertEl.classList.remove('hidden');
+        if (created >= startOfDay) {
+          dailySales += sales;
+          dailyProfit += profit;
+          dailyExpenses += expense;
         }
-      }
-
-      const lowItems = state.products.filter((p) => p.pos === pos && isLowStock(p));
-      if (lowAlertEl && lowTextEl) {
-        if (!lowItems.length) {
-          lowAlertEl.classList.add('hidden');
-        } else {
-          const sample = lowItems.slice(0, 2).map((p) => `${p.name} (${p.stock})`).join(', ');
-          const extra = lowItems.length > 2 ? ` +${lowItems.length - 2} more` : '';
-          lowTextEl.textContent = `Low Stock Alert (${lowItems.length}): ${sample}${extra}`;
-          lowAlertEl.classList.remove('hidden');
+        if (created >= startOfWeek) {
+          weeklySales += sales;
+          weeklyProfit += profit;
         }
-      }
+        if (created >= startOfMonth) {
+          monthlySales += sales;
+          monthlyProfit += profit;
+        }
+      });
+
+      return {
+        dailySales,
+        dailyProfit,
+        dailyExpenses,
+        dailyAmount: dailySales - dailyExpenses,
+        weeklySales,
+        weeklyProfit,
+        monthlySales,
+        monthlyProfit
+      };
     }
 
-    function openLowStockModal(pos = 'store', type = 'low') {
-      lowStockModalPos = pos;
-      lowStockModalAllCounters = false;
-      lowStockModalType = type === 'out' ? 'out' : 'low';
-      renderLowStockModal(pos, false, lowStockModalType);
-      document.getElementById('low-stock-modal')?.classList.remove('hidden');
+    function renderCounterBanners() {
+      ['store', 'softdrinks', 'cigarettes'].forEach((pos) => {
+        const metrics = computeTimeMetrics((tx) => tx.pos === pos);
+        const posProducts = state.products.filter((p) => p.pos === pos);
+        const origTotal = posProducts.reduce((sum, p) => sum + ((Number(p.cost) || 0) * (Number(p.stock) || 0)), 0);
+        const sellTotal = posProducts.reduce((sum, p) => sum + ((Number(p.price) || 0) * (Number(p.stock) || 0)), 0);
+
+        const salesEl = document.getElementById(`${pos}-sales-banner`);
+        const profitEl = document.getElementById(`${pos}-profit-banner`);
+        const amtEl = document.getElementById(`total-amount-${pos}`);
+        const origEl = document.getElementById(`${pos}-orig-total`);
+        const sellEl = document.getElementById(`${pos}-sell-total`);
+        const wSalesEl = document.getElementById(`${pos}-weekly-sales`);
+        const wProfitEl = document.getElementById(`${pos}-weekly-profit`);
+        const mSalesEl = document.getElementById(`${pos}-monthly-sales`);
+        const mProfitEl = document.getElementById(`${pos}-monthly-profit`);
+
+        if (salesEl) salesEl.textContent = formatCurrency(metrics.dailySales);
+        if (profitEl) profitEl.textContent = formatCurrency(metrics.dailyProfit);
+        if (amtEl) amtEl.textContent = formatCurrency(metrics.dailyAmount);
+        if (origEl) origEl.textContent = formatCurrency(origTotal);
+        if (sellEl) sellEl.textContent = formatCurrency(sellTotal);
+        if (wSalesEl) wSalesEl.textContent = formatCurrency(metrics.weeklySales);
+        if (wProfitEl) wProfitEl.textContent = formatCurrency(metrics.weeklyProfit);
+        if (mSalesEl) mSalesEl.textContent = formatCurrency(metrics.monthlySales);
+        if (mProfitEl) mProfitEl.textContent = formatCurrency(metrics.monthlyProfit);
+
+        const outItems = posProducts.filter((p) => (Number(p.stock) || 0) <= 0);
+        const lowItems = posProducts.filter((p) => {
+          const st = Number(p.stock) || 0;
+          const thresh = Number(p.lowStockThreshold ?? 5);
+          return st > 0 && st <= thresh;
+        });
+
+        const outAlert = document.getElementById(`${pos}-out-of-stock-alert`);
+        const outText = document.getElementById(`${pos}-out-of-stock-text`);
+        if (outAlert && outText) {
+          if (outItems.length) {
+            outAlert.classList.remove('hidden');
+            outText.textContent = `${outItems.length} item(s) OUT OF STOCK`;
+          } else {
+            outAlert.classList.add('hidden');
+          }
+        }
+
+        const lowAlert = document.getElementById(`${pos}-low-stock-alert`);
+        const lowText = document.getElementById(`${pos}-low-stock-text`);
+        if (lowAlert && lowText) {
+          if (lowItems.length) {
+            lowAlert.classList.remove('hidden');
+            lowText.textContent = `${lowItems.length} item(s) running LOW on stock`;
+          } else {
+            lowAlert.classList.add('hidden');
+          }
+        }
+      });
     }
 
-    function closeLowStockModal() {
-      document.getElementById('low-stock-modal')?.classList.add('hidden');
-    }
+    function renderProductCard(product) {
+      const stock = Number(product.stock) || 0;
+      const thresh = Number(product.lowStockThreshold ?? 5);
+      const isOut = stock <= 0;
+      const isLow = !isOut && stock <= thresh;
+      const cartList = state.carts[product.pos] || [];
+      const inCart = cartList.find((c) => c.productId === product.id);
+      const cartQty = inCart ? inCart.qty : 0;
 
-    function renderLowStockModal(pos = 'store', allCounters = false, type = lowStockModalType) {
-      lowStockModalPos = pos;
-      lowStockModalAllCounters = !!allCounters;
-      lowStockModalType = type === 'out' ? 'out' : 'low';
+      const stockBadge = isOut
+        ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Out of stock</span>`
+        : isLow
+        ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Low: ${stock}</span>`
+        : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Stock: ${stock}</span>`;
 
-      const typeOutBtn = document.getElementById('low-stock-type-out');
-      const typeLowBtn = document.getElementById('low-stock-type-low');
-      if (typeOutBtn && typeLowBtn) {
-        typeOutBtn.className = lowStockModalType === 'out'
-          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-rose-600 text-white transition'
-          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
-        typeLowBtn.className = lowStockModalType === 'low'
-          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-amber-600 text-white transition'
-          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
-      }
-
-      const scopeCounterBtn = document.getElementById('low-stock-scope-counter');
-      const scopeAllBtn = document.getElementById('low-stock-scope-all');
-      if (scopeCounterBtn && scopeAllBtn) {
-        scopeCounterBtn.className = !lowStockModalAllCounters
-          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
-          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
-        scopeAllBtn.className = lowStockModalAllCounters
-          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
-          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
-      }
-
-      const titleEl = document.getElementById('low-stock-modal-title');
-      const subEl = document.getElementById('low-stock-modal-subtitle');
-      const isOutMode = lowStockModalType === 'out';
-      if (titleEl) {
-        const label = isOutMode ? 'Out of Stock' : 'Low Stock';
-        titleEl.textContent = lowStockModalAllCounters ? `All ${label} Products` : `${label} — ${pos.toUpperCase()}`;
-      }
-      if (subEl) {
-        subEl.textContent = isOutMode ? 'Products with 0 stock remaining' : 'Products running low (above 0, at or below alert threshold)';
-      }
-
-      const listEl = document.getElementById('low-stock-modal-list');
-      if (!listEl) return;
-      const matcher = isOutMode ? isOutOfStock : isLowStock;
-      const items = state.products.filter((p) => (lowStockModalAllCounters ? true : p.pos === pos) && matcher(p));
-      if (!items.length) {
-        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-5 text-center text-xs font-bold text-slate-500">No ${isOutMode ? 'out-of-stock' : 'low-stock'} items found.</div>`;
-        return;
-      }
-
-      listEl.innerHTML = items.map((p) => `
-        <div class="${isOutMode ? 'bg-rose-50/70 border-rose-200' : 'bg-amber-50/70 border-amber-200'} border rounded-2xl p-3 flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(p.name)}</p>
-            <p class="text-[11px] font-bold ${isOutMode ? 'text-rose-800' : 'text-amber-800'}">
-              ${isOutMode ? 'Stock: 0 (Out of Stock)' : `Stock: ${p.stock} (Alert ≤ ${p.lowStockThreshold})`} • ${formatPeso(p.price)}
-            </p>
-          </div>
-          <button type="button" onclick="closeLowStockModal(); openEditorModal('${p.pos}', '${p.id}')"
-            class="px-3 py-1.5 rounded-xl bg-brand-purple text-white text-[11px] font-extrabold shrink-0">
-            Restock / Edit
-          </button>
-        </div>
-      `).join('');
-    }
-
-    function renderProductCard(p) {
-      const low = isLowStock(p);
-      const out = (Number(p.stock) || 0) <= 0;
-      const exp = getExpiryStatus(p.expiry);
-      const imgHtml = p.image
-        ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null;this.src='https://placehold.co/300x200/f1f5f9/475569?text=${encodeURIComponent(p.name.slice(0, 12))}'" class="w-full h-24 object-contain rounded-2xl bg-slate-100 p-1" />`
-        : `<div class="w-full h-24 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs px-2 text-center">${escapeHtml(p.category)}</div>`;
+      const imgHtml = product.image
+        ? `<img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none'" class="w-full h-24 object-cover rounded-2xl mb-2 bg-slate-100" />`
+        : '';
 
       return `
-        <div class="smooth-card bg-white rounded-3xl p-3 shadow-card border ${
-          exp?.tone === 'expired' ? 'border-rose-300 bg-rose-50/20' : low ? 'border-amber-300 bg-amber-50/20' : 'border-slate-100'
-        } flex flex-col justify-between gap-2">
-          <div class="space-y-1.5">
-            <div class="relative">
-              <div onclick="openProductDetail('${p.id}')" class="cursor-pointer">${imgHtml}</div>
-              <button type="button" onclick="event.stopPropagation(); openEditorModal('${p.pos}', '${p.id}')"
-                class="absolute top-1.5 right-1.5 px-2 py-1 rounded-lg bg-white/95 hover:bg-white text-slate-800 text-[10px] font-black shadow-xs border border-slate-200/80">
-                Edit
-              </button>
+        <div class="smooth-card bg-white rounded-3xl p-3 border border-slate-100 shadow-card flex flex-col justify-between gap-2.5">
+          <div onclick="openProductDetail('${escapeHtml(product.id)}')" class="cursor-pointer space-y-1">
+            ${imgHtml}
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 truncate">${escapeHtml(product.category || 'General')}</span>
+              ${stockBadge}
             </div>
-            <div onclick="openProductDetail('${p.id}')" class="cursor-pointer">
-              <p class="text-xs font-black text-slate-900 line-clamp-2 leading-snug">${escapeHtml(p.name)}</p>
-              ${exp ? `<p class="text-[10px] font-extrabold mt-0.5 ${
-                exp.tone === 'expired' ? 'text-rose-600' : exp.tone === 'soon' ? 'text-amber-700' : 'text-slate-500'
-              }">${escapeHtml(exp.label)}</p>` : ''}
-              <div class="flex items-center justify-between gap-1 mt-1">
-                <span class="text-sm font-black theme-accent-text">${formatPeso(p.price)}</span>
-                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                  out ? 'bg-rose-100 text-rose-700' : low ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
-                }">${out ? 'Out' : `Stock: ${p.stock}`}</span>
-              </div>
-            </div>
+            <h3 class="text-xs sm:text-sm font-black text-slate-900 leading-snug line-clamp-2">${escapeHtml(product.name)}</h3>
+            <p class="text-sm sm:text-base font-black theme-accent-text">${formatCurrency(product.price)}</p>
           </div>
-          <button type="button" onclick="addToCart('${p.id}')"
-            class="w-full min-h-[38px] sm:min-h-[42px] py-2 px-2.5 rounded-2xl text-xs font-black transition ${
-              out
-                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                : 'bg-brand-dark hover:bg-slate-800 active:scale-95 text-white'
-            }">
-            ${out ? 'Out of Stock' : '+ Add to Cart'}
-          </button>
+          <div class="flex items-center gap-1.5 pt-1">
+            <button type="button" onclick="openEditorModal('${escapeHtml(product.pos)}', '${escapeHtml(product.id)}')"
+              class="min-h-[36px] px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold transition">
+              Edit
+            </button>
+            <button type="button" ${isOut ? 'disabled' : ''} onclick="addToCart('${escapeHtml(product.id)}')"
+              class="flex-1 min-h-[36px] py-1.5 px-2.5 rounded-xl text-xs font-black transition ${
+                isOut
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'theme-accent-btn shadow-xs'
+              }">
+              ${isOut ? 'Sold Out' : cartQty > 0 ? `+ Add (${cartQty})` : '+ Add'}
+            </button>
+          </div>
         </div>
       `;
     }
 
-    function selectCategory(cat) {
-      selectedStoreCategory = cat;
-      renderStoreCatalog();
-    }
-
     function renderStoreCatalog() {
-      renderLowStockBanner('store');
-      const items = state.products.filter((p) => p.pos === 'store');
-      const cats = ['All', ...Array.from(new Set(items.map((p) => p.category).filter(Boolean)))];
-      if (!cats.includes(selectedStoreCategory)) selectedStoreCategory = 'All';
+      const search = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
+      const storeProducts = state.products.filter((p) => p.pos === 'store');
+      const categories = ['All', ...Array.from(new Set(storeProducts.map((p) => p.category || 'General')))];
+      if (!categories.includes(selectedStoreCategory)) selectedStoreCategory = 'All';
 
-      const catBar = document.getElementById('store-categories');
-      if (catBar) {
-        catBar.innerHTML = cats.map((c) => `
-          <button type="button" onclick="selectCategory('${escapeHtml(c).replace(/'/g, "\\'")}')"
-            class="min-h-[36px] px-3.5 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
-              selectedStoreCategory === c
-                ? 'bg-brand-purple text-white'
-                : 'bg-white text-slate-600 border border-slate-200'
-            }">
-            ${escapeHtml(c)}
-          </button>
-        `).join('');
+      const catWrap = document.getElementById('store-categories');
+      if (catWrap) {
+        catWrap.innerHTML = categories.map((cat) => {
+          const active = cat === selectedStoreCategory;
+          return `<button type="button" onclick="selectStoreCategory('${escapeHtml(cat)}')"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
+              active ? 'theme-accent-btn shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
+            }">${escapeHtml(cat)}</button>`;
+        }).join('');
       }
 
-      const q = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
-      const filtered = items.filter((p) => {
-        const matchCat = selectedStoreCategory === 'All' || p.category === selectedStoreCategory;
-        const matchQ = !q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || String(p.barcode || '').toLowerCase().includes(q);
-        return matchCat && matchQ;
+      const filtered = storeProducts.filter((p) => {
+        const matchCat = selectedStoreCategory === 'All' || (p.category || 'General') === selectedStoreCategory;
+        const matchSearch = !search ||
+          (p.name || '').toLowerCase().includes(search) ||
+          (p.category || '').toLowerCase().includes(search) ||
+          (p.barcode || '').toLowerCase().includes(search);
+        return matchCat && matchSearch;
       });
 
       const grid = document.getElementById('store-grid');
       if (grid) {
         grid.innerHTML = filtered.length
           ? filtered.map(renderProductCard).join('')
-          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No store items found.</div>`;
+          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No store items matched your search.</div>`;
       }
     }
 
+    function selectStoreCategory(cat) {
+      selectedStoreCategory = cat;
+      renderStoreCatalog();
+    }
+
     function renderSoftdrinksCatalog() {
-      renderLowStockBanner('softdrinks');
-      const q = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
-      const filtered = state.products.filter((p) => p.pos === 'softdrinks' && (!q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || String(p.barcode || '').toLowerCase().includes(q)));
+      const search = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
+      const list = state.products.filter((p) => p.pos === 'softdrinks' && (
+        !search ||
+        (p.name || '').toLowerCase().includes(search) ||
+        (p.category || '').toLowerCase().includes(search) ||
+        (p.barcode || '').toLowerCase().includes(search)
+      ));
       const grid = document.getElementById('softdrinks-grid');
       if (grid) {
-        grid.innerHTML = filtered.length
-          ? filtered.map(renderProductCard).join('')
-          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No softdrinks found.</div>`;
+        grid.innerHTML = list.length
+          ? list.map(renderProductCard).join('')
+          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No softdrinks matched your search.</div>`;
       }
     }
 
     function renderCigarettesCatalog() {
-      renderLowStockBanner('cigarettes');
-      const q = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
-      const filtered = state.products.filter((p) => p.pos === 'cigarettes' && (!q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || String(p.barcode || '').toLowerCase().includes(q)));
+      const search = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
+      const list = state.products.filter((p) => p.pos === 'cigarettes' && (
+        !search ||
+        (p.name || '').toLowerCase().includes(search) ||
+        (p.category || '').toLowerCase().includes(search) ||
+        (p.barcode || '').toLowerCase().includes(search)
+      ));
       const grid = document.getElementById('cigarettes-grid');
       if (grid) {
-        grid.innerHTML = filtered.length
-          ? filtered.map(renderProductCard).join('')
-          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No cigarettes/yosi items found.</div>`;
+        grid.innerHTML = list.length
+          ? list.map(renderProductCard).join('')
+          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No cigarette items matched your search.</div>`;
       }
     }
 
-    function openProductDetail(prodId) {
-      const p = state.products.find((item) => item.id === prodId);
-      if (!p) return;
-      const modal = document.getElementById('detail-modal');
-      const box = document.getElementById('detail-content');
-      if (!modal || !box) return;
-      const profitPerUnit = (Number(p.price) || 0) - (Number(p.cost) || 0);
-      const exp = getExpiryStatus(p.expiry);
-      box.innerHTML = `
-        <div class="flex items-start justify-between gap-2">
-          <div>
-            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-purple-100 text-brand-purple">${escapeHtml(p.pos)} • ${escapeHtml(p.category)}</span>
-            <h3 class="text-base font-black text-slate-900 mt-1">${escapeHtml(p.name)}</h3>
-            ${exp ? `<p class="text-[11px] font-extrabold mt-0.5 ${
-              exp.tone === 'expired' ? 'text-rose-600' : exp.tone === 'soon' ? 'text-amber-700' : 'text-slate-600'
-            }">${escapeHtml(exp.label)}</p>` : `<p class="text-[11px] font-semibold text-slate-400 mt-0.5">No expiry date set</p>`}
+    function addToCart(productId, qtyToAdd = 1) {
+      const product = state.products.find((p) => p.id === productId);
+      if (!product) return;
+      const stock = Number(product.stock) || 0;
+      if (stock <= 0) {
+        showToast(`${product.name} is out of stock.`, 'error');
+        return;
+      }
+      const pos = product.pos || 'store';
+      if (!state.carts[pos]) state.carts[pos] = [];
+      const existing = state.carts[pos].find((c) => c.productId === productId);
+      const currentQty = existing ? existing.qty : 0;
+      if (currentQty + qtyToAdd > stock) {
+        showToast(`Only ${stock} left in stock for ${product.name}.`, 'warn');
+        return;
+      }
+      if (existing) {
+        existing.qty += qtyToAdd;
+      } else {
+        state.carts[pos].push({ productId, qty: qtyToAdd });
+      }
+      playCartBeep();
+      saveState();
+      renderCatalogs();
+      updateCartIndicators();
+      showToast(`Added ${product.name} to cart`, 'success');
+    }
+
+    function updateCartIndicators() {
+      const pos = getActiveCartPos();
+      const cart = state.carts[pos] || [];
+      let count = 0;
+      let total = 0;
+      cart.forEach((item) => {
+        const prod = state.products.find((p) => p.id === item.productId);
+        if (prod) {
+          count += item.qty;
+          total += (Number(prod.price) || 0) * item.qty;
+        }
+      });
+
+      const headerBadge = document.getElementById('header-cart-badge');
+      if (headerBadge) {
+        if (count > 0) {
+          headerBadge.textContent = String(count);
+          headerBadge.classList.remove('hidden');
+        } else {
+          headerBadge.classList.add('hidden');
+        }
+      }
+
+      const floatingBar = document.getElementById('floating-cart-bar');
+      const badgeCount = document.getElementById('cart-badge-count');
+      const badgeTotal = document.getElementById('cart-badge-total');
+      const isPosTab = ['store', 'softdrinks', 'cigarettes'].includes(currentTab);
+      if (floatingBar && badgeCount && badgeTotal) {
+        if (count > 0 && isPosTab) {
+          badgeCount.textContent = String(count);
+          badgeTotal.textContent = formatCurrency(total);
+          floatingBar.classList.remove('hidden');
+        } else {
+          floatingBar.classList.add('hidden');
+        }
+      }
+    }
+
+    function openCartDrawer(pos = 'store') {
+      activeCartPos = ['store', 'softdrinks', 'cigarettes'].includes(pos) ? pos : 'store';
+      const title = document.getElementById('cart-modal-title');
+      if (title) {
+        const label = activeCartPos === 'softdrinks' ? 'Softdrinks' : activeCartPos === 'cigarettes' ? 'Cigarettes' : 'Store';
+        title.textContent = `${label} Cart & Checkout`;
+      }
+      renderCartDrawerItems();
+      document.getElementById('cart-modal')?.classList.remove('hidden');
+    }
+
+    function closeCartDrawer() {
+      document.getElementById('cart-modal')?.classList.add('hidden');
+    }
+
+    function renderCartDrawerItems() {
+      const listEl = document.getElementById('cart-items-list');
+      const cart = state.carts[activeCartPos] || [];
+      if (!listEl) return;
+      if (!cart.length) {
+        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-5 text-center text-xs font-bold text-slate-500">Cart is empty. Tap + Add on any product.</div>`;
+        renderCartTotals();
+        return;
+      }
+
+      listEl.innerHTML = cart.map((item) => {
+        const prod = state.products.find((p) => p.id === item.productId);
+        if (!prod) return '';
+        const subtotal = (Number(prod.price) || 0) * item.qty;
+        return `
+          <div class="bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-2 border border-slate-200/70">
+            <div class="min-w-0">
+              <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(prod.name)}</p>
+              <p class="text-[11px] font-semibold text-slate-500">${formatCurrency(prod.price)} each</p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="changeCartQty('${escapeHtml(prod.id)}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">-</button>
+              <span class="w-6 text-center text-xs font-black">${item.qty}</span>
+              <button type="button" onclick="changeCartQty('${escapeHtml(prod.id)}', 1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">+</button>
+              <span class="w-16 text-right text-xs font-black text-slate-900">${formatCurrency(subtotal)}</span>
+            </div>
           </div>
-          <button type="button" onclick="closeDetailModal()" class="text-xs font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">Close</button>
+        `;
+      }).join('');
+      renderCartTotals();
+    }
+
+    function changeCartQty(productId, delta) {
+      const cart = state.carts[activeCartPos] || [];
+      const idx = cart.findIndex((c) => c.productId === productId);
+      if (idx === -1) return;
+      const prod = state.products.find((p) => p.id === productId);
+      const maxStock = prod ? (Number(prod.stock) || 0) : 0;
+      const nextQty = cart[idx].qty + delta;
+      if (nextQty <= 0) {
+        cart.splice(idx, 1);
+      } else if (nextQty > maxStock) {
+        showToast(`Only ${maxStock} left in stock.`, 'warn');
+        return;
+      } else {
+        cart[idx].qty = nextQty;
+      }
+      saveState();
+      renderCartDrawerItems();
+      renderCatalogs();
+      updateCartIndicators();
+    }
+
+    function clearCurrentCart() {
+      state.carts[activeCartPos] = [];
+      saveState();
+      renderCartDrawerItems();
+      renderCatalogs();
+      updateCartIndicators();
+    }
+
+    function getCartSubtotal() {
+      const cart = state.carts[activeCartPos] || [];
+      return cart.reduce((sum, item) => {
+        const prod = state.products.find((p) => p.id === item.productId);
+        return sum + (prod ? (Number(prod.price) || 0) * item.qty : 0);
+      }, 0);
+    }
+
+    function renderCartTotals() {
+      const sub = getCartSubtotal();
+      const discount = Math.max(0, Number(document.getElementById('cart-discount')?.value) || 0);
+      const net = Math.max(0, sub - discount);
+      const totalEl = document.getElementById('cart-summary-total');
+      if (totalEl) totalEl.textContent = formatCurrency(net);
+      updateCartChangePreview();
+    }
+
+    function updateCartChangePreview() {
+      const sub = getCartSubtotal();
+      const discount = Math.max(0, Number(document.getElementById('cart-discount')?.value) || 0);
+      const net = Math.max(0, sub - discount);
+      const tendered = Number(document.getElementById('cart-cash-tendered')?.value) || 0;
+      const preview = document.getElementById('cart-change-preview');
+      if (!preview) return;
+      if (tendered > 0 && tendered >= net) {
+        preview.textContent = `Change: ${formatCurrency(tendered - net)}`;
+      } else if (tendered > 0 && tendered < net) {
+        preview.textContent = `Short by: ${formatCurrency(net - tendered)}`;
+      } else {
+        preview.textContent = '';
+      }
+    }
+
+    function toggleCartUtangCustomer() {
+      const method = document.getElementById('cart-payment-method')?.value;
+      const wrap = document.getElementById('cart-utang-customer-wrap');
+      if (wrap) {
+        if (method === 'Utang') wrap.classList.remove('hidden');
+        else wrap.classList.add('hidden');
+      }
+    }
+
+    function completeCartCheckout() {
+      const cart = state.carts[activeCartPos] || [];
+      if (!cart.length) {
+        showToast('Cart is empty.', 'warn');
+        return;
+      }
+      const method = document.getElementById('cart-payment-method')?.value || 'Cash';
+      const discount = Math.max(0, Number(document.getElementById('cart-discount')?.value) || 0);
+      const utangCustomer = (document.getElementById('cart-utang-customer')?.value || '').trim();
+
+      if (method === 'Utang' && !utangCustomer) {
+        showToast('Please enter customer name for Utang.', 'error');
+        return;
+      }
+
+      let grossSales = 0;
+      let totalCost = 0;
+      const itemsSnapshot = [];
+
+      for (const item of cart) {
+        const prod = state.products.find((p) => p.id === item.productId);
+        if (!prod) continue;
+        if ((Number(prod.stock) || 0) < item.qty) {
+          showToast(`Insufficient stock for ${prod.name}.`, 'error');
+          return;
+        }
+        const price = Number(prod.price) || 0;
+        const cost = Number(prod.cost) || 0;
+        grossSales += price * item.qty;
+        totalCost += cost * item.qty;
+        itemsSnapshot.push({
+          productId: prod.id,
+          name: prod.name,
+          qty: item.qty,
+          price,
+          cost
+        });
+      }
+
+      const netSales = Math.max(0, grossSales - discount);
+      const profit = netSales - totalCost;
+      const tendered = Number(document.getElementById('cart-cash-tendered')?.value) || netSales;
+      if (method === 'Cash' && tendered < netSales) {
+        showToast('Cash tendered is less than total.', 'error');
+        return;
+      }
+
+      itemsSnapshot.forEach((it) => {
+        const prod = state.products.find((p) => p.id === it.productId);
+        if (prod) {
+          prod.stock = Math.max(0, (Number(prod.stock) || 0) - it.qty);
+        }
+      });
+
+      const txId = 'tx-' + Date.now();
+      const summaryNames = itemsSnapshot.map((i) => `${i.name} x${i.qty}`).join(', ');
+      state.transactions.unshift({
+        id: txId,
+        kind: 'sale',
+        pos: activeCartPos,
+        paymentMethod: method,
+        customerName: method === 'Utang' ? utangCustomer : '',
+        description: summaryNames,
+        items: itemsSnapshot,
+        sales: netSales,
+        profit,
+        discount,
+        createdAt: new Date().toISOString(),
+        voided: false
+      });
+
+      if (method === 'Utang') {
+        state.utangRecords.unshift({
+          id: 'utang-' + Date.now(),
+          customerName: utangCustomer,
+          note: summaryNames,
+          amount: netSales,
+          paidAmount: 0,
+          paid: false,
+          txId,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      state.carts[activeCartPos] = [];
+      if (document.getElementById('cart-discount')) document.getElementById('cart-discount').value = '';
+      if (document.getElementById('cart-cash-tendered')) document.getElementById('cart-cash-tendered').value = '';
+      if (document.getElementById('cart-utang-customer')) document.getElementById('cart-utang-customer').value = '';
+
+      playCashierSaleSound();
+      saveState();
+      closeCartDrawer();
+      renderAll();
+      const changeMsg = method === 'Cash' && tendered > netSales ? ` (Change: ${formatCurrency(tendered - netSales)})` : '';
+      showToast(`Sale completed: ${formatCurrency(netSales)}${changeMsg}`, 'success');
+    }
+
+    function openProductDetail(productId) {
+      const prod = state.products.find((p) => p.id === productId);
+      if (!prod) return;
+      const content = document.getElementById('detail-content');
+      if (!content) return;
+      content.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full theme-accent-badge border">${escapeHtml(prod.pos)} • ${escapeHtml(prod.category || 'General')}</span>
+          <button type="button" onclick="closeDetailModal()" class="text-xs font-extrabold text-slate-500 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-slate-900">${escapeHtml(prod.name)}</h3>
+          ${prod.barcode ? `<p class="text-xs font-mono text-slate-500 mt-0.5">Barcode: ${escapeHtml(prod.barcode)}</p>` : ''}
         </div>
         <div class="grid grid-cols-3 gap-2 text-center">
           <div class="bg-slate-50 rounded-2xl p-2.5">
-            <p class="text-[10px] font-bold text-slate-500">Price</p>
-            <p class="text-sm font-black text-brand-purple">${formatPeso(p.price)}</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase">Price</p>
+            <p class="text-sm font-black theme-accent-text">${formatCurrency(prod.price)}</p>
           </div>
           <div class="bg-slate-50 rounded-2xl p-2.5">
-            <p class="text-[10px] font-bold text-slate-500">Cost / Kita</p>
-            <p class="text-sm font-black text-emerald-700">${formatPeso(p.cost)} / ${formatPeso(profitPerUnit)}</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase">Cost</p>
+            <p class="text-sm font-black text-slate-800">${formatCurrency(prod.cost)}</p>
           </div>
           <div class="bg-slate-50 rounded-2xl p-2.5">
-            <p class="text-[10px] font-bold text-slate-500">Stock (Alert ≤${p.lowStockThreshold})</p>
-            <p class="text-sm font-black text-slate-900">${p.stock}</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase">Stock</p>
+            <p class="text-sm font-black text-slate-800">${Number(prod.stock) || 0}</p>
           </div>
         </div>
         <div class="flex items-center gap-2 pt-1">
-          <button type="button" onclick="closeDetailModal(); openEditorModal('${p.pos}', '${p.id}')"
-            class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold">
-            Edit Product
+          <button type="button" onclick="closeDetailModal(); openEditorModal('${escapeHtml(prod.pos)}', '${escapeHtml(prod.id)}')"
+            class="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold">
+            Edit Item
           </button>
-          <button type="button" ${p.stock <= 0 ? 'disabled' : ''} onclick="addToCart('${p.id}'); closeDetailModal()"
-            class="flex-1 py-3 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark disabled:bg-slate-200 text-white text-sm font-black">
-            ${p.stock <= 0 ? 'Out of Stock' : '+ Add to Cart'}
+          <button type="button" onclick="addToCart('${escapeHtml(prod.id)}'); closeDetailModal();"
+            class="flex-1 py-2.5 rounded-2xl theme-accent-btn text-xs font-black">
+            + Add to Cart
           </button>
         </div>
       `;
-      modal.classList.remove('hidden');
+      document.getElementById('detail-modal')?.classList.remove('hidden');
     }
 
     function closeDetailModal() {
       document.getElementById('detail-modal')?.classList.add('hidden');
     }
 
-    function openEditorModal(defaultPos = 'store', prodId = null) {
-      const modal = document.getElementById('editor-modal');
-      const titleEl = document.getElementById('editor-title');
+    function openEditorModal(pos = 'store', productId = null, prefillBarcode = '') {
+      const prod = productId ? state.products.find((p) => p.id === productId) : null;
+      document.getElementById('editor-title').textContent = prod ? 'Edit Product' : 'Add Product';
+      document.getElementById('editor-id').value = prod ? prod.id : '';
+      document.getElementById('editor-pos').value = prod ? prod.pos : pos;
+      document.getElementById('editor-name').value = prod ? prod.name : '';
+      document.getElementById('editor-category').value = prod ? prod.category : (pos === 'softdrinks' ? 'Soda' : pos === 'cigarettes' ? 'Stick' : 'General');
+      document.getElementById('editor-barcode').value = prod ? (prod.barcode || '') : prefillBarcode;
+      document.getElementById('editor-price').value = prod ? prod.price : '';
+      document.getElementById('editor-cost').value = prod ? prod.cost : '';
+      document.getElementById('editor-stock').value = prod ? prod.stock : '';
+      document.getElementById('editor-low-stock').value = prod ? (prod.lowStockThreshold ?? 5) : 5;
+      document.getElementById('editor-expiry').value = prod ? (prod.expiryDate || '') : '';
+      document.getElementById('editor-image').value = prod ? (prod.image || '') : '';
+
       const delBtn = document.getElementById('editor-delete-btn');
-      if (!modal) return;
-
-      const existing = prodId ? state.products.find((p) => p.id === prodId) : null;
-      document.getElementById('editor-id').value = existing ? existing.id : '';
-      document.getElementById('editor-pos').value = existing ? existing.pos : (defaultPos || 'store');
-      document.getElementById('editor-name').value = existing ? existing.name : '';
-      document.getElementById('editor-category').value = existing ? existing.category : (defaultPos === 'softdrinks' ? 'Drinks' : defaultPos === 'cigarettes' ? 'Sticks' : 'General');
-      document.getElementById('editor-barcode').value = existing ? (existing.barcode || '') : '';
-      document.getElementById('editor-price').value = existing ? existing.price : '';
-      document.getElementById('editor-cost').value = existing ? existing.cost : '';
-      document.getElementById('editor-stock').value = existing ? existing.stock : '10';
-      document.getElementById('editor-low-stock').value = existing ? (existing.lowStockThreshold ?? 5) : '5';
-      document.getElementById('editor-expiry').value = existing ? (existing.expiry || '') : '';
-      document.getElementById('editor-image').value = existing ? (existing.image || '') : '';
-
-      if (titleEl) titleEl.textContent = existing ? 'Edit Product' : 'Add Product';
-      if (delBtn) delBtn.classList.toggle('hidden', !existing);
-
-      modal.classList.remove('hidden');
-      setTimeout(() => document.getElementById('editor-name')?.focus(), 40);
+      if (delBtn) {
+        if (prod) delBtn.classList.remove('hidden');
+        else delBtn.classList.add('hidden');
+      }
+      document.getElementById('editor-modal')?.classList.remove('hidden');
     }
 
     function closeEditorModal() {
@@ -2192,50 +2208,41 @@
 
     function saveProductFromForm(e) {
       e.preventDefault();
-      const id = document.getElementById('editor-id').value.trim();
-      const pos = document.getElementById('editor-pos').value || 'store';
+      const id = document.getElementById('editor-id').value;
+      const pos = document.getElementById('editor-pos').value;
       const name = document.getElementById('editor-name').value.trim();
       const category = document.getElementById('editor-category').value.trim() || 'General';
-      const barcode = (document.getElementById('editor-barcode')?.value || '').trim();
-      const price = Math.max(0, parseFloat(document.getElementById('editor-price').value) || 0);
-      const cost = Math.max(0, parseFloat(document.getElementById('editor-cost').value) || 0);
-      const stock = Math.max(0, parseInt(document.getElementById('editor-stock').value, 10) || 0);
-      const lowStockThreshold = Math.max(0, parseInt(document.getElementById('editor-low-stock').value, 10) || 0);
-      const expiry = (document.getElementById('editor-expiry')?.value || '').trim();
+      const barcode = document.getElementById('editor-barcode').value.trim();
+      const price = Number(document.getElementById('editor-price').value) || 0;
+      const cost = Number(document.getElementById('editor-cost').value) || 0;
+      const stock = Math.max(0, Math.floor(Number(document.getElementById('editor-stock').value) || 0));
+      const lowStockThreshold = Math.max(0, Math.floor(Number(document.getElementById('editor-low-stock').value) || 5));
+      const expiryDate = document.getElementById('editor-expiry').value || '';
       const image = document.getElementById('editor-image').value.trim();
 
-      if (!name) return showToast('Enter product name', true);
+      if (!name) return;
 
       if (id) {
-        const prod = state.products.find((p) => p.id === id);
-        if (prod) {
-          prod.pos = pos;
-          prod.name = name;
-          prod.category = category;
-          prod.barcode = barcode;
-          prod.expiry = expiry;
-          prod.price = price;
-          prod.cost = cost;
-          prod.stock = stock;
-          prod.lowStockThreshold = lowStockThreshold;
-          prod.image = image;
+        const existing = state.products.find((p) => p.id === id);
+        if (existing) {
+          Object.assign(existing, { pos, name, category, barcode, price, cost, stock, lowStockThreshold, expiryDate, image });
         }
-        showToast('Product updated');
+        showToast(`Updated ${name}`, 'success');
       } else {
         state.products.unshift({
-          id: `prod-${Date.now()}`,
+          id: 'prod-' + Date.now(),
           pos,
           name,
           category,
           barcode,
-          expiry,
           price,
           cost,
           stock,
           lowStockThreshold,
+          expiryDate,
           image
         });
-        showToast('Product added');
+        showToast(`Added ${name}`, 'success');
       }
 
       saveState();
@@ -2244,485 +2251,220 @@
     }
 
     function deleteProductFromEditor() {
-      const id = document.getElementById('editor-id').value.trim();
+      const id = document.getElementById('editor-id').value;
       if (!id) return;
-      const prod = state.products.find((p) => p.id === id);
-      if (!prod) return;
-
       state.products = state.products.filter((p) => p.id !== id);
-      for (const pos of ['store', 'softdrinks', 'cigarettes']) {
-        state.carts[pos] = (state.carts[pos] || []).filter((item) => item.productId !== id);
-      }
       saveState();
       closeEditorModal();
       renderAll();
-      showToast(`Deleted "${prod.name}"`);
+      showToast('Product deleted', 'warn');
     }
 
-    // Cart & Checkout
-    function addToCart(prodId) {
-      const p = state.products.find((item) => item.id === prodId);
-      if (!p) return;
-      const cart = state.carts[p.pos] || (state.carts[p.pos] = []);
-      const existing = cart.find((c) => c.productId === p.id);
-      const currentQty = existing ? existing.qty : 0;
-      if (currentQty + 1 > p.stock) {
-        return showToast(`Only ${p.stock} left in stock`, true);
+    function openExpenseModal() {
+      const sel = document.getElementById('expense-counter');
+      if (sel && ['store', 'softdrinks', 'cigarettes', 'gcash'].includes(currentTab)) {
+        sel.value = currentTab;
       }
-      if (existing) {
-        existing.qty += 1;
-        existing.price = p.price;
-        existing.cost = p.cost;
-      } else {
-        cart.push({
-          productId: p.id,
-          name: p.name,
-          price: p.price,
-          cost: p.cost,
-          qty: 1
-        });
-      }
-      saveState();
-      updateCartBar();
-      playCartBeep();
-      showToast(`Added ${p.name}`);
+      document.getElementById('expense-modal')?.classList.remove('hidden');
     }
 
-    function openCartDrawer(pos = 'store') {
-      const targetPos = ['store', 'softdrinks', 'cigarettes'].includes(pos) ? pos : getActiveCartPos();
-      currentTab = targetPos;
-      renderCartModal(targetPos);
-      document.getElementById('cart-modal')?.classList.remove('hidden');
+    function closeExpenseModal() {
+      document.getElementById('expense-modal')?.classList.add('hidden');
     }
 
-    function closeCartDrawer() {
-      document.getElementById('cart-modal')?.classList.add('hidden');
-    }
-
-    function adjustCartQty(pos, productId, delta) {
-      const cart = state.carts[pos] || [];
-      const item = cart.find((c) => c.productId === productId);
-      const prod = state.products.find((p) => p.id === productId);
-      if (!item) return;
-      const nextQty = item.qty + delta;
-      if (nextQty <= 0) {
-        state.carts[pos] = cart.filter((c) => c.productId !== productId);
-      } else {
-        if (prod && nextQty > prod.stock) {
-          return showToast(`Only ${prod.stock} left in stock`, true);
-        }
-        item.qty = nextQty;
-      }
-      saveState();
-      renderCartModal(pos);
-      updateCartBar();
-    }
-
-    function toggleCartUtangCustomer() {
-      const method = document.getElementById('cart-payment-method')?.value || 'Cash';
-      const wrap = document.getElementById('cart-utang-customer-wrap');
-      if (wrap) wrap.classList.toggle('hidden', method !== 'Utang');
-      updateCartChangePreview();
-    }
-
-    function clearCurrentCart() {
-      const pos = getActiveCartPos();
-      state.carts[pos] = [];
-      saveState();
-      renderCartModal(pos);
-      updateCartBar();
-      showToast('Cart cleared');
-    }
-
-    function getCartDiscount(subtotal) {
-      const raw = parseFloat(document.getElementById('cart-discount')?.value) || 0;
-      return Math.max(0, Math.min(Number(subtotal) || 0, raw));
-    }
-
-    function renderCartTotals() {
-      const pos = getActiveCartPos();
-      const cart = state.carts[pos] || [];
-      const subtotal = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
-      const discount = getCartDiscount(subtotal);
-      const total = Math.max(0, subtotal - discount);
-
-      const totalEl = document.getElementById('cart-summary-total');
-      if (totalEl) {
-        totalEl.textContent = discount > 0
-          ? `${formatPeso(total)} (-${formatPeso(discount)} disc.)`
-          : formatPeso(total);
-      }
-      updateCartChangePreview();
-    }
-
-    function updateCartChangePreview() {
-      const pos = getActiveCartPos();
-      const cart = state.carts[pos] || [];
-      const subtotal = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
-      const total = Math.max(0, subtotal - getCartDiscount(subtotal));
-      const method = document.getElementById('cart-payment-method')?.value || 'Cash';
-      const tenderedRaw = document.getElementById('cart-cash-tendered')?.value;
-      const preview = document.getElementById('cart-change-preview');
-      if (!preview) return;
-
-      if (method !== 'Cash' || tenderedRaw === '') {
-        preview.textContent = '';
-        return;
-      }
-      const tendered = parseFloat(tenderedRaw) || 0;
-      const change = tendered - total;
-      preview.textContent = change >= 0 ? `Change / Sukli: ${formatPeso(change)}` : `Kulang pa: ${formatPeso(Math.abs(change))}`;
-    }
-
-    function renderCartModal(pos = 'store') {
-      const cart = state.carts[pos] || [];
-      const listEl = document.getElementById('cart-items-list');
-      const titleEl = document.getElementById('cart-modal-title');
-      if (titleEl) titleEl.textContent = `${pos.toUpperCase()} Cart & Checkout`;
-
-      renderCartTotals();
-
-      if (!listEl) return;
-      if (!cart.length) {
-        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-4 text-center text-xs font-bold text-slate-500">Cart is empty.</div>`;
-        updateCartChangePreview();
-        return;
-      }
-
-      listEl.innerHTML = cart.map((item) => `
-        <div class="bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(item.name)}</p>
-            <p class="text-[11px] font-bold text-slate-500">${formatPeso(item.price)} each</p>
-          </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="adjustCartQty('${pos}', '${item.productId}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">-</button>
-            <span class="text-xs font-black w-6 text-center">${item.qty}</span>
-            <button type="button" onclick="adjustCartQty('${pos}', '${item.productId}', 1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">+</button>
-          </div>
-        </div>
-      `).join('');
-
-      toggleCartUtangCustomer();
-    }
-
-    function completeCartCheckout() {
-      const pos = getActiveCartPos();
-      const cart = state.carts[pos] || [];
-      if (!cart.length) return showToast('Cart is empty', true);
-
-      let subtotalAmount = 0;
-      let rawProfit = 0;
-      const outAlertNames = [];
-      const lowAlertNames = [];
-
-      for (const item of cart) {
-        const prod = state.products.find((p) => p.id === item.productId);
-        const qty = Number(item.qty) || 0;
-        const price = Number(item.price) || 0;
-        const cost = prod ? (Number(prod.cost) || 0) : (Number(item.cost) || 0);
-
-        if (prod) {
-          if (qty > prod.stock) {
-            return showToast(`Insufficient stock for ${prod.name}`, true);
-          }
-          prod.stock = Math.max(0, (Number(prod.stock) || 0) - qty);
-          if (isOutOfStock(prod)) {
-            outAlertNames.push(prod.name);
-          } else if (isLowStock(prod)) {
-            lowAlertNames.push(`${prod.name} (${prod.stock})`);
-          }
-        }
-        subtotalAmount += price * qty;
-        rawProfit += (price - cost) * qty;
-      }
-
-      const discount = getCartDiscount(subtotalAmount);
-      const totalAmount = Math.max(0, subtotalAmount - discount);
-      const totalProfit = rawProfit - discount;
-
-      const method = document.getElementById('cart-payment-method')?.value || 'Cash';
-      const utangCustomer = (document.getElementById('cart-utang-customer')?.value || '').trim();
-      if (method === 'Utang' && !utangCustomer) {
-        return showToast('Enter customer name for Utang', true);
-      }
-
-      const baseTitle = cart.map((i) => `${i.name} x${i.qty}`).join(', ');
-      const title = discount > 0 ? `${baseTitle} (-${formatPeso(discount)} disc.)` : baseTitle;
-      const txId = `tx-${Date.now()}`;
+    function recordExpense(e) {
+      e.preventDefault();
+      const pos = document.getElementById('expense-counter').value || 'general';
+      const desc = document.getElementById('expense-desc').value.trim();
+      const amount = Number(document.getElementById('expense-amount').value) || 0;
+      if (!desc || amount <= 0) return;
 
       state.transactions.unshift({
-        id: txId,
-        kind: 'sale',
+        id: 'exp-' + Date.now(),
+        kind: 'expense',
         pos,
-        title,
-        subtotal: subtotalAmount,
-        discount,
-        amount: totalAmount,
-        profit: totalProfit,
-        paymentMethod: method,
-        customerName: method === 'Utang' ? utangCustomer : '',
-        voided: false,
+        description: desc,
+        amount,
+        sales: 0,
+        profit: 0,
         createdAt: new Date().toISOString(),
-        items: cart.map((i) => ({ productId: i.productId, name: i.name, qty: i.qty, price: i.price }))
+        voided: false
       });
 
-      if (method === 'Utang') {
-        state.utangRecords.unshift({
-          id: `ut-${Date.now()}`,
-          txId,
-          customerName: utangCustomer,
-          note: title,
-          amount: totalAmount,
-          paid: false,
-          createdAt: new Date().toISOString()
-        });
-      }
-
-      state.carts[pos] = [];
-      const discEl = document.getElementById('cart-discount');
-      const tenderedEl = document.getElementById('cart-cash-tendered');
-      const custEl = document.getElementById('cart-utang-customer');
-      if (discEl) discEl.value = '';
-      if (tenderedEl) tenderedEl.value = '';
-      if (custEl) custEl.value = '';
-
+      document.getElementById('expense-desc').value = '';
+      document.getElementById('expense-amount').value = '';
       saveState();
-      closeCartDrawer();
+      closeExpenseModal();
       renderAll();
-      playCashierSaleSound();
-
-      if (outAlertNames.length && lowAlertNames.length) {
-        showToast(`Sale saved! Out of stock: ${outAlertNames.join(', ')} | Low stock: ${lowAlertNames.join(', ')}`);
-      } else if (outAlertNames.length) {
-        showToast(`Sale saved! Out of stock: ${outAlertNames.join(', ')}`, true);
-      } else if (lowAlertNames.length) {
-        showToast(`Sale saved! Low stock: ${lowAlertNames.join(', ')}`);
-      } else {
-        showToast(`Sale completed (${formatPeso(totalAmount)})`);
-      }
-    }
-
-    // GCash & E-Load
-    function renderGcashPuhunan() {
-      const puhunan = Math.max(0, Number(state.gcashPuhunan) || 0);
-      const bannerEl = document.getElementById('gcash-puhunan-banner');
-      const dispEl = document.getElementById('gcash-puhunan-display');
-      if (bannerEl) bannerEl.textContent = formatPeso(puhunan);
-      if (dispEl) dispEl.textContent = formatPeso(puhunan);
-    }
-
-    function setGcashPuhunan() {
-      const inputEl = document.getElementById('gcash-puhunan-input');
-      const val = parseFloat(inputEl?.value);
-      if (Number.isNaN(val) || val < 0) {
-        return showToast('Enter a valid capital amount', true);
-      }
-      state.gcashPuhunan = val;
-      if (inputEl) inputEl.value = '';
-      saveState();
-      renderGcashPuhunan();
-      showToast(`GCash capital set to ${formatPeso(val)}`);
-    }
-
-    function addGcashPuhunan() {
-      const inputEl = document.getElementById('gcash-puhunan-input');
-      const addVal = parseFloat(inputEl?.value);
-      if (Number.isNaN(addVal) || addVal <= 0) {
-        return showToast('Enter an amount to add to capital', true);
-      }
-      state.gcashPuhunan = Math.max(0, Number(state.gcashPuhunan) || 0) + addVal;
-      if (inputEl) inputEl.value = '';
-      saveState();
-      renderGcashPuhunan();
-      showToast(`Added ${formatPeso(addVal)} to GCash capital`);
+      showToast(`Expense recorded: ${formatCurrency(amount)}`, 'warn');
     }
 
     function setGcashType(type) {
-      activeGcashType = ['cash_in', 'cash_out', 'eload'].includes(type) ? type : 'cash_in';
-      for (const t of ['cash_in', 'cash_out', 'eload']) {
-        const btn = document.getElementById(`gcash-type-${t}`);
-        if (btn) {
-          btn.className = t === activeGcashType
-            ? 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-brand-purple text-white transition'
-            : 'gcash-type-btn py-2 px-2 rounded-xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
-        }
-      }
-      autoSuggestGcashFee();
+      selectedGcashType = type;
+      ['cash_in', 'cash_out', 'eload'].forEach((t) => {
+        const btn = document.getElementById('gcash-type-' + t);
+        if (!btn) return;
+        btn.className = t === type
+          ? 'gcash-type-btn min-h-[44px] py-2.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold bg-brand-purple text-white transition'
+          : 'gcash-type-btn min-h-[44px] py-2.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-100 text-slate-700 transition';
+      });
     }
 
     function setGcashAmount(amt) {
-      const amtInput = document.getElementById('gcash-amount');
-      if (amtInput) {
-        amtInput.value = String(amt);
+      const input = document.getElementById('gcash-amount');
+      if (input) {
+        input.value = amt;
         autoSuggestGcashFee();
       }
     }
 
     function autoSuggestGcashFee() {
-      const amt = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
+      const amt = Number(document.getElementById('gcash-amount')?.value) || 0;
       const feeInput = document.getElementById('gcash-fee');
-      if (!feeInput) return;
-      if (amt <= 0) {
-        feeInput.value = '';
-        return;
-      }
-      if (activeGcashType === 'eload') {
-        feeInput.value = Math.max(2, Math.round(amt * 0.05)).toFixed(2);
+      if (!feeInput || amt <= 0) return;
+      if (selectedGcashType === 'eload') {
+        feeInput.value = amt >= 100 ? 5 : 3;
       } else {
-        const tiers = Math.max(1, Math.ceil(amt / 500));
-        feeInput.value = (tiers * 10).toFixed(2);
+        feeInput.value = Math.max(5, Math.ceil(amt / 500) * 10);
       }
     }
 
-    function clearGcashForm() {
-      const amtEl = document.getElementById('gcash-amount');
-      const feeEl = document.getElementById('gcash-fee');
-      const noteEl = document.getElementById('gcash-note');
-      if (amtEl) amtEl.value = '';
-      if (feeEl) feeEl.value = '';
-      if (noteEl) noteEl.value = '';
+    function setGcashPuhunan() {
+      const val = Number(document.getElementById('gcash-puhunan-input')?.value);
+      if (isNaN(val) || val < 0) return;
+      state.gcashPuhunan = val;
+      document.getElementById('gcash-puhunan-input').value = '';
+      saveState();
+      renderGcashTab();
+      showToast(`GCash Capital set to ${formatCurrency(val)}`, 'success');
+    }
+
+    function addGcashPuhunan() {
+      const val = Number(document.getElementById('gcash-puhunan-input')?.value);
+      if (isNaN(val) || val <= 0) return;
+      state.gcashPuhunan = (Number(state.gcashPuhunan) || 0) + val;
+      document.getElementById('gcash-puhunan-input').value = '';
+      saveState();
+      renderGcashTab();
+      showToast(`Added ${formatCurrency(val)} to GCash Capital`, 'success');
     }
 
     function recordGcashTransaction() {
-      const amount = parseFloat(document.getElementById('gcash-amount')?.value) || 0;
-      const fee = Math.max(0, parseFloat(document.getElementById('gcash-fee')?.value) || 0);
+      const amount = Number(document.getElementById('gcash-amount')?.value) || 0;
+      const fee = Math.max(0, Number(document.getElementById('gcash-fee')?.value) || 0);
       const note = (document.getElementById('gcash-note')?.value || '').trim();
       if (amount <= 0) {
-        return showToast('Enter a valid GCash / E-Load amount', true);
+        showToast('Enter a valid amount.', 'error');
+        return;
       }
 
-      // Cash In: puhunan + amount + fee; Cash Out & E-Load: puhunan - amount + fee
-      const currentPuhunan = Math.max(0, Number(state.gcashPuhunan) || 0);
-      const puhunanDelta = activeGcashType === 'cash_in'
-        ? (amount + fee)
-        : (fee - amount);
-      const nextPuhunan = currentPuhunan + puhunanDelta;
-      if (nextPuhunan < 0) {
-        return showToast('Insufficient GCash capital for this transaction', true);
+      if (selectedGcashType === 'cash_in' || selectedGcashType === 'eload') {
+        state.gcashPuhunan = Math.max(0, (Number(state.gcashPuhunan) || 0) - amount);
+      } else if (selectedGcashType === 'cash_out') {
+        state.gcashPuhunan = (Number(state.gcashPuhunan) || 0) + amount;
       }
-      state.gcashPuhunan = nextPuhunan;
 
-      const labels = {
-        cash_in: 'GCash Cash In',
-        cash_out: 'GCash Cash Out',
-        eload: 'E-Load'
-      };
-      const label = labels[activeGcashType] || 'GCash';
-      const title = note ? `${label} (${note}) — ${formatPeso(amount)}` : `${label} — ${formatPeso(amount)}`;
+      const labelMap = { cash_in: 'GCash Cash In', cash_out: 'GCash Cash Out', eload: 'E-Load' };
+      const desc = `${labelMap[selectedGcashType] || 'GCash'} ${formatCurrency(amount)}${note ? ' (' + note + ')' : ''}`;
 
       state.transactions.unshift({
-        id: `tx-${Date.now()}`,
+        id: 'gcash-' + Date.now(),
         kind: 'gcash',
         pos: 'gcash',
-        gcashType: activeGcashType,
-        puhunanDelta,
-        title,
+        gcashType: selectedGcashType,
+        description: desc,
         amount,
-        fee,
+        sales: fee,
         profit: fee,
-        paymentMethod: 'GCash',
-        voided: false,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        voided: false
       });
 
-      saveState();
       clearGcashForm();
+      saveState();
       renderAll();
-      showToast(`${label} recorded (+${formatPeso(fee)} fee)`);
+      showToast(`Recorded ${labelMap[selectedGcashType]} (+${formatCurrency(fee)} fee)`, 'success');
     }
 
-    // Utang Management
+    function clearGcashForm() {
+      if (document.getElementById('gcash-amount')) document.getElementById('gcash-amount').value = '';
+      if (document.getElementById('gcash-fee')) document.getElementById('gcash-fee').value = '';
+      if (document.getElementById('gcash-note')) document.getElementById('gcash-note').value = '';
+    }
+
+    function renderGcashTab() {
+      const metrics = computeTimeMetrics((tx) => tx.pos === 'gcash');
+      const cap = Number(state.gcashPuhunan) || 0;
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setTxt('gcash-sales-banner', formatCurrency(metrics.dailyProfit));
+      setTxt('gcash-profit-banner', formatCurrency(metrics.dailyProfit));
+      setTxt('total-amount-gcash', formatCurrency(metrics.dailyAmount));
+      setTxt('gcash-puhunan-banner', formatCurrency(cap));
+      setTxt('gcash-puhunan-display', formatCurrency(cap));
+      setTxt('gcash-weekly-sales', formatCurrency(metrics.weeklyProfit));
+      setTxt('gcash-weekly-profit', formatCurrency(metrics.weeklyProfit));
+      setTxt('gcash-monthly-sales', formatCurrency(metrics.monthlyProfit));
+      setTxt('gcash-monthly-profit', formatCurrency(metrics.monthlyProfit));
+    }
+
     function addManualUtang() {
       const customerName = (document.getElementById('utang-customer-input')?.value || '').trim();
-      const note = (document.getElementById('utang-note-input')?.value || '').trim() || 'Store Credit';
-      const amount = parseFloat(document.getElementById('utang-amount-input')?.value) || 0;
-
-      if (!customerName) return showToast('Enter customer name', true);
-      if (amount <= 0) return showToast('Enter a valid credit amount', true);
-
-      const txId = `tx-${Date.now()}`;
-      state.transactions.unshift({
-        id: txId,
-        kind: 'sale',
-        pos: 'store',
-        title: `Credit: ${customerName} (${note})`,
-        amount,
-        profit: 0,
-        paymentMethod: 'Utang',
-        customerName,
-        voided: false,
-        createdAt: new Date().toISOString()
-      });
-
+      const note = (document.getElementById('utang-note-input')?.value || '').trim();
+      const amount = Number(document.getElementById('utang-amount-input')?.value) || 0;
+      if (!customerName || amount <= 0) {
+        showToast('Enter customer name and amount.', 'error');
+        return;
+      }
       state.utangRecords.unshift({
-        id: `ut-${Date.now() + 1}`,
-        txId,
+        id: 'utang-' + Date.now(),
         customerName,
-        note,
+        note: note || 'Manual Utang',
         amount,
+        paidAmount: 0,
         paid: false,
         createdAt: new Date().toISOString()
       });
-
       document.getElementById('utang-customer-input').value = '';
       document.getElementById('utang-note-input').value = '';
       document.getElementById('utang-amount-input').value = '';
-
       saveState();
-      renderAll();
-      showToast(`Added credit record for ${customerName}`);
+      renderUtangTab();
+      showToast(`Utang recorded for ${customerName}`, 'success');
     }
 
     function setUtangFilter(filter) {
-      selectedUtangFilter = ['unpaid', 'paid', 'all'].includes(filter) ? filter : 'unpaid';
-      for (const f of ['unpaid', 'paid', 'all']) {
-        const btn = document.getElementById(`utang-filter-${f}`);
-        if (btn) {
-          btn.className = f === selectedUtangFilter
-            ? 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
-            : 'px-3 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition';
-        }
-      }
+      selectedUtangFilter = filter;
+      ['unpaid', 'paid', 'all'].forEach((f) => {
+        const btn = document.getElementById('utang-filter-' + f);
+        if (!btn) return;
+        btn.className = f === filter
+          ? 'min-h-[40px] px-3.5 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
+          : 'min-h-[40px] px-3.5 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition';
+      });
       renderUtangTab();
     }
 
-    function toggleUtangPaid(utangId) {
+    function markUtangPaid(utangId) {
       const rec = state.utangRecords.find((u) => u.id === utangId);
       if (!rec) return;
-      rec.paid = !rec.paid;
-      rec.paidAt = rec.paid ? new Date().toISOString() : null;
+      rec.paidAmount = Number(rec.amount) || 0;
+      rec.paid = true;
+      rec.paidAt = new Date().toISOString();
       saveState();
-      renderAll();
-      showToast(rec.paid ? `Marked ${rec.customerName}'s utang as PAID` : `Marked ${rec.customerName}'s utang as UNPAID`);
-    }
-
-    function getUtangRemaining(rec) {
-      const original = Math.max(0, Number(rec?.amount) || 0);
-      const paidSoFar = Math.max(0, Number(rec?.paidAmount) || 0);
-      if (rec?.paid) return 0;
-      return Math.max(0, original - paidSoFar);
+      renderUtangTab();
+      showToast(`Marked ${rec.customerName}'s utang as PAID`, 'success');
     }
 
     function openPartialUtangModal(utangId) {
       const rec = state.utangRecords.find((u) => u.id === utangId);
       if (!rec) return;
-      const remaining = getUtangRemaining(rec);
-      if (remaining <= 0) {
-        return showToast(`${rec.customerName}'s utang has no remaining balance`);
-      }
+      const remaining = Math.max(0, (Number(rec.amount) || 0) - (Number(rec.paidAmount) || 0));
       document.getElementById('partial-utang-id').value = rec.id;
-      document.getElementById('partial-utang-subtitle').textContent = `${rec.customerName} • ${rec.note || 'Store Credit'}`;
-      document.getElementById('partial-utang-remaining').textContent = formatPeso(remaining);
-      const amtInput = document.getElementById('partial-utang-amount');
-      const noteInput = document.getElementById('partial-utang-note');
-      if (amtInput) {
-        amtInput.value = '';
-        amtInput.max = String(remaining.toFixed(2));
-      }
-      if (noteInput) noteInput.value = '';
+      document.getElementById('partial-utang-subtitle').textContent = `${rec.customerName} — ${rec.note || 'Utang'}`;
+      document.getElementById('partial-utang-remaining').textContent = formatCurrency(remaining);
+      document.getElementById('partial-utang-amount').value = '';
+      document.getElementById('partial-utang-note').value = '';
       document.getElementById('partial-utang-modal')?.classList.remove('hidden');
-      setTimeout(() => amtInput?.focus(), 40);
     }
 
     function closePartialUtangModal() {
@@ -2730,21 +2472,17 @@
     }
 
     function setQuickPartialAmount(val) {
-      const id = document.getElementById('partial-utang-id')?.value;
-      const rec = state.utangRecords.find((u) => u.id === id);
-      const remaining = rec ? getUtangRemaining(rec) : val;
-      const capped = Math.min(remaining, Math.max(0, Number(val) || 0));
-      const amtInput = document.getElementById('partial-utang-amount');
-      if (amtInput && capped > 0) amtInput.value = capped.toFixed(2);
+      const inp = document.getElementById('partial-utang-amount');
+      if (inp) inp.value = val;
     }
 
     function setFullRemainingPartialAmount() {
       const id = document.getElementById('partial-utang-id')?.value;
       const rec = state.utangRecords.find((u) => u.id === id);
       if (!rec) return;
-      const remaining = getUtangRemaining(rec);
-      const amtInput = document.getElementById('partial-utang-amount');
-      if (amtInput) amtInput.value = remaining.toFixed(2);
+      const remaining = Math.max(0, (Number(rec.amount) || 0) - (Number(rec.paidAmount) || 0));
+      const inp = document.getElementById('partial-utang-amount');
+      if (inp) inp.value = remaining.toFixed(2);
     }
 
     function submitPartialUtangPayment(e) {
@@ -2752,77 +2490,49 @@
       const id = document.getElementById('partial-utang-id')?.value;
       const rec = state.utangRecords.find((u) => u.id === id);
       if (!rec) return;
-
-      const remaining = getUtangRemaining(rec);
-      const payAmt = parseFloat(document.getElementById('partial-utang-amount')?.value) || 0;
-      const note = (document.getElementById('partial-utang-note')?.value || '').trim();
-
-      if (payAmt <= 0) return showToast('Enter a valid partial payment amount', true);
-      if (payAmt > remaining + 0.009) {
-        return showToast(`Amount exceeds remaining balance (${formatPeso(remaining)})`, true);
-      }
-
-      const appliedPay = Math.min(remaining, payAmt);
-      rec.paidAmount = Math.max(0, Number(rec.paidAmount) || 0) + appliedPay;
-      if (!Array.isArray(rec.payments)) rec.payments = [];
-      rec.payments.push({
-        amount: appliedPay,
-        note,
-        paidAt: new Date().toISOString()
-      });
-
-      const nextRemaining = Math.max(0, (Number(rec.amount) || 0) - rec.paidAmount);
-      if (nextRemaining <= 0.009) {
-        rec.paidAmount = Number(rec.amount) || 0;
+      const payAmt = Number(document.getElementById('partial-utang-amount')?.value) || 0;
+      if (payAmt <= 0) return;
+      const total = Number(rec.amount) || 0;
+      rec.paidAmount = Math.min(total, (Number(rec.paidAmount) || 0) + payAmt);
+      if (rec.paidAmount >= total - 0.009) {
+        rec.paidAmount = total;
         rec.paid = true;
         rec.paidAt = new Date().toISOString();
-      } else {
-        rec.paid = false;
       }
-
       saveState();
       closePartialUtangModal();
-      renderAll();
-      showToast(
-        rec.paid
-          ? `Full balance settled for ${rec.customerName} (+${formatPeso(appliedPay)})`
-          : `Partial payment ${formatPeso(appliedPay)} saved (${formatPeso(nextRemaining)} left)`
-      );
-    }
-
-    function deleteUtangRecord(utangId) {
-      const rec = state.utangRecords.find((u) => u.id === utangId);
-      if (!rec) return;
-      state.utangRecords = state.utangRecords.filter((u) => u.id !== utangId);
-      saveState();
-      renderAll();
-      showToast(`Removed utang record for ${rec.customerName}`);
+      renderUtangTab();
+      showToast(`Recorded ${formatCurrency(payAmt)} payment for ${rec.customerName}`, 'success');
     }
 
     function renderUtangTab() {
-      const unpaidTotal = state.utangRecords
-        .filter((u) => !u.paid)
-        .reduce((sum, u) => sum + getUtangRemaining(u), 0);
-      const paidTotal = state.utangRecords
-        .reduce((sum, u) => sum + (u.paid ? (Number(u.amount) || 0) : (Number(u.paidAmount) || 0)), 0);
-      const unpaidCount = state.utangRecords.filter((u) => !u.paid).length;
+      const search = (document.getElementById('utang-search')?.value || '').trim().toLowerCase();
+      let unpaidTotal = 0;
+      let paidTotal = 0;
+      let activeAccounts = 0;
 
-      const unpaidEl = document.getElementById('utang-unpaid-banner');
-      const paidEl = document.getElementById('utang-paid-banner');
-      const countEl = document.getElementById('utang-count-banner');
-      if (unpaidEl) unpaidEl.textContent = formatPeso(unpaidTotal);
-      if (paidEl) paidEl.textContent = formatPeso(paidTotal);
-      if (countEl) countEl.textContent = String(unpaidCount);
+      state.utangRecords.forEach((u) => {
+        const total = Number(u.amount) || 0;
+        const paidAmt = u.paid ? total : (Number(u.paidAmount) || 0);
+        const rem = Math.max(0, total - paidAmt);
+        unpaidTotal += rem;
+        paidTotal += paidAmt;
+        if (rem > 0) activeAccounts += 1;
+      });
 
-      const q = (document.getElementById('utang-search')?.value || '').trim().toLowerCase();
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setTxt('utang-unpaid-banner', formatCurrency(unpaidTotal));
+      setTxt('utang-paid-banner', formatCurrency(paidTotal));
+      setTxt('utang-count-banner', String(activeAccounts));
+
       const filtered = state.utangRecords.filter((u) => {
-        const matchFilter = selectedUtangFilter === 'all'
-          ? true
-          : selectedUtangFilter === 'paid'
-            ? !!u.paid
-            : !u.paid;
-        const matchQ = !q || String(u.customerName || '').toLowerCase().includes(q) || String(u.note || '').toLowerCase().includes(q);
-        return matchFilter && matchQ;
+        const total = Number(u.amount) || 0;
+        const paidAmt = u.paid ? total : (Number(u.paidAmount) || 0);
+        const isPaid = paidAmt >= total - 0.009;
+        if (selectedUtangFilter === 'unpaid' && isPaid) return false;
+        if (selectedUtangFilter === 'paid' && !isPaid) return false;
+        if (!search) return true;
+        return (u.customerName || '').toLowerCase().includes(search) || (u.note || '').toLowerCase().includes(search);
       });
 
       const listEl = document.getElementById('utang-list');
@@ -2833,352 +2543,45 @@
       }
 
       listEl.innerHTML = filtered.map((u) => {
-        const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }) : '';
-        const originalAmt = Number(u.amount) || 0;
-        const remainingAmt = getUtangRemaining(u);
-        const paidAmt = Math.max(0, originalAmt - remainingAmt);
-        const isPartial = !u.paid && paidAmt > 0;
+        const total = Number(u.amount) || 0;
+        const paidAmt = u.paid ? total : (Number(u.paidAmount) || 0);
+        const rem = Math.max(0, total - paidAmt);
+        const isPaid = rem <= 0.009;
+        const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
         return `
-          <div class="bg-white rounded-3xl p-4 shadow-card border ${u.paid ? 'border-emerald-200/80' : 'border-amber-200'} flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <p class="text-sm font-black text-slate-900 truncate">${escapeHtml(u.customerName)}</p>
-                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                  u.paid ? 'bg-emerald-100 text-emerald-700' : isPartial ? 'bg-sky-100 text-sky-800' : 'bg-amber-100 text-amber-800'
-                }">${u.paid ? 'PAID' : isPartial ? 'PARTIAL' : 'UNPAID'}</span>
-                ${dateStr ? `<span class="text-[10px] font-semibold text-slate-400">${escapeHtml(dateStr)}</span>` : ''}
+          <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-card space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <h3 class="text-sm font-black text-slate-900">${escapeHtml(u.customerName)}</h3>
+                  <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">
+                    ${isPaid ? 'PAID' : 'UNPAID'}
+                  </span>
+                </div>
+                <p class="text-xs font-semibold text-slate-600 mt-0.5">${escapeHtml(u.note || '')}</p>
+                <p class="text-[10px] font-semibold text-slate-400 mt-0.5">${escapeHtml(dateStr)}</p>
               </div>
-              <p class="text-xs font-semibold text-slate-500 truncate mt-0.5">${escapeHtml(u.note || '')}</p>
-              <p class="text-sm font-black ${u.paid ? 'text-emerald-700' : 'text-amber-700'} mt-1">
-                ${u.paid ? `Paid: ${formatPeso(originalAmt)}` : `Bal: ${formatPeso(remainingAmt)}`}
-              </p>
-              ${paidAmt > 0 && !u.paid ? `<p class="text-[11px] font-bold text-emerald-700">Paid so far: ${formatPeso(paidAmt)} of ${formatPeso(originalAmt)}</p>` : ''}
+              <div class="text-right shrink-0">
+                <p class="text-sm font-black ${isPaid ? 'text-emerald-700' : 'text-amber-700'}">${formatCurrency(rem)}</p>
+                <p class="text-[10px] font-semibold text-slate-400">of ${formatCurrency(total)}</p>
+              </div>
             </div>
-            <div class="flex flex-col gap-1.5 shrink-0">
-              ${!u.paid ? `
-                <button type="button" onclick="openPartialUtangModal('${u.id}')"
-                  class="min-h-[36px] px-3 py-1.5 rounded-xl bg-brand-purple hover:bg-brand-purpleDark active:scale-95 text-white text-xs font-extrabold transition">
+            ${!isPaid ? `
+              <div class="flex items-center gap-2 pt-1">
+                <button type="button" onclick="openPartialUtangModal('${escapeHtml(u.id)}')"
+                  class="flex-1 min-h-[38px] py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-extrabold transition">
                   Partial Pay
                 </button>
-              ` : ''}
-              <button type="button" onclick="toggleUtangPaid('${u.id}')"
-                class="min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-extrabold transition ${
-                  u.paid
-                    ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                    : 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white'
-                }">
-                ${u.paid ? 'Mark Unpaid' : 'Mark Paid'}
-              </button>
-              <button type="button" onclick="deleteUtangRecord('${u.id}')"
-                class="min-h-[36px] px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-600 text-xs font-extrabold">
-                Delete
-              </button>
-            </div>
+                <button type="button" onclick="markUtangPaid('${escapeHtml(u.id)}')"
+                  class="flex-1 min-h-[38px] py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition">
+                  Mark Full Paid
+                </button>
+              </div>
+            ` : ''}
           </div>
         `;
       }).join('');
-    }
-
-    // Expenses
-    function openExpenseModal() {
-      const counterSelect = document.getElementById('expense-counter');
-      if (counterSelect && ['store', 'softdrinks', 'cigarettes', 'gcash'].includes(currentTab)) {
-        counterSelect.value = currentTab;
-      }
-      document.getElementById('expense-modal')?.classList.remove('hidden');
-      setTimeout(() => document.getElementById('expense-desc')?.focus(), 40);
-    }
-
-    function closeExpenseModal() {
-      document.getElementById('expense-modal')?.classList.add('hidden');
-    }
-
-    function recordExpense(e) {
-      e.preventDefault();
-      const pos = document.getElementById('expense-counter')?.value || 'general';
-      const desc = (document.getElementById('expense-desc')?.value || '').trim();
-      const amount = parseFloat(document.getElementById('expense-amount')?.value) || 0;
-      if (!desc) return showToast('Enter expense description', true);
-      if (amount <= 0) return showToast('Enter valid expense amount', true);
-
-      state.transactions.unshift({
-        id: `tx-${Date.now()}`,
-        kind: 'expense',
-        pos,
-        title: desc,
-        amount,
-        profit: 0,
-        paymentMethod: 'Cash',
-        voided: false,
-        createdAt: new Date().toISOString()
-      });
-
-      document.getElementById('expense-desc').value = '';
-      document.getElementById('expense-amount').value = '';
-      saveState();
-      closeExpenseModal();
-      renderAll();
-      showToast(`Expense recorded (${formatPeso(amount)})`);
-    }
-
-    // Void Password & Transaction Voiding
-    function getVoidPassword() {
-      return (localStorage.getItem(VOID_PASSWORD_KEY) || '1234').trim() || '1234';
-    }
-
-    function toggleChangeVoidPasswordBox(forceShow = null) {
-      const box = document.getElementById('change-void-pass-box');
-      if (!box) return;
-      const shouldShow = forceShow === null ? box.classList.contains('hidden') : !!forceShow;
-      box.classList.toggle('hidden', !shouldShow);
-      if (shouldShow) {
-        document.getElementById('void-current-pass-input').value = '';
-        document.getElementById('void-new-pass-input').value = '';
-        document.getElementById('void-current-pass-input')?.focus();
-      }
-    }
-
-    function saveNewVoidPassword() {
-      const currentInput = (document.getElementById('void-current-pass-input')?.value || '').trim();
-      const newInput = (document.getElementById('void-new-pass-input')?.value || '').trim();
-      if (!currentInput) return showToast('Enter current void password', true);
-      if (currentInput !== getVoidPassword()) return showToast('Current void password is incorrect', true);
-      if (!newInput || newInput.length < 2) return showToast('New password must be at least 2 characters', true);
-
-      localStorage.setItem(VOID_PASSWORD_KEY, newInput);
-      const hintEl = document.getElementById('void-password-hint');
-      if (hintEl) hintEl.textContent = newInput;
-      toggleChangeVoidPasswordBox(false);
-      saveState();
-      showToast('Void password updated');
-    }
-
-    function openVoidModal(txId) {
-      const tx = state.transactions.find((t) => t.id === txId);
-      if (!tx || tx.voided) return;
-      pendingVoidId = txId;
-
-      const hintEl = document.getElementById('void-password-hint');
-      if (hintEl) hintEl.textContent = getVoidPassword();
-
-      const descEl = document.getElementById('void-modal-desc');
-      if (descEl) descEl.textContent = `Void "${tx.title}" (${formatPeso(tx.amount)})? Stock will be restored if applicable.`;
-
-      const passInput = document.getElementById('void-password-input');
-      const errEl = document.getElementById('void-password-error');
-      if (passInput) passInput.value = '';
-      if (errEl) errEl.classList.add('hidden');
-      toggleChangeVoidPasswordBox(false);
-
-      const confirmBtn = document.getElementById('void-confirm-btn');
-      if (confirmBtn) confirmBtn.onclick = confirmVoidTransaction;
-
-      document.getElementById('void-modal')?.classList.remove('hidden');
-      setTimeout(() => passInput?.focus(), 40);
-    }
-
-    function closeVoidModal() {
-      pendingVoidId = null;
-      document.getElementById('void-modal')?.classList.add('hidden');
-    }
-
-    function confirmVoidTransaction() {
-      const passInput = document.getElementById('void-password-input');
-      const errEl = document.getElementById('void-password-error');
-      const entered = (passInput?.value || '').trim();
-      if (entered !== getVoidPassword()) {
-        if (errEl) errEl.classList.remove('hidden');
-        passInput?.focus();
-        return;
-      }
-
-      const tx = state.transactions.find((t) => t.id === pendingVoidId);
-      if (!tx || tx.voided) return closeVoidModal();
-
-      tx.voided = true;
-      tx.voidedAt = new Date().toISOString();
-
-      if (tx.kind === 'gcash') {
-        const amt = Number(tx.amount) || 0;
-        const fee = Number(tx.fee ?? tx.profit) || 0;
-        const appliedDelta = typeof tx.puhunanDelta === 'number'
-          ? tx.puhunanDelta
-          : (tx.gcashType === 'cash_in' ? (amt + fee) : (-amt + fee));
-        state.gcashPuhunan = Math.max(0, (Number(state.gcashPuhunan) || 0) - appliedDelta);
-      }
-
-      if (tx.kind === 'sale' && Array.isArray(tx.items)) {
-        for (const item of tx.items) {
-          const prod = state.products.find((p) => p.id === item.productId);
-          if (prod) {
-            prod.stock = (Number(prod.stock) || 0) + (Number(item.qty) || 0);
-          }
-        }
-      }
-
-      const linkedUtang = state.utangRecords.find((u) => u.txId === tx.id);
-      if (linkedUtang) {
-        linkedUtang.paid = true;
-        linkedUtang.note = `${linkedUtang.note} [VOIDED]`;
-      }
-
-      saveState();
-      closeVoidModal();
-      renderAll();
-      showToast('Transaction voided');
-    }
-
-    // Metrics & Reports
-    function computeMetrics() {
-      const now = new Date();
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      const startOfWeek = new Date(now);
-      startOfWeek.setHours(0, 0, 0, 0);
-      startOfWeek.setDate(now.getDate() - now.getDay());
-
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-      const counters = {
-        store: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0, origTotal: 0, sellTotal: 0 },
-        softdrinks: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0, origTotal: 0, sellTotal: 0 },
-        cigarettes: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0, origTotal: 0, sellTotal: 0 },
-        gcash: { sales: 0, profit: 0, weeklySales: 0, weeklyProfit: 0, monthlySales: 0, monthlyProfit: 0, origTotal: 0, sellTotal: 0 }
-      };
-
-      for (const p of state.products) {
-        const pos = counters[p.pos] ? p.pos : 'store';
-        const stock = Math.max(0, Number(p.stock) || 0);
-        const cost = Math.max(0, Number(p.cost) || 0);
-        const price = Math.max(0, Number(p.price) || 0);
-        counters[pos].origTotal += cost * stock;
-        counters[pos].sellTotal += price * stock;
-      }
-
-      let grossSales = 0;
-      let grossProfit = 0;
-      let totalExpenses = 0;
-      let weeklySales = 0;
-      let weeklyProfit = 0;
-      let monthlySales = 0;
-      let monthlyProfit = 0;
-
-      for (const tx of state.transactions) {
-        if (!tx || tx.voided) continue;
-        const created = tx.createdAt ? new Date(tx.createdAt) : now;
-        const isToday = created >= startOfDay;
-        const isWeekly = created >= startOfWeek;
-        const isMonthly = created >= startOfMonth;
-        const amt = Number(tx.amount) || 0;
-        const prof = Number(tx.profit) || 0;
-        const pos = counters[tx.pos] ? tx.pos : 'store';
-
-        if (tx.kind === 'expense') {
-          if (isToday) totalExpenses += amt;
-          continue;
-        }
-
-        if (tx.kind === 'gcash') {
-          const fee = Number(tx.fee ?? tx.profit) || 0;
-          if (isToday) {
-            counters.gcash.sales += fee;
-            counters.gcash.profit += fee;
-            grossProfit += fee;
-          }
-          if (isWeekly) {
-            counters.gcash.weeklySales += fee;
-            counters.gcash.weeklyProfit += fee;
-            weeklyProfit += fee;
-          }
-          if (isMonthly) {
-            counters.gcash.monthlySales += fee;
-            counters.gcash.monthlyProfit += fee;
-            monthlyProfit += fee;
-          }
-          continue;
-        }
-
-        // Regular sales (Store, Softdrinks, Cigarettes) — daily metrics reset every day
-        if (isToday) {
-          counters[pos].sales += amt;
-          counters[pos].profit += prof;
-          grossSales += amt;
-          grossProfit += prof;
-        }
-        if (isWeekly) {
-          counters[pos].weeklySales += amt;
-          counters[pos].weeklyProfit += prof;
-          weeklySales += amt;
-          weeklyProfit += prof;
-        }
-        if (isMonthly) {
-          counters[pos].monthlySales += amt;
-          counters[pos].monthlyProfit += prof;
-          monthlySales += amt;
-          monthlyProfit += prof;
-        }
-      }
-
-      // GCash is excluded from Total Amount in Reports
-      const totalAmount = Math.max(0, grossSales - totalExpenses);
-
-      return {
-        counters,
-        grossSales,
-        grossProfit,
-        totalExpenses,
-        totalAmount,
-        weeklySales,
-        weeklyProfit,
-        monthlySales,
-        monthlyProfit
-      };
-    }
-
-    function updateDashboardKPIs() {
-      const m = computeMetrics();
-
-      const setText = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = formatPeso(val);
-      };
-
-      setText('store-sales-banner', m.counters.store.sales);
-      setText('store-profit-banner', m.counters.store.profit);
-      setText('store-weekly-sales', m.counters.store.weeklySales);
-      setText('store-weekly-profit', m.counters.store.weeklyProfit);
-      setText('store-monthly-sales', m.counters.store.monthlySales);
-      setText('store-monthly-profit', m.counters.store.monthlyProfit);
-      setText('total-amount-store', m.counters.store.sales);
-      setText('store-orig-total', m.counters.store.origTotal);
-      setText('store-sell-total', m.counters.store.sellTotal);
-
-      setText('softdrinks-sales-banner', m.counters.softdrinks.sales);
-      setText('softdrinks-profit-banner', m.counters.softdrinks.profit);
-      setText('softdrinks-weekly-sales', m.counters.softdrinks.weeklySales);
-      setText('softdrinks-weekly-profit', m.counters.softdrinks.weeklyProfit);
-      setText('softdrinks-monthly-sales', m.counters.softdrinks.monthlySales);
-      setText('softdrinks-monthly-profit', m.counters.softdrinks.monthlyProfit);
-      setText('total-amount-softdrinks', m.counters.softdrinks.sales);
-      setText('softdrinks-orig-total', m.counters.softdrinks.origTotal);
-      setText('softdrinks-sell-total', m.counters.softdrinks.sellTotal);
-
-      setText('cigarettes-sales-banner', m.counters.cigarettes.sales);
-      setText('cigarettes-profit-banner', m.counters.cigarettes.profit);
-      setText('cigarettes-weekly-sales', m.counters.cigarettes.weeklySales);
-      setText('cigarettes-weekly-profit', m.counters.cigarettes.weeklyProfit);
-      setText('cigarettes-monthly-sales', m.counters.cigarettes.monthlySales);
-      setText('cigarettes-monthly-profit', m.counters.cigarettes.monthlyProfit);
-      setText('total-amount-cigarettes', m.counters.cigarettes.sales);
-      setText('cigarettes-orig-total', m.counters.cigarettes.origTotal);
-      setText('cigarettes-sell-total', m.counters.cigarettes.sellTotal);
-
-      setText('gcash-sales-banner', m.counters.gcash.sales);
-      setText('gcash-profit-banner', m.counters.gcash.profit);
-      setText('gcash-weekly-sales', m.counters.gcash.weeklySales);
-      setText('gcash-weekly-profit', m.counters.gcash.weeklyProfit);
-      setText('gcash-monthly-sales', m.counters.gcash.monthlySales);
-      setText('gcash-monthly-profit', m.counters.gcash.monthlyProfit);
-      setText('total-amount-gcash', m.counters.gcash.sales);
     }
 
     function setReportFilter(filter) {
@@ -3186,41 +2589,145 @@
       renderReports();
     }
 
+    function togglePastLedgerView() {
+      showPastLedger = !showPastLedger;
+      renderReports();
+    }
+
     function renderReports() {
-      const m = computeMetrics();
-      const setText = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = formatPeso(val);
-      };
+      const allMetrics = computeTimeMetrics(null);
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-      setText('rep-gross-sales', m.grossSales);
-      setText('rep-gross-profit', m.grossProfit);
-      setText('rep-total-expenses', m.totalExpenses);
-      setText('rep-total-amount', m.totalAmount);
-      setText('rep-weekly-sales', m.weeklySales);
-      setText('rep-weekly-profit', m.weeklyProfit);
-      setText('rep-monthly-sales', m.monthlySales);
-      setText('rep-monthly-profit', m.monthlyProfit);
+      setTxt('rep-gross-sales', formatCurrency(allMetrics.dailySales));
+      setTxt('rep-gross-profit', formatCurrency(allMetrics.dailyProfit));
+      setTxt('rep-total-expenses', formatCurrency(allMetrics.dailyExpenses));
+      setTxt('rep-total-amount', formatCurrency(allMetrics.dailyAmount));
+      setTxt('rep-weekly-sales', formatCurrency(allMetrics.weeklySales));
+      setTxt('rep-weekly-profit', formatCurrency(allMetrics.weeklyProfit));
+      setTxt('rep-monthly-sales', formatCurrency(allMetrics.monthlySales));
+      setTxt('rep-monthly-profit', formatCurrency(allMetrics.monthlyProfit));
 
-      const cardsEl = document.getElementById('rep-counter-cards');
-      if (cardsEl) {
-        const labels = {
-          store: 'Store',
-          softdrinks: 'Softdrinks',
-          cigarettes: 'Cigarettes',
-          gcash: 'GCash'
-        };
-        cardsEl.innerHTML = ['store', 'softdrinks', 'cigarettes', 'gcash'].map((k) => `
-          <div class="bg-slate-50 rounded-2xl p-2.5 border border-slate-100">
-            <p class="text-[10px] font-extrabold uppercase text-slate-500">${labels[k]}</p>
-            <p class="text-xs font-black text-slate-900 mt-0.5">${formatPeso(m.counters[k].sales)}</p>
-            <p class="text-[10px] font-bold text-emerald-700">Kita: ${formatPeso(m.counters[k].profit)}</p>
-          </div>
-        `).join('');
+      const counters = [
+        { key: 'store', label: 'Store' },
+        { key: 'softdrinks', label: 'Softdrinks' },
+        { key: 'cigarettes', label: 'Yosi' },
+        { key: 'gcash', label: 'GCash' }
+      ];
+      const counterCardsEl = document.getElementById('rep-counter-cards');
+      if (counterCardsEl) {
+        counterCardsEl.innerHTML = counters.map((c) => {
+          const m = computeTimeMetrics((tx) => tx.pos === c.key);
+          return `
+            <div class="bg-slate-50 rounded-2xl p-2.5 border border-slate-200/70">
+              <p class="text-[10px] font-extrabold uppercase text-slate-500">${c.label}</p>
+              <p class="text-xs font-black text-slate-900 mt-0.5">${formatCurrency(m.dailySales)}</p>
+              <p class="text-[10px] font-bold text-emerald-700">Profit: ${formatCurrency(m.dailyProfit)}</p>
+            </div>
+          `;
+        }).join('');
       }
 
-      renderProductSalesChart();
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
 
+      // Daily Top 10 Sales (resets every day)
+      const dailySalesMap = {};
+      let dailyTotalUnits = 0;
+      state.transactions.forEach((tx) => {
+        if (!tx || tx.voided || tx.kind !== 'sale') return;
+        const created = tx.createdAt ? new Date(tx.createdAt) : now;
+        if (created < startOfDay) return;
+        (tx.items || []).forEach((it) => {
+          const key = it.productId || it.name;
+          if (!key) return;
+          if (!dailySalesMap[key]) {
+            dailySalesMap[key] = { name: it.name, qty: 0, revenue: 0 };
+          }
+          const q = Number(it.qty) || 0;
+          const rev = (Number(it.price) || 0) * q;
+          dailySalesMap[key].qty += q;
+          dailySalesMap[key].revenue += rev;
+          dailyTotalUnits += q;
+        });
+      });
+
+      const dailyTop10 = Object.values(dailySalesMap)
+        .sort((a, b) => b.qty - a.qty || b.revenue - a.revenue)
+        .slice(0, 10);
+
+      const top10SummaryEl = document.getElementById('rep-daily-top10-summary');
+      if (top10SummaryEl) top10SummaryEl.textContent = `${dailyTotalUnits} sold today`;
+
+      const top10ChartEl = document.getElementById('rep-daily-top10-chart');
+      if (top10ChartEl) {
+        if (!dailyTop10.length) {
+          top10ChartEl.innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-3">No product sales recorded today yet.</p>`;
+        } else {
+          const maxQty = Math.max(1, dailyTop10[0].qty);
+          top10ChartEl.innerHTML = dailyTop10.map((item, idx) => {
+            const pct = Math.max(8, Math.round((item.qty / maxQty) * 100));
+            return `
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-[11px] font-bold gap-2">
+                  <span class="truncate text-slate-800"><span class="font-black theme-accent-text mr-1">#${idx + 1}</span>${escapeHtml(item.name)}</span>
+                  <span class="shrink-0 font-black text-slate-900">${item.qty} sold • ${formatCurrency(item.revenue)}</span>
+                </div>
+                <div class="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full theme-accent-btn" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Overall Best-Selling to Slow-Moving
+      const allSalesMap = {};
+      state.products.forEach((p) => {
+        allSalesMap[p.id] = { name: p.name, qty: 0, revenue: 0 };
+      });
+      state.transactions.forEach((tx) => {
+        if (!tx || tx.voided || tx.kind !== 'sale') return;
+        (tx.items || []).forEach((it) => {
+          const key = it.productId || it.name;
+          if (!key) return;
+          if (!allSalesMap[key]) {
+            allSalesMap[key] = { name: it.name, qty: 0, revenue: 0 };
+          }
+          const q = Number(it.qty) || 0;
+          allSalesMap[key].qty += q;
+          allSalesMap[key].revenue += (Number(it.price) || 0) * q;
+        });
+      });
+
+      const rankedAll = Object.values(allSalesMap).sort((a, b) => b.qty - a.qty || b.revenue - a.revenue);
+      const chartSummaryEl = document.getElementById('rep-product-chart-summary');
+      if (chartSummaryEl) chartSummaryEl.textContent = `${rankedAll.length} items`;
+
+      const chartEl = document.getElementById('rep-product-sales-chart');
+      if (chartEl) {
+        if (!rankedAll.length) {
+          chartEl.innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-3">No products available.</p>`;
+        } else {
+          const maxAll = Math.max(1, rankedAll[0].qty);
+          chartEl.innerHTML = rankedAll.slice(0, 12).map((item) => {
+            const pct = item.qty > 0 ? Math.max(6, Math.round((item.qty / maxAll) * 100)) : 2;
+            return `
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-[11px] font-bold gap-2">
+                  <span class="truncate text-slate-700">${escapeHtml(item.name)}</span>
+                  <span class="shrink-0 text-slate-600">${item.qty} sold (${formatCurrency(item.revenue)})</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full ${item.qty > 0 ? 'bg-emerald-500' : 'bg-slate-300'}" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Filter pills
       const filters = [
         { key: 'all', label: 'All' },
         { key: 'store', label: 'Store' },
@@ -3229,547 +2736,326 @@
         { key: 'gcash', label: 'GCash' },
         { key: 'expense', label: 'Expenses' }
       ];
-      const filterBar = document.getElementById('report-filters');
-      if (filterBar) {
-        filterBar.innerHTML = filters.map((f) => `
-          <button type="button" onclick="setReportFilter('${f.key}')"
-            class="min-h-[36px] px-3.5 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
-              selectedReportFilter === f.key
-                ? 'bg-brand-purple text-white'
-                : 'bg-white text-slate-600 border border-slate-200'
-            }">
-            ${f.label}
-          </button>
-        `).join('');
+      const filterWrap = document.getElementById('report-filters');
+      if (filterWrap) {
+        filterWrap.innerHTML = filters.map((f) => {
+          const active = selectedReportFilter === f.key;
+          return `<button type="button" onclick="setReportFilter('${f.key}')"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
+              active ? 'theme-accent-btn shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }">${f.label}</button>`;
+        }).join('');
       }
 
-      const filteredTx = state.transactions.filter((tx) => {
-        if (!tx) return false;
-        if (selectedReportFilter === 'all') return true;
-        if (selectedReportFilter === 'expense') return tx.kind === 'expense';
-        return tx.pos === selectedReportFilter;
-      });
-
+      // Daily Transactions Ledger (hides previous days after the day by default)
       const ledgerEl = document.getElementById('transactions-ledger');
-      if (!ledgerEl) return;
-      if (!filteredTx.length) {
-        ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No transactions in this filter.</div>`;
-        return;
+      const scopeLabelEl = document.getElementById('ledger-scope-label');
+      const togglePastBtn = document.getElementById('toggle-past-ledger-btn');
+
+      if (scopeLabelEl) {
+        scopeLabelEl.textContent = showPastLedger ? 'All Transactions (Including Past Days)' : "Today's Transactions";
+      }
+      if (togglePastBtn) {
+        togglePastBtn.textContent = showPastLedger ? 'Hide Past Days' : 'Show Past Days';
+        togglePastBtn.className = showPastLedger
+          ? 'min-h-[34px] px-3 py-1.5 rounded-xl theme-accent-btn text-[11px] font-extrabold shrink-0 transition'
+          : 'min-h-[34px] px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-[11px] font-extrabold shrink-0 transition';
       }
 
-      ledgerEl.innerHTML = filteredTx.map((tx) => {
-        const dt = tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-        const isExpense = tx.kind === 'expense';
-        return `
-          <div class="bg-white rounded-3xl p-3.5 shadow-card border ${tx.voided ? 'border-slate-200 opacity-60' : 'border-slate-100'} flex items-center justify-between gap-2.5">
-            <div class="min-w-0">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                  isExpense ? 'bg-rose-100 text-rose-700' : 'bg-purple-100 text-brand-purple'
-                }">${escapeHtml(tx.pos || 'store')}</span>
-                ${tx.paymentMethod ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${escapeHtml(tx.paymentMethod)}</span>` : ''}
-                ${tx.voided ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">VOIDED</span>` : ''}
-                ${dt ? `<span class="text-[10px] font-semibold text-slate-400">${escapeHtml(dt)}</span>` : ''}
+      if (ledgerEl) {
+        const filteredTx = state.transactions.filter((tx) => {
+          if (!tx) return false;
+          if (!showPastLedger) {
+            const created = tx.createdAt ? new Date(tx.createdAt) : now;
+            if (created < startOfDay) return false;
+          }
+          if (selectedReportFilter === 'all') return true;
+          if (selectedReportFilter === 'expense') return tx.kind === 'expense';
+          return tx.pos === selectedReportFilter;
+        });
+
+        if (!filteredTx.length) {
+          ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">${
+            showPastLedger ? 'No transactions recorded yet.' : 'No transactions recorded today yet.'
+          }</div>`;
+        } else {
+          ledgerEl.innerHTML = filteredTx.map((tx) => {
+            const isExpense = tx.kind === 'expense';
+            const isVoided = Boolean(tx.voided);
+            const displayAmt = isExpense ? (Number(tx.amount) || 0) : (Number(tx.sales) || 0);
+            const timeStr = tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+            return `
+              <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-card flex items-start justify-between gap-2 ${isVoided ? 'opacity-55' : ''}">
+                <div class="min-w-0 space-y-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                      isExpense ? 'bg-rose-100 text-rose-700' : 'theme-accent-badge border'
+                    }">${escapeHtml(tx.pos || 'store')}</span>
+                    ${tx.paymentMethod ? `<span class="text-[10px] font-bold text-slate-500">${escapeHtml(tx.paymentMethod)}</span>` : ''}
+                    ${isVoided ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">VOIDED</span>` : ''}
+                  </div>
+                  <p class="text-xs font-black text-slate-900 leading-snug">${escapeHtml(tx.description || '')}</p>
+                  <p class="text-[10px] font-semibold text-slate-400">${escapeHtml(timeStr)}</p>
+                </div>
+                <div class="text-right shrink-0 space-y-1">
+                  <p class="text-sm font-black ${isExpense ? 'text-rose-600' : 'text-slate-900'}">${isExpense ? '-' : ''}${formatCurrency(displayAmt)}</p>
+                  ${!isExpense && !isVoided ? `<p class="text-[10px] font-bold text-emerald-700">Profit: ${formatCurrency(tx.profit)}</p>` : ''}
+                  ${!isVoided ? `
+                    <button type="button" onclick="openVoidModal('${escapeHtml(tx.id)}')"
+                      class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-extrabold">
+                      Void
+                    </button>
+                  ` : ''}
+                </div>
               </div>
-              <p class="text-xs font-black text-slate-900 truncate mt-1 ${tx.voided ? 'line-through' : ''}">${escapeHtml(tx.title || '')}</p>
-              <div class="flex items-center gap-2 mt-0.5 text-[11px] font-bold">
-                <span class="${isExpense ? 'text-rose-600' : 'text-slate-900'}">${isExpense ? '-' : ''}${formatPeso(tx.amount)}</span>
-                ${!isExpense ? `<span class="text-emerald-700">Kita: ${formatPeso(tx.profit)}</span>` : ''}
-              </div>
-            </div>
-            ${!tx.voided ? `
-              <button type="button" onclick="openVoidModal('${tx.id}')"
-                class="min-h-[36px] px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-600 text-xs font-extrabold shrink-0">
-                Void
-              </button>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
+            `;
+          }).join('');
+        }
+      }
     }
 
-    function renderProductSalesChart() {
-      const chartEl = document.getElementById('rep-product-sales-chart');
-      const summaryEl = document.getElementById('rep-product-chart-summary');
-      if (!chartEl) return;
+    function getVoidPassword() {
+      return localStorage.getItem(VOID_PASSWORD_KEY) || '1234';
+    }
 
-      const statsMap = new Map();
-      for (const p of state.products) {
-        statsMap.set(p.id, {
-          id: p.id,
-          name: p.name,
-          pos: p.pos,
-          unitsSold: 0,
-          salesTotal: 0
+    function openVoidModal(txId) {
+      const tx = state.transactions.find((t) => t.id === txId);
+      if (!tx || tx.voided) return;
+      pendingVoidId = txId;
+      document.getElementById('void-modal-desc').textContent = `${tx.description} (${formatCurrency(tx.kind === 'expense' ? tx.amount : tx.sales)})`;
+      document.getElementById('void-password-input').value = '';
+      document.getElementById('void-password-error')?.classList.add('hidden');
+      const hintEl = document.getElementById('void-password-hint');
+      if (hintEl) hintEl.textContent = getVoidPassword() === '1234' ? '1234' : '••••';
+      document.getElementById('void-modal')?.classList.remove('hidden');
+
+      const confirmBtn = document.getElementById('void-confirm-btn');
+      if (confirmBtn) {
+        confirmBtn.onclick = () => {
+          const entered = document.getElementById('void-password-input')?.value || '';
+          if (entered !== getVoidPassword()) {
+            document.getElementById('void-password-error')?.classList.remove('hidden');
+            return;
+          }
+          executeVoidTransaction(pendingVoidId);
+          closeVoidModal();
+        };
+      }
+    }
+
+    function closeVoidModal() {
+      pendingVoidId = null;
+      document.getElementById('void-modal')?.classList.add('hidden');
+    }
+
+    function toggleChangeVoidPasswordBox(forceState) {
+      const box = document.getElementById('change-void-pass-box');
+      if (!box) return;
+      const shouldShow = typeof forceState === 'boolean' ? forceState : box.classList.contains('hidden');
+      if (shouldShow) box.classList.remove('hidden');
+      else box.classList.add('hidden');
+    }
+
+    function saveNewVoidPassword() {
+      const cur = document.getElementById('void-current-pass-input')?.value || '';
+      const next = (document.getElementById('void-new-pass-input')?.value || '').trim();
+      if (cur !== getVoidPassword()) {
+        showToast('Current void password is incorrect.', 'error');
+        return;
+      }
+      if (!next) {
+        showToast('Enter a new void password.', 'error');
+        return;
+      }
+      localStorage.setItem(VOID_PASSWORD_KEY, next);
+      document.getElementById('void-current-pass-input').value = '';
+      document.getElementById('void-new-pass-input').value = '';
+      toggleChangeVoidPasswordBox(false);
+      showToast('Void password updated!', 'success');
+    }
+
+    function executeVoidTransaction(txId) {
+      const tx = state.transactions.find((t) => t.id === txId);
+      if (!tx || tx.voided) return;
+      tx.voided = true;
+      if (tx.kind === 'sale' && Array.isArray(tx.items)) {
+        tx.items.forEach((it) => {
+          const prod = state.products.find((p) => p.id === it.productId);
+          if (prod) {
+            prod.stock = (Number(prod.stock) || 0) + (Number(it.qty) || 0);
+          }
         });
       }
-
-      for (const tx of state.transactions) {
-        if (!tx || tx.voided || tx.kind !== 'sale' || !Array.isArray(tx.items)) continue;
-        for (const item of tx.items) {
-          const qty = Math.max(0, Number(item.qty) || 0);
-          const price = Math.max(0, Number(item.price) || 0);
-          const lineSales = qty * price;
-          const key = item.productId || item.name;
-          if (!key) continue;
-
-          let entry = statsMap.get(key);
-          if (!entry) {
-            entry = Array.from(statsMap.values()).find((v) => v.name.toLowerCase() === String(item.name || '').toLowerCase());
-          }
-          if (!entry) {
-            entry = {
-              id: key,
-              name: item.name || 'Item',
-              pos: tx.pos || 'store',
-              unitsSold: 0,
-              salesTotal: 0
-            };
-            statsMap.set(key, entry);
-          }
-          entry.unitsSold += qty;
-          entry.salesTotal += lineSales;
+      if (tx.kind === 'gcash') {
+        const amt = Number(tx.amount) || 0;
+        if (tx.gcashType === 'cash_in' || tx.gcashType === 'eload') {
+          state.gcashPuhunan = (Number(state.gcashPuhunan) || 0) + amt;
+        } else if (tx.gcashType === 'cash_out') {
+          state.gcashPuhunan = Math.max(0, (Number(state.gcashPuhunan) || 0) - amt);
         }
       }
+      saveState();
+      renderAll();
+      showToast('Transaction voided and stock restored.', 'warn');
+    }
 
-      const ranked = Array.from(statsMap.values()).sort((a, b) => {
-        if (b.unitsSold !== a.unitsSold) return b.unitsSold - a.unitsSold;
-        if (b.salesTotal !== a.salesTotal) return b.salesTotal - a.salesTotal;
-        return a.name.localeCompare(b.name);
+    function openLowStockModal(pos = 'store', type = 'low') {
+      lowStockModalPos = pos;
+      lowStockModalAllCounters = false;
+      lowStockModalType = type;
+      renderLowStockModal(pos, false, type);
+      document.getElementById('low-stock-modal')?.classList.remove('hidden');
+    }
+
+    function closeLowStockModal() {
+      document.getElementById('low-stock-modal')?.classList.add('hidden');
+    }
+
+    function renderLowStockModal(pos, allCounters, type) {
+      lowStockModalPos = pos;
+      lowStockModalAllCounters = allCounters;
+      lowStockModalType = type;
+
+      const setBtnStyle = (id, active) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = active
+          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
+          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
+      };
+      setBtnStyle('low-stock-type-out', type === 'out');
+      setBtnStyle('low-stock-type-low', type === 'low');
+      setBtnStyle('low-stock-scope-counter', !allCounters);
+      setBtnStyle('low-stock-scope-all', allCounters);
+
+      const items = state.products.filter((p) => {
+        if (!allCounters && p.pos !== pos) return false;
+        const st = Number(p.stock) || 0;
+        const thresh = Number(p.lowStockThreshold ?? 5);
+        return type === 'out' ? st <= 0 : (st > 0 && st <= thresh);
       });
 
-      const topTen = ranked.slice(0, 10);
-
-      if (summaryEl) {
-        summaryEl.textContent = `Top ${topTen.length} of ${ranked.length}`;
-      }
-
-      if (!topTen.length) {
-        chartEl.innerHTML = `<p class="text-xs font-bold text-slate-400 text-center py-3">No product sales data yet.</p>`;
+      const listEl = document.getElementById('low-stock-modal-list');
+      if (!listEl) return;
+      if (!items.length) {
+        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-5 text-center text-xs font-bold text-slate-500">No items in this category.</div>`;
         return;
       }
 
-      const maxUnits = Math.max(1, ...topTen.map((r) => r.unitsSold));
-      chartEl.innerHTML = topTen.map((item, idx) => {
-        const pct = Math.max(4, Math.round((item.unitsSold / maxUnits) * 100));
-        const badgeClass = item.unitsSold > 0
-          ? 'theme-accent-badge'
-          : 'bg-slate-200 text-slate-600';
-        return `
-          <div class="bg-white rounded-2xl p-2.5 border border-slate-100 space-y-1">
-            <div class="flex items-center justify-between gap-2 text-xs">
-              <div class="flex items-center gap-1.5 min-w-0">
-                <span class="text-[10px] font-black px-1.5 py-0.5 rounded-md ${badgeClass} shrink-0">#${idx + 1}</span>
-                <span class="font-black text-slate-900 truncate">${escapeHtml(item.name)}</span>
-              </div>
-              <span class="font-extrabold text-slate-700 shrink-0">${item.unitsSold} sold • ${formatPeso(item.salesTotal)}</span>
-            </div>
-            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div class="h-full rounded-full ${item.unitsSold > 0 ? 'theme-accent-btn' : 'bg-slate-300'}" style="width: ${pct}%"></div>
-            </div>
+      listEl.innerHTML = items.map((p) => `
+        <div class="bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-2 border border-slate-200/70">
+          <div class="min-w-0">
+            <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(p.name)}</p>
+            <p class="text-[11px] font-semibold text-slate-500 uppercase">${escapeHtml(p.pos)} • Stock: ${Number(p.stock) || 0}</p>
           </div>
-        `;
-      }).join('');
+          <button type="button" onclick="closeLowStockModal(); openEditorModal('${escapeHtml(p.pos)}', '${escapeHtml(p.id)}')"
+            class="px-3 py-1.5 rounded-xl theme-accent-btn text-xs font-extrabold shrink-0">
+            Restock
+          </button>
+        </div>
+      `).join('');
     }
 
-    // Derive a cohesive UI palette from the #1 best-selling product
-    function getBestSellerThemePalette(product) {
-      if (!product) {
-        return {
-          name: 'Pink Default',
-          bg: '#FDF2F8',
-          border: '#FBCFE8',
-          accent: '#DB2777',
-          accentDark: '#BE185D',
-          accentLight: '#EC4899',
-          accentSoft: '#FCE7F3',
-          accentText: '#BE185D',
-          glow: 'rgba(219, 39, 119, 0.48)'
-        };
-      }
-
-      const text = `${product.name || ''} ${product.category || ''} ${product.pos || ''}`.toLowerCase();
-      if (text.includes('coke') || text.includes('cola') || text.includes('red') || text.includes('marlboro') || text.includes('sardinas') || text.includes('tomato')) {
-        return {
-          name: 'Crimson Red',
-          bg: '#FEF2F2',
-          border: '#FECACA',
-          accent: '#DC2626',
-          accentDark: '#B91C1C',
-          accentLight: '#EF4444',
-          accentSoft: '#FEE2E2',
-          accentText: '#B91C1C',
-          glow: 'rgba(220, 38, 38, 0.45)'
-        };
-      }
-      if (text.includes('sprite') || text.includes('mint') || text.includes('menthol') || text.includes('green') || text.includes('rice') || text.includes('bigas') || text.includes('vegetable')) {
-        return {
-          name: 'Emerald Green',
-          bg: '#ECFDF5',
-          border: '#A7F3D0',
-          accent: '#059669',
-          accentDark: '#047857',
-          accentLight: '#10B981',
-          accentSoft: '#D1FAE5',
-          accentText: '#047857',
-          glow: 'rgba(5, 150, 105, 0.45)'
-        };
-      }
-      if (text.includes('royal') || text.includes('orange') || text.includes('mango') || text.includes('cheese') || text.includes('canton') || text.includes('noodle')) {
-        return {
-          name: 'Warm Amber',
-          bg: '#FFFBEB',
-          border: '#FDE68A',
-          accent: '#D97706',
-          accentDark: '#B45309',
-          accentLight: '#F59E0B',
-          accentSoft: '#FEF3C7',
-          accentText: '#B45309',
-          glow: 'rgba(217, 119, 6, 0.45)'
-        };
-      }
-      if (text.includes('water') || text.includes('tubig') || text.includes('blue') || text.includes('soap') || text.includes('safeguard') || text.includes('detergent')) {
-        return {
-          name: 'Ocean Blue',
-          bg: '#F0F9FF',
-          border: '#BAE6FD',
-          accent: '#0284C7',
-          accentDark: '#0369A1',
-          accentLight: '#0EA5E9',
-          accentSoft: '#E0F2FE',
-          accentText: '#0369A1',
-          glow: 'rgba(2, 132, 199, 0.45)'
-        };
-      }
-      if (text.includes('coffee') || text.includes('kape') || text.includes('choco') || text.includes('winston') || text.includes('brown')) {
-        return {
-          name: 'Roasted Mocha',
-          bg: '#FAF5F0',
-          border: '#E7D5C4',
-          accent: '#92400E',
-          accentDark: '#78350F',
-          accentLight: '#B45309',
-          accentSoft: '#F3E8DC',
-          accentText: '#78350F',
-          glow: 'rgba(146, 64, 14, 0.45)'
-        };
-      }
-
-      // Deterministic fallback hue based on product name so any custom product gets a distinct theme
-      let hash = 0;
-      const seed = String(product.name || 'item');
-      for (let i = 0; i < seed.length; i++) {
-        hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const hue = Math.abs(hash) % 360;
-      return {
-        name: `Hue ${hue}°`,
-        bg: `hsl(${hue}, 85%, 97%)`,
-        border: `hsl(${hue}, 78%, 88%)`,
-        accent: `hsl(${hue}, 76%, 46%)`,
-        accentDark: `hsl(${hue}, 80%, 37%)`,
-        accentLight: `hsl(${hue}, 82%, 55%)`,
-        accentSoft: `hsl(${hue}, 88%, 93%)`,
-        accentText: `hsl(${hue}, 78%, 35%)`,
-        glow: `hsla(${hue}, 78%, 45%, 0.45)`
-      };
+    function openBarcodeScanner(mode = 'pos') {
+      barcodeMode = mode;
+      document.getElementById('barcode-unmatched-box')?.classList.add('hidden');
+      document.getElementById('barcode-manual-input').value = '';
+      document.getElementById('barcode-modal')?.classList.remove('hidden');
+      startCameraBarcodeScan();
     }
 
-    function applyBestSellerUiTheme() {
-      const salesByKey = new Map();
-      for (const tx of state.transactions || []) {
-        if (!tx || tx.voided || tx.kind !== 'sale' || !Array.isArray(tx.items)) continue;
-        for (const item of tx.items) {
-          const qty = Math.max(0, Number(item.qty) || 0);
-          const price = Math.max(0, Number(item.price) || 0);
-          const key = item.productId || item.name;
-          if (!key) continue;
-          const prev = salesByKey.get(key) || {
-            productId: item.productId || '',
-            name: item.name || 'Item',
-            pos: tx.pos || 'store',
-            unitsSold: 0,
-            salesTotal: 0
-          };
-          prev.unitsSold += qty;
-          prev.salesTotal += qty * price;
-          salesByKey.set(key, prev);
-        }
-      }
-
-      const rankedSales = Array.from(salesByKey.values()).sort((a, b) => {
-        if (b.unitsSold !== a.unitsSold) return b.unitsSold - a.unitsSold;
-        return b.salesTotal - a.salesTotal;
-      });
-
-      const topSale = rankedSales[0] || null;
-      const matchedProduct = topSale
-        ? (state.products.find((p) => p.id === topSale.productId) ||
-           state.products.find((p) => p.name.toLowerCase() === String(topSale.name || '').toLowerCase()) ||
-           { name: topSale.name, category: '', pos: topSale.pos })
-        : null;
-
-      const palette = getBestSellerThemePalette(matchedProduct);
-      const rootStyle = document.documentElement.style;
-      rootStyle.setProperty('--ui-bg', palette.bg);
-      rootStyle.setProperty('--ui-border', palette.border);
-      rootStyle.setProperty('--ui-accent', palette.accent);
-      rootStyle.setProperty('--ui-accent-dark', palette.accentDark);
-      rootStyle.setProperty('--ui-accent-light', palette.accentLight);
-      rootStyle.setProperty('--ui-accent-soft', palette.accentSoft);
-      rootStyle.setProperty('--ui-accent-text', palette.accentText);
-      rootStyle.setProperty('--ui-glow', palette.glow);
-
-      const pill = document.getElementById('best-seller-ui-pill');
-      if (pill) {
-        if (topSale && topSale.unitsSold > 0) {
-          pill.textContent = `Best Seller UI: ${topSale.name} (${topSale.unitsSold} sold)`;
-          pill.classList.remove('hidden');
-        } else {
-          pill.textContent = '';
-          pill.classList.add('hidden');
-        }
-      }
+    function closeBarcodeScanner() {
+      stopCameraBarcodeScan();
+      document.getElementById('barcode-modal')?.classList.add('hidden');
     }
 
-    // Barcode Scanner (Camera BarcodeDetector + ZXing Fallback + Manual/USB Scanner input)
-    function stopBarcodeCamera() {
-      if (barcodeScanFrame) {
-        cancelAnimationFrame(barcodeScanFrame);
-        barcodeScanFrame = null;
-      }
-      if (zxingReader) {
-        try {
-          zxingReader.reset();
-        } catch (_) {
-          // Ignore ZXing reset errors
-        }
-        zxingReader = null;
-      }
-      if (barcodeStream) {
-        barcodeStream.getTracks().forEach((track) => track.stop());
-        barcodeStream = null;
-      }
-      const video = document.getElementById('barcode-video');
-      if (video) {
-        video.pause();
-        video.srcObject = null;
-      }
-    }
-
-    async function startBarcodeCamera() {
+    async function startCameraBarcodeScan() {
       const video = document.getElementById('barcode-video');
       const fallback = document.getElementById('barcode-camera-fallback');
-      const statusEl = document.getElementById('barcode-camera-status');
       if (!video) return;
-
-      stopBarcodeCamera();
-      if (fallback) fallback.classList.add('hidden');
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        if (statusEl) statusEl.textContent = 'Camera API not supported on this device.';
-        if (fallback) fallback.classList.remove('hidden');
-        return;
-      }
-
       try {
-        barcodeStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
-          audio: false
-        });
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          fallback?.classList.remove('hidden');
+          return;
+        }
+        fallback?.classList.add('hidden');
+        barcodeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         video.srcObject = barcodeStream;
         await video.play();
 
         if ('BarcodeDetector' in window) {
-          const detector = new window.BarcodeDetector({
-            formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'codabar', 'itf', 'qr_code']
-          });
-
-          const scanLoop = async () => {
-            if (!barcodeStream || video.readyState < 2) {
-              barcodeScanFrame = requestAnimationFrame(scanLoop);
-              return;
-            }
+          const detector = new window.BarcodeDetector();
+          barcodeDetectorInterval = setInterval(async () => {
             try {
               const codes = await detector.detect(video);
-              if (Array.isArray(codes) && codes.length > 0) {
-                const rawVal = String(codes[0].rawValue || '').trim();
-                if (rawVal) {
-                  handleDetectedBarcode(rawVal);
-                  return;
-                }
+              if (codes && codes.length && codes[0].rawValue) {
+                handleDetectedBarcode(codes[0].rawValue);
               }
-            } catch (_) {
-              // Ignore transient frame detection errors
-            }
-            barcodeScanFrame = requestAnimationFrame(scanLoop);
-          };
-
-          barcodeScanFrame = requestAnimationFrame(scanLoop);
-        } else if (window.ZXing && typeof window.ZXing.BrowserMultiFormatReader === 'function') {
-          const hints = new Map();
-          if (window.ZXing.DecodeHintType && window.ZXing.BarcodeFormat) {
-            hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-              window.ZXing.BarcodeFormat.EAN_13,
-              window.ZXing.BarcodeFormat.EAN_8,
-              window.ZXing.BarcodeFormat.UPC_A,
-              window.ZXing.BarcodeFormat.UPC_E,
-              window.ZXing.BarcodeFormat.CODE_128,
-              window.ZXing.BarcodeFormat.CODE_39,
-              window.ZXing.BarcodeFormat.CODABAR,
-              window.ZXing.BarcodeFormat.ITF,
-              window.ZXing.BarcodeFormat.QR_CODE
-            ]);
-          }
-          zxingReader = new window.ZXing.BrowserMultiFormatReader(hints);
-          zxingReader.decodeFromStream(barcodeStream, video, (result) => {
-            if (result && result.getText) {
-              const rawVal = String(result.getText() || '').trim();
-              if (rawVal) {
-                handleDetectedBarcode(rawVal);
-              }
+            } catch (e) {}
+          }, 450);
+        } else if (window.ZXing && window.ZXing.BrowserMultiFormatReader) {
+          zxingCodeReader = new window.ZXing.BrowserMultiFormatReader();
+          zxingCodeReader.decodeFromVideoElement(video, (result) => {
+            if (result && result.text) {
+              handleDetectedBarcode(result.text);
             }
           });
-        } else {
-          if (statusEl) statusEl.textContent = 'Auto-camera scan not supported; use manual/USB input below.';
-          if (fallback) fallback.classList.remove('hidden');
         }
-      } catch (err) {
-        console.error('Barcode camera error:', err);
-        if (statusEl) statusEl.textContent = 'Camera permission denied or unavailable.';
-        if (fallback) fallback.classList.remove('hidden');
+      } catch (e) {
+        fallback?.classList.remove('hidden');
       }
     }
 
-    function openBarcodeScanner(mode = 'pos') {
-      barcodeScannerMode = mode === 'editor' ? 'editor' : 'pos';
-      lastScannedBarcode = '';
-
-      const titleEl = document.getElementById('barcode-modal-title');
-      const subEl = document.getElementById('barcode-modal-subtitle');
-      const unmatchedBox = document.getElementById('barcode-unmatched-box');
-      const inputEl = document.getElementById('barcode-manual-input');
-
-      if (titleEl) {
-        titleEl.textContent = barcodeScannerMode === 'editor' ? 'Scan Product Barcode' : 'Scan Barcode to Sell';
+    function stopCameraBarcodeScan() {
+      if (barcodeDetectorInterval) {
+        clearInterval(barcodeDetectorInterval);
+        barcodeDetectorInterval = null;
       }
-      if (subEl) {
-        subEl.textContent = barcodeScannerMode === 'editor'
-          ? 'Scan or enter barcode to fill the product form'
-          : 'Scan or enter barcode to add matching product to cart';
+      if (zxingCodeReader) {
+        try { zxingCodeReader.reset(); } catch (e) {}
+        zxingCodeReader = null;
       }
-      if (unmatchedBox) unmatchedBox.classList.add('hidden');
-      if (inputEl) inputEl.value = '';
-
-      document.getElementById('barcode-modal')?.classList.remove('hidden');
-      startBarcodeCamera();
-      setTimeout(() => inputEl?.focus(), 80);
-    }
-
-    function closeBarcodeScanner() {
-      stopBarcodeCamera();
-      document.getElementById('barcode-modal')?.classList.add('hidden');
-    }
-
-    function handleDetectedBarcode(code) {
-      const cleanCode = String(code || '').trim();
-      if (!cleanCode) return;
-      lastScannedBarcode = cleanCode;
-
-      const inputEl = document.getElementById('barcode-manual-input');
-      if (inputEl) inputEl.value = cleanCode;
-
-      if (barcodeScannerMode === 'editor') {
-        const editorBarcode = document.getElementById('editor-barcode');
-        if (editorBarcode) editorBarcode.value = cleanCode;
-        closeBarcodeScanner();
-        showToast(`Barcode set: ${cleanCode}`);
-        return;
-      }
-
-      const matched = state.products.find((p) => String(p.barcode || '').trim().toLowerCase() === cleanCode.toLowerCase());
-      if (matched) {
-        closeBarcodeScanner();
-        if (['store', 'softdrinks', 'cigarettes'].includes(matched.pos) && currentTab !== matched.pos) {
-          switchTab(matched.pos);
-        }
-        openProductDetail(matched.id);
-        showToast(`Found: ${matched.name}`);
-      } else {
-        const unmatchedBox = document.getElementById('barcode-unmatched-box');
-        const codeSpan = document.getElementById('barcode-unmatched-code');
-        if (codeSpan) codeSpan.textContent = cleanCode;
-        if (unmatchedBox) unmatchedBox.classList.remove('hidden');
-        showToast(`Barcode ${cleanCode} not found`, true);
+      if (barcodeStream) {
+        barcodeStream.getTracks().forEach((t) => t.stop());
+        barcodeStream = null;
       }
     }
 
     function submitManualBarcode(e) {
       e.preventDefault();
-      const val = (document.getElementById('barcode-manual-input')?.value || '').trim();
-      if (!val) return showToast('Enter or scan a barcode', true);
-      handleDetectedBarcode(val);
+      const code = (document.getElementById('barcode-manual-input')?.value || '').trim();
+      if (!code) return;
+      handleDetectedBarcode(code);
     }
 
-    function createProductFromScannedBarcode() {
-      const code = lastScannedBarcode || (document.getElementById('barcode-manual-input')?.value || '').trim();
-      const targetPos = ['softdrinks', 'cigarettes'].includes(currentTab) ? currentTab : 'store';
-      closeBarcodeScanner();
-      openEditorModal(targetPos, null);
-      const barcodeInput = document.getElementById('editor-barcode');
-      if (barcodeInput && code) barcodeInput.value = code;
-      document.getElementById('editor-name')?.focus();
-    }
+    function handleDetectedBarcode(code) {
+      const cleanCode = String(code || '').trim();
+      if (!cleanCode) return;
+      if (barcodeMode === 'editor') {
+        const inp = document.getElementById('editor-barcode');
+        if (inp) inp.value = cleanCode;
+        closeBarcodeScanner();
+        showToast(`Barcode ${cleanCode} set`, 'success');
+        return;
+      }
 
-    // Export / Import JSON & Auto-Sync Toggle
-    function exportBackupJSON() {
-      try {
-        const dataStr = JSON.stringify(buildSyncEnvelope(), null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `sarisari-pos-backup-${new Date().toISOString().slice(0, 10)}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showToast('Exported JSON backup');
-      } catch (err) {
-        console.error('Export JSON error:', err);
-        showToast('Failed to export JSON', true);
+      const matched = state.products.find((p) => (p.barcode || '').trim() === cleanCode);
+      if (matched) {
+        closeBarcodeScanner();
+        switchTab(matched.pos || 'store');
+        addToCart(matched.id, 1);
+      } else {
+        lastUnmatchedBarcode = cleanCode;
+        const codeSpan = document.getElementById('barcode-unmatched-code');
+        if (codeSpan) codeSpan.textContent = cleanCode;
+        document.getElementById('barcode-unmatched-box')?.classList.remove('hidden');
       }
     }
 
-    function importBackupJSON(event) {
-      const file = event?.target?.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const parsed = JSON.parse(String(e.target?.result || ''));
-          const nowIso = new Date().toISOString();
-          state = mergeIncomingState(parsed);
-          if (typeof parsed.voidPassword === 'string' && parsed.voidPassword.trim()) {
-            localStorage.setItem(VOID_PASSWORD_KEY, parsed.voidPassword.trim());
-          }
-          localStorage.setItem(UPDATED_AT_KEY, nowIso);
-          const serialized = JSON.stringify(buildSyncEnvelope(nowIso));
-          localStorage.setItem(STORAGE_KEY, serialized);
-          if (autoSyncEnabled) {
-            localStorage.setItem(BACKUP_KEY, serialized);
-            scheduleCloudPush();
-          }
-          renderAll();
-          showToast('Imported & merged JSON backup');
-        } catch (err) {
-          console.error('Import JSON error:', err);
-          showToast('Invalid JSON backup file', true);
-        } finally {
-          event.target.value = '';
-        }
-      };
-      reader.readAsText(file);
+    function createProductFromScannedBarcode() {
+      const code = lastUnmatchedBarcode;
+      closeBarcodeScanner();
+      openEditorModal(getActiveCartPos(), null, code);
     }
 
     function toggleAutoSync() {
@@ -3779,67 +3065,190 @@
       if (btn) {
         btn.textContent = autoSyncEnabled ? 'Auto Sync: ON' : 'Auto Sync: OFF';
         btn.className = autoSyncEnabled
-          ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
-          : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
+          ? 'min-h-[38px] px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-extrabold transition'
+          : 'min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-xs font-extrabold transition';
       }
-      if (autoSyncEnabled) {
+      showToast(autoSyncEnabled ? 'Auto Sync enabled' : 'Auto Sync disabled');
+    }
+
+    function openCloudSyncModal() {
+      const inp = document.getElementById('cloud-sync-code-input');
+      if (inp) inp.value = localStorage.getItem(SYNC_CODE_KEY) || '';
+      document.getElementById('cloud-sync-modal')?.classList.remove('hidden');
+    }
+
+    function closeCloudSyncModal() {
+      document.getElementById('cloud-sync-modal')?.classList.add('hidden');
+    }
+
+    function generateSyncCode() {
+      const code = 'store-' + Math.random().toString(36).substring(2, 8);
+      const inp = document.getElementById('cloud-sync-code-input');
+      if (inp) inp.value = code;
+    }
+
+    function scheduleCloudPush() {
+      const code = (localStorage.getItem(SYNC_CODE_KEY) || '').trim();
+      if (!code) return;
+      clearTimeout(cloudPushTimer);
+      cloudPushTimer = setTimeout(() => pushAllToCloud(false), 1500);
+    }
+
+    async function saveSyncCodeAndPull() {
+      const code = (document.getElementById('cloud-sync-code-input')?.value || '').trim();
+      if (!code) {
+        showToast('Enter a Sync Code first.', 'error');
+        return;
+      }
+      localStorage.setItem(SYNC_CODE_KEY, code);
+      await pullFromCloud(true);
+    }
+
+    async function pushAllToCloud(manual = false) {
+      const code = (localStorage.getItem(SYNC_CODE_KEY) || '').trim();
+      if (!code) {
+        if (manual) showToast('Set a Sync Code first.', 'warn');
+        return;
+      }
+      const payload = JSON.stringify({ state, updatedAt: Date.now() });
+      for (const base of CLOUD_SYNC_ENDPOINTS) {
+        try {
+          const res = await fetch(base + encodeURIComponent(code), {
+            method: 'POST',
+            body: payload
+          });
+          if (res.ok) {
+            if (manual) showToast('Pushed store data to cloud!', 'success');
+            return;
+          }
+        } catch (e) {}
+      }
+      if (manual) showToast('Cloud push unreachable; saved locally.', 'warn');
+    }
+
+    async function pullFromCloud(manual = false) {
+      const code = (localStorage.getItem(SYNC_CODE_KEY) || '').trim();
+      if (!code || isCloudSyncing) return;
+      isCloudSyncing = true;
+      for (const base of CLOUD_SYNC_ENDPOINTS) {
+        try {
+          const res = await fetch(base + encodeURIComponent(code));
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.state) {
+              state = sanitizeState(data.state);
+              saveState(true);
+              renderAll();
+              if (manual) showToast('Synced latest store data!', 'success');
+            }
+            break;
+          }
+        } catch (e) {}
+      }
+      isCloudSyncing = false;
+    }
+
+    function exportBackupJSON() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sarisari-backup-${getLocalDayKey()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Backup JSON downloaded', 'success');
+    }
+
+    function importBackupJSON(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || '{}'));
+          state = sanitizeState(parsed);
+          saveState();
+          renderAll();
+          showToast('JSON backup imported!', 'success');
+        } catch (err) {
+          showToast('Invalid JSON file.', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function copyJsonBackup() {
+      const ta = document.createElement('textarea');
+      ta.value = JSON.stringify(state);
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('JSON backup copied to clipboard!', 'success');
+      } catch (e) {
+        showToast('Could not copy JSON.', 'error');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function openJsonRestoreModal() {
+      document.getElementById('json-restore-textarea').value = '';
+      document.getElementById('json-restore-modal')?.classList.remove('hidden');
+    }
+
+    function closeJsonRestoreModal() {
+      document.getElementById('json-restore-modal')?.classList.add('hidden');
+    }
+
+    function applyJsonBackupFromModal() {
+      try {
+        const raw = document.getElementById('json-restore-textarea')?.value || '';
+        const parsed = JSON.parse(raw);
+        state = sanitizeState(parsed);
         saveState();
-        pullFromCloud(false);
-        startCloudPolling();
-        showToast('Auto Sync enabled');
-      } else {
-        clearInterval(cloudPollInterval);
-        showToast('Auto Sync paused');
+        closeJsonRestoreModal();
+        renderAll();
+        showToast('JSON backup restored!', 'success');
+      } catch (e) {
+        showToast('Invalid JSON format.', 'error');
       }
     }
 
-    function renderAll() {
-      checkDailySalesReset(false);
-      applyBestSellerUiTheme();
+    function renderCatalogs() {
       renderStoreCatalog();
       renderSoftdrinksCatalog();
       renderCigarettesCatalog();
-      renderGcashPuhunan();
-      updateDashboardKPIs();
-      updateCartBar();
-      if (currentTab === 'utang') renderUtangTab();
-      if (currentTab === 'reports') renderReports();
     }
 
-    window.onload = function () {
+    function renderAll() {
+      applyBestSellerUiTheme();
+      renderCounterBanners();
+      renderCatalogs();
+      renderGcashTab();
+      renderUtangTab();
+      renderReports();
+      updateCartIndicators();
+    }
+
+    // Bottom-up iPhone app opening animation on button clicks
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('button, [role="button"]');
+      if (!btn || btn.disabled) return;
+      btn.classList.remove('btn-bounce-active');
+      void btn.offsetWidth;
+      btn.classList.add('btn-bounce-active');
+      clearTimeout(btn._animTimer);
+      btn._animTimer = setTimeout(() => {
+        btn.classList.remove('btn-bounce-active');
+      }, 420);
+    }, true);
+
+    window.addEventListener('DOMContentLoaded', () => {
       loadState();
       checkDailySalesReset(false);
-      const syncBtn = document.getElementById('autosync-toggle-btn');
-      if (syncBtn) {
-        syncBtn.textContent = autoSyncEnabled ? 'Auto Sync: ON' : 'Auto Sync: OFF';
-        syncBtn.className = autoSyncEnabled
-          ? 'px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-extrabold transition'
-          : 'px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-extrabold transition';
-      }
-      switchTab('store');
       renderAll();
       setInterval(() => checkDailySalesReset(true), 30000);
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          checkDailySalesReset(true);
-        }
-      });
-      if (getSyncCode() && autoSyncEnabled) {
-        pullFromCloud(false);
-        startCloudPolling();
-      }
-    };
-
-    document.addEventListener('pointerdown', (e) => {
-      const target = e.target?.closest?.('button, [role="button"]');
-      if (!target || target.disabled) return;
-      target.classList.remove('btn-bounce-active');
-      void target.offsetWidth;
-      target.classList.add('btn-bounce-active');
-      window.setTimeout(() => {
-        target.classList.remove('btn-bounce-active');
-      }, 420);
-    }, { passive: true });
+    });
   </script>
 </body>
 </html>
