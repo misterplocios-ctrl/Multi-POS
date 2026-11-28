@@ -1768,7 +1768,18 @@
           if (tx.fee !== undefined && tx.fee !== null && Number(tx.fee) > 0) return Number(tx.fee);
           if (tx.profit !== undefined && tx.profit !== null && Number(tx.profit) > 0) return Number(tx.profit);
           const m = String(tx.summary || '').match(/Fee(?:\s*Earned)?:\s*₱?\s*([0-9,.]+)/i);
-          return m ? (Number(String(m[1]).replace(/,/g, '')) || 0) : 0;
+          if (m) return Number(String(m[1]).replace(/,/g, '')) || 0;
+          if (kind === 'gcash') {
+            const amt = Number(tx.amount ?? tx.total ?? 0) || 0;
+            if (amt > 0) {
+              const gType = String(tx.gcashType || tx.summary || '').toLowerCase();
+              if (gType.includes('load') || gType.includes('e-load')) {
+                return amt <= 50 ? 3 : 5;
+              }
+              return Math.max(1, Math.ceil(amt / 500)) * 10;
+            }
+          }
+          return 0;
         })();
         const computedItemProfit = Array.isArray(tx.items)
           ? tx.items.reduce((sum, it) => sum + ((Number(it.price) || 0) - (Number(it.cost) || 0)) * (Number(it.qty) || 0), 0) - discountVal
@@ -3007,7 +3018,17 @@
               : (rawTotal || itemsSum || rawAmount || summaryAmt);
 
             const feeMatch = String(tx.summary || '').match(/Fee(?:\s*Earned)?:\s*₱?\s*([0-9,.]+)/i);
-            const displayFee = (Number(tx.fee) || 0) || (feeMatch ? (Number(String(feeMatch[1]).replace(/,/g, '')) || 0) : 0);
+            const fallbackGcashFee = (() => {
+              if (tx.kind !== 'gcash') return 0;
+              if (Number(tx.profit) > 0) return Number(tx.profit);
+              if (amt > 0) {
+                const gType = String(tx.gcashType || tx.summary || '').toLowerCase();
+                if (gType.includes('load') || gType.includes('e-load')) return amt <= 50 ? 3 : 5;
+                return Math.max(1, Math.ceil(amt / 500)) * 10;
+              }
+              return 0;
+            })();
+            const displayFee = (Number(tx.fee) || 0) || (feeMatch ? (Number(String(feeMatch[1]).replace(/,/g, '')) || 0) : fallbackGcashFee);
             const displaySummary = tx.summary || (Array.isArray(tx.items) && tx.items.length
               ? tx.items.map((i) => `${i.qty}x ${i.name}`).join(', ')
               : `${String(tx.kind || 'sale').toUpperCase()} transaction`);
