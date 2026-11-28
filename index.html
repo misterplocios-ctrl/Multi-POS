@@ -668,7 +668,7 @@
           <div class="flex items-center justify-between gap-2 flex-wrap">
             <div>
               <h2 class="text-sm font-black text-slate-900">Sales, Profit &amp; Total Amount</h2>
-              <p class="text-[11px] font-semibold text-slate-500">Expenses deduct from total sales amount</p>
+              <p class="text-[11px] font-semibold text-slate-500">Monthly expenses deduct from monthly sales amount</p>
             </div>
             <div class="grid grid-cols-2 sm:flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
               <button type="button" onclick="openCloudSyncModal()"
@@ -1262,118 +1262,61 @@
     const SYNC_CODE_KEY = 'sarisari_pos_sync_code_v1';
     const UPDATED_AT_KEY = 'sarisari_pos_updated_at_v1';
     const DAILY_RESET_KEY = 'sarisari_pos_last_day_v1';
+    const MONTHLY_RESET_KEY = 'sarisari_pos_last_month_v1';
     const CLOUD_SYNC_ENDPOINTS = [
       'https://kvdb.io/api/v1/sarisari_pos_sync_2026_',
       'https://keyvalue.immanuel.co/api/KeyVal/sarisari_pos_sync_2026_'
     ];
 
+    const SEED_PRODUCTS = [
+      { id: 'p-rice-1kg', pos: 'store', name: 'Sinandomeng Rice (1kg)', category: 'Rice & Grains', price: 54, cost: 47, stock: 35, lowStockThreshold: 8, expiryDate: '', barcode: '480001001', image: 'https://placehold.co/300x300/fce7f3/be185d?text=Rice+1kg' },
+      { id: 'p-pancit-canton', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 16, cost: 13, stock: 48, lowStockThreshold: 10, expiryDate: '', barcode: '480001002', image: 'https://placehold.co/300x300/fce7f3/be185d?text=Pancit+Canton' },
+      { id: 'p-sardines', pos: 'store', name: '555 Sardines (155g)', category: 'Canned Goods', price: 25, cost: 21, stock: 24, lowStockThreshold: 6, expiryDate: '', barcode: '480001003', image: 'https://placehold.co/300x300/fce7f3/be185d?text=555+Sardines' },
+      { id: 'p-coffee-twin', pos: 'store', name: 'Kopiko Brown Twin Pack', category: 'Coffee & Drinks', price: 15, cost: 12, stock: 40, lowStockThreshold: 10, expiryDate: '', barcode: '480001004', image: 'https://placehold.co/300x300/fce7f3/be185d?text=Kopiko+Twin' },
+      { id: 'p-egg', pos: 'store', name: 'Fresh Egg (1 pc)', category: 'Fresh & Dairy', price: 9, cost: 7.5, stock: 30, lowStockThreshold: 10, expiryDate: '', barcode: '480001005', image: 'https://placehold.co/300x300/fce7f3/be185d?text=Fresh+Egg' },
+      { id: 'p-safeguard', pos: 'store', name: 'Safeguard Soap (60g)', category: 'Toiletries', price: 22, cost: 18, stock: 18, lowStockThreshold: 5, expiryDate: '', barcode: '480001006', image: 'https://placehold.co/300x300/fce7f3/be185d?text=Safeguard' },
+      { id: 'p-coke-mismo', pos: 'softdrinks', name: 'Coke Mismo (295ml)', category: 'Softdrinks', price: 20, cost: 15.5, stock: 36, lowStockThreshold: 8, expiryDate: '', barcode: '480002001', image: 'https://placehold.co/300x300/ffe4e6/be123c?text=Coke+Mismo' },
+      { id: 'p-sprite-mismo', pos: 'softdrinks', name: 'Sprite Mismo (295ml)', category: 'Softdrinks', price: 20, cost: 15.5, stock: 24, lowStockThreshold: 8, expiryDate: '', barcode: '480002002', image: 'https://placehold.co/300x300/dcfce7/15803d?text=Sprite+Mismo' },
+      { id: 'p-royal-mismo', pos: 'softdrinks', name: 'Royal Tru-Orange (295ml)', category: 'Softdrinks', price: 20, cost: 15.5, stock: 24, lowStockThreshold: 8, expiryDate: '', barcode: '480002003', image: 'https://placehold.co/300x300/ffedd5/c2410c?text=Royal+Mismo' },
+      { id: 'p-coke-15l', pos: 'softdrinks', name: 'Coke 1.5 Liter', category: 'Softdrinks', price: 72, cost: 60, stock: 12, lowStockThreshold: 4, expiryDate: '', barcode: '480002004', image: 'https://placehold.co/300x300/ffe4e6/be123c?text=Coke+1.5L' },
+      { id: 'p-marlboro-red', pos: 'cigarettes', name: 'Marlboro Red (1 Stick)', category: 'Sticks', price: 10, cost: 7.5, stock: 60, lowStockThreshold: 15, expiryDate: '', barcode: '480003001', image: 'https://placehold.co/300x300/fef3c7/b45309?text=Marlboro+Stick' },
+      { id: 'p-mighty-green', pos: 'cigarettes', name: 'Mighty Menthol (1 Stick)', category: 'Sticks', price: 8, cost: 6, stock: 60, lowStockThreshold: 15, expiryDate: '', barcode: '480003002', image: 'https://placehold.co/300x300/fef3c7/b45309?text=Mighty+Stick' },
+      { id: 'p-marlboro-pack', pos: 'cigarettes', name: 'Marlboro Red (1 Pack)', category: 'Packs', price: 185, cost: 150, stock: 8, lowStockThreshold: 3, expiryDate: '', barcode: '480003003', image: 'https://placehold.co/300x300/fef3c7/b45309?text=Marlboro+Pack' }
+    ];
+
     let state = {
       products: [],
-      carts: { store: [], softdrinks: [], cigarettes: [] },
       transactions: [],
+      expenses: [],
       utangRecords: [],
-      gcashPuhunan: 0
+      gcashPuhunan: 0,
+      updatedAt: 0
     };
+
     let currentTab = 'store';
     let selectedStoreCategory = 'All';
     let selectedReportFilter = 'all';
-    let showPastLedger = false;
-    let selectedUtangFilter = 'unpaid';
-    let selectedGcashType = 'cash_in';
-    let activeCartPos = 'store';
-    let pendingVoidId = null;
+    let showPastLedgerDays = false;
+    let utangFilter = 'unpaid';
+    let gcashType = 'cash_in';
+    let carts = { store: [], softdrinks: [], cigarettes: [] };
+    let activeCartDrawerPos = 'store';
+    let lowStockModalPos = 'store';
+    let lowStockModalAllCounters = false;
+    let lowStockModalType = 'out';
+    let autoSyncEnabled = localStorage.getItem(AUTOSYNC_KEY) !== 'false';
     let barcodeMode = 'pos';
     let lastUnmatchedBarcode = '';
     let barcodeStream = null;
-    let barcodeDetectorInterval = null;
-    let zxingCodeReader = null;
-    let lowStockModalPos = 'store';
-    let lowStockModalAllCounters = false;
-    let lowStockModalType = 'low';
-    let autoSyncEnabled = true;
-    let syncTimer = null;
-    let cloudPushTimer = null;
-    let cloudPullInterval = null;
+    let barcodeScanInterval = null;
+    let zxingReader = null;
     let isCloudSyncing = false;
-    let lastLoadedThemeKey = '';
-
-    const SEED_PRODUCTS = [
-      { id: 'prod-1', pos: 'store', name: 'Well-Milled Rice (1kg)', category: 'Staples', price: 54, cost: 47, stock: 25, lowStockThreshold: 8, expiryDate: '', barcode: '480000100001', image: '' },
-      { id: 'prod-2', pos: 'store', name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 16, cost: 13, stock: 36, lowStockThreshold: 10, expiryDate: '', barcode: '480000100002', image: '' },
-      { id: 'prod-3', pos: 'store', name: 'Mega Sardines Green', category: 'Canned Goods', price: 26, cost: 22, stock: 20, lowStockThreshold: 6, expiryDate: '', barcode: '480000100003', image: '' },
-      { id: 'prod-4', pos: 'store', name: 'Argentina Corned Beef 150g', category: 'Canned Goods', price: 38, cost: 33, stock: 14, lowStockThreshold: 5, expiryDate: '', barcode: '480000100004', image: '' },
-      { id: 'prod-5', pos: 'store', name: 'Kopiko Black 3-in-1', category: 'Coffee & Drinks', price: 10, cost: 8, stock: 45, lowStockThreshold: 12, expiryDate: '', barcode: '480000100005', image: '' },
-      { id: 'prod-6', pos: 'store', name: 'Safeguard White 60g', category: 'Toiletries', price: 24, cost: 20, stock: 12, lowStockThreshold: 4, expiryDate: '', barcode: '480000100006', image: '' },
-      { id: 'prod-7', pos: 'softdrinks', name: 'Coca-Cola Mismo 295ml', category: 'Soda', price: 20, cost: 16, stock: 24, lowStockThreshold: 6, expiryDate: '', barcode: '480000200001', image: '' },
-      { id: 'prod-8', pos: 'softdrinks', name: 'Sprite Mismo 295ml', category: 'Soda', price: 20, cost: 16, stock: 18, lowStockThreshold: 6, expiryDate: '', barcode: '480000200002', image: '' },
-      { id: 'prod-9', pos: 'softdrinks', name: 'Royal Tru-Orange Mismo', category: 'Soda', price: 20, cost: 16, stock: 16, lowStockThreshold: 6, expiryDate: '', barcode: '480000200003', image: '' },
-      { id: 'prod-10', pos: 'softdrinks', name: 'C2 Apple Green Tea 230ml', category: 'Juice & Tea', price: 18, cost: 14, stock: 15, lowStockThreshold: 5, expiryDate: '', barcode: '480000200004', image: '' },
-      { id: 'prod-11', pos: 'cigarettes', name: 'Marlboro Red (Stick)', category: 'Stick', price: 10, cost: 8, stock: 60, lowStockThreshold: 15, expiryDate: '', barcode: '480000300001', image: '' },
-      { id: 'prod-12', pos: 'cigarettes', name: 'Mighty Green (Stick)', category: 'Stick', price: 8, cost: 6.5, stock: 50, lowStockThreshold: 15, expiryDate: '', barcode: '480000300002', image: '' },
-      { id: 'prod-13', pos: 'cigarettes', name: 'Winston Red (Pack)', category: 'Pack', price: 165, cost: 152, stock: 8, lowStockThreshold: 3, expiryDate: '', barcode: '480000300003', image: '' }
-    ];
-
-    const PRODUCT_THEMES = [
-      {
-        keywords: ['coke', 'coca-cola', 'coca cola', 'marlboro red', 'winston red', 'sardines', 'argentina', 'corned beef', 'red'],
-        bg: '#FEF2F2',
-        border: '#FECACA',
-        accent: '#DC2626',
-        accentDark: '#B91C1C',
-        accentLight: '#EF4444',
-        accentSoft: '#FEE2E2',
-        accentText: '#B91C1C',
-        glow: 'rgba(220, 38, 38, 0.42)'
-      },
-      {
-        keywords: ['sprite', 'mighty green', 'c2', 'green', 'mountain dew', '7up', 'gulay', 'safeguard'],
-        bg: '#ECFDF5',
-        border: '#A7F3D0',
-        accent: '#059669',
-        accentDark: '#047857',
-        accentLight: '#10B981',
-        accentSoft: '#D1FAE5',
-        accentText: '#047857',
-        glow: 'rgba(5, 150, 105, 0.42)'
-      },
-      {
-        keywords: ['royal', 'orange', 'pancit canton', 'canton', 'kopiko', 'coffee', 'noodles', 'snack'],
-        bg: '#FFF7ED',
-        border: '#FED7AA',
-        accent: '#EA580C',
-        accentDark: '#C2410C',
-        accentLight: '#F97316',
-        accentSoft: '#FFEDD5',
-        accentText: '#C2410C',
-        glow: 'rgba(234, 88, 12, 0.42)'
-      },
-      {
-        keywords: ['pepsi', 'water', 'tubig', 'blue', 'ice', 'milk', 'gatas', 'rice', 'bigas'],
-        bg: '#EFF6FF',
-        border: '#BFDBFE',
-        accent: '#2563EB',
-        accentDark: '#1D4ED8',
-        accentLight: '#3B82F6',
-        accentSoft: '#DBEAFE',
-        accentText: '#1D4ED8',
-        glow: 'rgba(37, 99, 235, 0.42)'
-      },
-      {
-        keywords: ['sting', 'pink', 'strawberry', 'yakult', 'bear brand', 'biscuit'],
-        bg: '#FDF2F8',
-        border: '#FBCFE8',
-        accent: '#DB2777',
-        accentDark: '#BE185D',
-        accentLight: '#EC4899',
-        accentSoft: '#FCE7F3',
-        accentText: '#BE185D',
-        glow: 'rgba(219, 39, 119, 0.45)'
-      }
-    ];
+    let cloudSyncDebounceTimer = null;
 
     function formatCurrency(val) {
       const num = Number(val) || 0;
-      return '₱' + num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const sign = num < 0 ? '-' : '';
+      return `${sign}₱${Math.abs(num).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
     function escapeHtml(str) {
@@ -1385,84 +1328,17 @@
         .replace(/'/g, '&#39;');
     }
 
-    function showToast(msg, tone = 'dark') {
-      const banner = document.getElementById('toast-banner');
-      const inner = document.getElementById('toast-inner');
-      if (!banner || !inner) return;
-      inner.textContent = msg;
-      inner.className = 'rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center ' + (
-        tone === 'error' ? 'bg-rose-600 text-white' :
-        tone === 'success' ? 'bg-emerald-600 text-white' :
-        tone === 'warn' ? 'bg-amber-500 text-slate-950' :
-        'bg-slate-900 text-white'
-      );
-      banner.classList.remove('hidden');
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => {
-        banner.classList.add('hidden');
-      }, 2400);
-    }
-
-    let sharedAudioCtx = null;
-    function getAudioContext() {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return null;
-      if (!sharedAudioCtx) {
-        sharedAudioCtx = new AudioCtx();
-      }
-      if (sharedAudioCtx.state === 'suspended') {
-        sharedAudioCtx.resume().catch(() => {});
-      }
-      return sharedAudioCtx;
-    }
-
-    function playCartBeep() {
-      try {
-        const ctx = getAudioContext();
-        if (!ctx) return;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(2400, now);
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.exponentialRampToValueAtTime(0.24, now + 0.008);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.115);
-      } catch (e) {}
-    }
-
-    function playCashierSaleSound() {
-      try {
-        const ctx = getAudioContext();
-        if (!ctx) return;
-        const now = ctx.currentTime;
-        const notes = [1318.5, 1760, 2637];
-        notes.forEach((freq, idx) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const start = now + idx * 0.065;
-          osc.type = idx === 2 ? 'triangle' : 'sine';
-          osc.frequency.setValueAtTime(freq, start);
-          gain.gain.setValueAtTime(0.001, start);
-          gain.gain.exponentialRampToValueAtTime(idx === 2 ? 0.24 : 0.16, start + 0.01);
-          gain.gain.exponentialRampToValueAtTime(0.001, start + (idx === 2 ? 0.32 : 0.12));
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(start);
-          osc.stop(start + (idx === 2 ? 0.34 : 0.13));
-        });
-      } catch (e) {}
-    }
-
     function getLocalDayKey(dateObj = new Date()) {
       const y = dateObj.getFullYear();
       const m = String(dateObj.getMonth() + 1).padStart(2, '0');
       const d = String(dateObj.getDate()).padStart(2, '0');
       return `${y}-${m}-${d}`;
+    }
+
+    function getLocalMonthKey(dateObj = new Date()) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      return `${y}-${m}`;
     }
 
     function checkDailySalesReset(shouldNotify = false) {
@@ -1477,116 +1353,110 @@
       } else if (!lastDay) {
         localStorage.setItem(DAILY_RESET_KEY, todayKey);
       }
-    }
 
-    function getBestSellingProduct() {
-      const activeSales = state.transactions.filter((tx) => tx && tx.kind === 'sale' && !tx.voided);
-      if (!activeSales.length) return null;
-      const qtyMap = {};
-      activeSales.forEach((tx) => {
-        (tx.items || []).forEach((it) => {
-          const key = it.productId || it.name;
-          if (!key) return;
-          if (!qtyMap[key]) {
-            qtyMap[key] = { productId: it.productId, name: it.name, qty: 0 };
-          }
-          qtyMap[key].qty += Number(it.qty) || 0;
-        });
-      });
-      const ranked = Object.values(qtyMap).sort((a, b) => b.qty - a.qty);
-      return ranked[0] || null;
-    }
-
-    function applyBestSellerUiTheme() {
-      const best = getBestSellingProduct();
-      const pill = document.getElementById('best-seller-ui-pill');
-      let theme = PRODUCT_THEMES[4];
-
-      if (best && best.name) {
-        const lower = best.name.toLowerCase();
-        const found = PRODUCT_THEMES.find((t) => t.keywords.some((kw) => lower.includes(kw)));
-        if (found) {
-          theme = found;
-        } else {
-          let hash = 0;
-          for (let i = 0; i < lower.length; i++) {
-            hash = (hash * 31 + lower.charCodeAt(i)) >>> 0;
-          }
-          theme = PRODUCT_THEMES[hash % PRODUCT_THEMES.length];
+      const monthKey = getLocalMonthKey();
+      const lastMonth = localStorage.getItem(MONTHLY_RESET_KEY);
+      if (lastMonth && lastMonth !== monthKey) {
+        localStorage.setItem(MONTHLY_RESET_KEY, monthKey);
+        renderAll();
+        if (shouldNotify) {
+          showToast('New month started — GCash Cash Out, Cash In & E-Load reset to ₱0.00!', 'success');
         }
-        if (pill) {
-          pill.textContent = `Top: ${best.name} (${best.qty})`;
-          pill.classList.remove('hidden');
-        }
-      } else if (pill) {
-        pill.classList.add('hidden');
+      } else if (!lastMonth) {
+        localStorage.setItem(MONTHLY_RESET_KEY, monthKey);
       }
-
-      const themeKey = `${theme.accent}_${best ? best.name : 'default'}`;
-      if (lastLoadedThemeKey === themeKey) return;
-      lastLoadedThemeKey = themeKey;
-
-      const root = document.documentElement;
-      root.style.setProperty('--ui-bg', theme.bg);
-      root.style.setProperty('--ui-border', theme.border);
-      root.style.setProperty('--ui-accent', theme.accent);
-      root.style.setProperty('--ui-accent-dark', theme.accentDark);
-      root.style.setProperty('--ui-accent-light', theme.accentLight);
-      root.style.setProperty('--ui-accent-soft', theme.accentSoft);
-      root.style.setProperty('--ui-accent-text', theme.accentText);
-      root.style.setProperty('--ui-glow', theme.glow);
     }
 
-    function sanitizeState(raw) {
-      const clean = {
-        products: Array.isArray(raw?.products) ? raw.products : [],
-        carts: {
-          store: Array.isArray(raw?.carts?.store) ? raw.carts.store : [],
-          softdrinks: Array.isArray(raw?.carts?.softdrinks) ? raw.carts.softdrinks : [],
-          cigarettes: Array.isArray(raw?.carts?.cigarettes) ? raw.carts.cigarettes : []
-        },
-        transactions: Array.isArray(raw?.transactions) ? raw.transactions : [],
-        utangRecords: Array.isArray(raw?.utangRecords) ? raw.utangRecords : [],
-        gcashPuhunan: Number(raw?.gcashPuhunan) || 0
-      };
-      if (!clean.products.length && !localStorage.getItem(STORAGE_KEY)) {
-        clean.products = JSON.parse(JSON.stringify(SEED_PRODUCTS));
-      }
-      return clean;
+    function showToast(message, type = 'info') {
+      const banner = document.getElementById('toast-banner');
+      const inner = document.getElementById('toast-inner');
+      if (!banner || !inner) return;
+      inner.textContent = message;
+      inner.className = 'rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-float flex items-center justify-center text-center transition ' +
+        (type === 'error' ? 'bg-rose-600 text-white' : type === 'success' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white');
+      banner.classList.remove('hidden');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 2800);
     }
 
-    function saveState(skipCloud = false) {
+    let sharedAudioCtx = null;
+    function getAudioCtx() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return null;
+      if (!sharedAudioCtx) sharedAudioCtx = new AudioCtx();
+      if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume().catch(() => {});
+      return sharedAudioCtx;
+    }
+
+    function playCashierSaleSound() {
       try {
-        const serialized = JSON.stringify(state);
-        localStorage.setItem(STORAGE_KEY, serialized);
-        localStorage.setItem(BACKUP_KEY, serialized);
-        localStorage.setItem(UPDATED_AT_KEY, String(Date.now()));
-        const statusEl = document.getElementById('autosync-status-text');
-        if (statusEl) {
-          statusEl.textContent = autoSyncEnabled ? 'Saved locally' : 'Auto Sync: OFF';
-        }
-        if (autoSyncEnabled && !skipCloud) {
-          scheduleCloudPush();
-        }
-      } catch (e) {
-        console.error('Save error', e);
-      }
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const notes = [1046.5, 1318.5, 1567.98];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.055);
+          gain.gain.setValueAtTime(0.001, now + idx * 0.055);
+          gain.gain.exponentialRampToValueAtTime(0.14, now + idx * 0.055 + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.055);
+          osc.stop(now + idx * 0.055 + 0.2);
+        });
+      } catch (e) {}
+    }
+
+    function playNavClickSound(tabName = 'store') {
+      // Button click sound disabled
     }
 
     function loadState() {
       try {
-        const rawStr = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(BACKUP_KEY);
-        if (rawStr) {
-          state = sanitizeState(JSON.parse(rawStr));
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(BACKUP_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state.products = Array.isArray(parsed.products) ? parsed.products : [...SEED_PRODUCTS];
+          state.transactions = Array.isArray(parsed.transactions) ? parsed.transactions : [];
+          state.expenses = Array.isArray(parsed.expenses) ? parsed.expenses : [];
+          state.utangRecords = Array.isArray(parsed.utangRecords) ? parsed.utangRecords : [];
+          state.gcashPuhunan = Number(parsed.gcashPuhunan) || 0;
+          state.updatedAt = Number(parsed.updatedAt) || Date.now();
         } else {
-          state = sanitizeState({});
-          saveState(true);
+          state.products = [...SEED_PRODUCTS];
+          state.transactions = [];
+          state.expenses = [];
+          state.utangRecords = [];
+          state.gcashPuhunan = 0;
+          state.updatedAt = Date.now();
+          saveState(false);
         }
-      } catch (e) {
-        state = sanitizeState({});
+      } catch (err) {
+        state.products = [...SEED_PRODUCTS];
       }
-      const savedSync = localStorage.getItem(AUTOSYNC_KEY);
-      autoSyncEnabled = savedSync === null ? true : savedSync === 'true';
+    }
+
+    function saveState(triggerCloud = true) {
+      try {
+        state.updatedAt = Date.now();
+        const serialized = JSON.stringify(state);
+        localStorage.setItem(STORAGE_KEY, serialized);
+        localStorage.setItem(BACKUP_KEY, serialized);
+        localStorage.setItem(UPDATED_AT_KEY, String(state.updatedAt));
+        if (triggerCloud && autoSyncEnabled && getSyncCode()) {
+          clearTimeout(cloudSyncDebounceTimer);
+          cloudSyncDebounceTimer = setTimeout(() => {
+            pushAllToCloud(false);
+          }, 1200);
+        }
+      } catch (err) {
+        console.error('Failed saving state', err);
+      }
     }
 
     function getActiveCartPos() {
@@ -1597,10 +1467,19 @@
 
     function switchTab(tab) {
       currentTab = tab;
+      playNavClickSound(tab);
       const tabs = ['store', 'softdrinks', 'cigarettes', 'gcash', 'utang', 'reports'];
+      const subtitles = {
+        store: 'Store POS',
+        softdrinks: 'Softdrinks Counter',
+        cigarettes: 'Cigarettes / Yosi Counter',
+        gcash: 'GCash & E-Load',
+        utang: 'Utang / Credit List',
+        reports: 'Reports & Ledger'
+      };
       tabs.forEach((t) => {
-        const sec = document.getElementById('tab-' + t);
-        const nav = document.getElementById('nav-' + t);
+        const sec = document.getElementById(`tab-${t}`);
+        const nav = document.getElementById(`nav-${t}`);
         if (sec) {
           if (t === tab) {
             sec.classList.remove('hidden');
@@ -1613,242 +1492,481 @@
         }
         if (nav) {
           if (t === tab) {
-            nav.className = 'flex flex-col items-center py-1.5 rounded-2xl text-white font-extrabold transition active:scale-90 nav-btn-float nav-btn-active-highlight';
+            nav.classList.remove('theme-accent-badge', 'font-bold');
+            nav.classList.add('text-white', 'font-extrabold', 'nav-btn-float', 'nav-btn-active-highlight');
           } else {
-            nav.className = 'flex flex-col items-center py-1.5 rounded-2xl theme-accent-badge font-bold transition active:scale-90';
+            nav.classList.remove('text-white', 'font-extrabold', 'nav-btn-float', 'nav-btn-active-highlight');
+            nav.classList.add('theme-accent-badge', 'font-bold');
           }
         }
       });
-
-      const subtitle = document.getElementById('header-subtitle');
-      if (subtitle) {
-        const labels = {
-          store: 'Store POS',
-          softdrinks: 'Softdrinks POS',
-          cigarettes: 'Cigarettes / Yosi POS',
-          gcash: 'GCash & E-Load Ledger',
-          utang: 'Utang / Credit Tracker',
-          reports: 'Reports & Daily Ledger'
-        };
-        subtitle.textContent = labels[tab] || 'Store POS';
-      }
-
-      updateCartIndicators();
-      if (tab === 'reports') renderReports();
-      if (tab === 'utang') renderUtangTab();
-      if (tab === 'gcash') renderGcashTab();
+      const subEl = document.getElementById('header-subtitle');
+      if (subEl) subEl.textContent = subtitles[tab] || 'Store POS';
+      updateFloatingCartBar();
+      renderAll();
     }
 
-    function computeTimeMetrics(filterFn) {
+    function makeCounterFilter(pos) {
+      return (item) => {
+        if (!item) return false;
+        if (item.kind === 'gcash') return pos === 'gcash';
+        if (item.counter) return item.counter === pos;
+        if (item.pos) return item.pos === pos;
+        return pos === 'store';
+      };
+    }
+
+    function computeTimeMetrics(filterFn = null) {
       const now = new Date();
       const todayKey = getLocalDayKey(now);
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
+      const startOfTodayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
       const dayOfWeek = now.getDay();
-      const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0, 0).getTime();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
+      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek, 0, 0, 0, 0);
+      const startOfWeekMs = startOfWeek.getTime();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+      const startOfMonthMs = startOfMonth.getTime();
 
       let dailySales = 0;
       let dailyProfit = 0;
-      let dailyExpenses = 0;
       let weeklySales = 0;
       let weeklyProfit = 0;
       let monthlySales = 0;
       let monthlyProfit = 0;
-      let monthlyExpenses = 0;
 
       state.transactions.forEach((tx) => {
         if (!tx || tx.voided) return;
-        const txPos = tx.pos || 'general';
-        if (filterFn && !filterFn(tx)) {
-          // Kapag naka-filter sa isang counter (hal. store), isama pa rin ang expense na naka-tag sa counter na iyon
-          if (!(tx.kind === 'expense' && txPos === filterFn._pos)) {
-            return;
-          }
-        }
+        if (filterFn && !filterFn(tx)) return;
 
         const parsedDate = tx.createdAt ? new Date(tx.createdAt) : now;
         const isValidDate = !Number.isNaN(parsedDate.getTime());
         const effectiveDate = isValidDate ? parsedDate : now;
-        const createdMs = effectiveDate.getTime();
-        const isToday = !tx.createdAt || getLocalDayKey(effectiveDate) === todayKey || createdMs >= startOfDay;
+        const txMs = effectiveDate.getTime();
+        const isToday = !tx.createdAt || getLocalDayKey(effectiveDate) === todayKey || txMs >= startOfTodayMs;
 
-        const rawSales = Number(tx.sales);
-        const fallbackAmt = Number(tx.amount) || 0;
-        const sales = Number.isFinite(rawSales) && rawSales > 0
-          ? rawSales
-          : (tx.kind === 'sale' ? fallbackAmt : 0);
-        const profit = Number(tx.profit) || 0;
-        const expense = tx.kind === 'expense' ? (Number(tx.amount) || 0) : 0;
+        const txSales = tx.kind === 'gcash'
+          ? (Number(tx.fee) || 0)
+          : (Number(tx.total) ?? Number(tx.amount) ?? 0);
+        const txProfit = tx.kind === 'gcash'
+          ? (Number(tx.fee) || 0)
+          : (Number(tx.profit) || 0);
 
         if (isToday) {
-          dailySales += sales;
-          dailyProfit += profit;
-          dailyExpenses += expense;
+          dailySales += txSales;
+          dailyProfit += txProfit;
         }
-        if (createdMs >= startOfWeek || isToday) {
-          weeklySales += sales;
-          weeklyProfit += profit;
+        if (isToday || txMs >= startOfWeekMs) {
+          weeklySales += txSales;
+          weeklyProfit += txProfit;
         }
-        if (createdMs >= startOfMonth || isToday) {
-          monthlySales += sales;
-          monthlyProfit += profit;
-          monthlyExpenses += expense;
+        if (isToday || txMs >= startOfMonthMs) {
+          monthlySales += txSales;
+          monthlyProfit += txProfit;
         }
       });
 
-      const netDailySales = dailySales;
-      const netWeeklySales = weeklySales;
+      let dailyExpenses = 0;
+      let monthlyExpenses = 0;
+      state.expenses.forEach((exp) => {
+        if (!exp || exp.voided) return;
+        if (filterFn && !filterFn(exp)) return;
+        const parsedDate = exp.createdAt ? new Date(exp.createdAt) : now;
+        const isValidDate = !Number.isNaN(parsedDate.getTime());
+        const effectiveDate = isValidDate ? parsedDate : now;
+        const expMs = effectiveDate.getTime();
+        const isToday = !exp.createdAt || getLocalDayKey(effectiveDate) === todayKey || expMs >= startOfTodayMs;
+        const amt = Number(exp.amount) || 0;
+        if (isToday) {
+          dailyExpenses += amt;
+        }
+        if (isToday || expMs >= startOfMonthMs) {
+          monthlyExpenses += amt;
+        }
+      });
+
       const netMonthlySales = monthlySales - monthlyExpenses;
 
       return {
-        dailySales: netDailySales,
+        dailySales,
         dailyProfit,
         dailyExpenses,
-        dailyAmount: netDailySales,
-        weeklySales: netWeeklySales,
+        monthlyExpenses,
+        dailyAmount: dailySales,
+        weeklySales,
         weeklyProfit,
         monthlySales: netMonthlySales,
-        monthlyProfit,
-        monthlyExpenses
+        monthlyProfit
       };
     }
 
-    function makeCounterFilter(pos) {
-      const fn = (tx) => tx && tx.pos === pos;
-      fn._pos = pos;
-      return fn;
+    function getCart(pos) {
+      if (!carts[pos]) carts[pos] = [];
+      return carts[pos];
     }
 
-    function renderCounterBanners() {
-      ['store', 'softdrinks', 'cigarettes'].forEach((pos) => {
-        const metrics = computeTimeMetrics(makeCounterFilter(pos));
-        const posProducts = state.products.filter((p) => p.pos === pos);
-        const origTotal = posProducts.reduce((sum, p) => sum + ((Number(p.cost) || 0) * (Number(p.stock) || 0)), 0);
-        const sellTotal = posProducts.reduce((sum, p) => sum + ((Number(p.price) || 0) * (Number(p.stock) || 0)), 0);
+    function addToCart(productId, qtyDelta = 1) {
+      const product = state.products.find((p) => p.id === productId);
+      if (!product) return;
+      const pos = product.pos || 'store';
+      const cart = getCart(pos);
+      const existing = cart.find((item) => item.productId === productId);
+      const currentQty = existing ? existing.qty : 0;
+      const nextQty = currentQty + qtyDelta;
 
-        const salesEl = document.getElementById(`${pos}-sales-banner`);
-        const profitEl = document.getElementById(`${pos}-profit-banner`);
-        const amtEl = document.getElementById(`total-amount-${pos}`);
-        const origEl = document.getElementById(`${pos}-orig-total`);
-        const sellEl = document.getElementById(`${pos}-sell-total`);
-        const wSalesEl = document.getElementById(`${pos}-weekly-sales`);
-        const wProfitEl = document.getElementById(`${pos}-weekly-profit`);
-        const mSalesEl = document.getElementById(`${pos}-monthly-sales`);
-        const mProfitEl = document.getElementById(`${pos}-monthly-profit`);
-
-        if (salesEl) salesEl.textContent = formatCurrency(metrics.dailySales);
-        if (profitEl) profitEl.textContent = formatCurrency(metrics.dailyProfit);
-        if (amtEl) amtEl.textContent = formatCurrency(metrics.dailyAmount);
-        if (origEl) origEl.textContent = formatCurrency(origTotal);
-        if (sellEl) sellEl.textContent = formatCurrency(sellTotal);
-        if (wSalesEl) wSalesEl.textContent = formatCurrency(metrics.weeklySales);
-        if (wProfitEl) wProfitEl.textContent = formatCurrency(metrics.weeklyProfit);
-        if (mSalesEl) mSalesEl.textContent = formatCurrency(metrics.monthlySales);
-        if (mProfitEl) mProfitEl.textContent = formatCurrency(metrics.monthlyProfit);
-
-        const outItems = posProducts.filter((p) => (Number(p.stock) || 0) <= 0);
-        const lowItems = posProducts.filter((p) => {
-          const st = Number(p.stock) || 0;
-          const thresh = Number(p.lowStockThreshold ?? 5);
-          return st > 0 && st <= thresh;
-        });
-
-        const outAlert = document.getElementById(`${pos}-out-of-stock-alert`);
-        const outText = document.getElementById(`${pos}-out-of-stock-text`);
-        if (outAlert && outText) {
-          if (outItems.length) {
-            outAlert.classList.remove('hidden');
-            outText.textContent = `${outItems.length} item(s) OUT OF STOCK`;
-          } else {
-            outAlert.classList.add('hidden');
-          }
+      if (nextQty <= 0) {
+        carts[pos] = cart.filter((item) => item.productId !== productId);
+      } else {
+        if (nextQty > Number(product.stock)) {
+          showToast(`Only ${product.stock} left in stock for ${product.name}.`, 'error');
+          return;
         }
+        if (existing) {
+          existing.qty = nextQty;
+        } else {
+          cart.push({
+            productId: product.id,
+            name: product.name,
+            price: Number(product.price) || 0,
+            cost: Number(product.cost) || 0,
+            qty: nextQty
+          });
+        }
+      }
+      updateFloatingCartBar();
+      renderCatalogByPos(pos);
+      if (!document.getElementById('cart-modal').classList.contains('hidden')) {
+        renderCartDrawer();
+      }
+    }
 
-        const lowAlert = document.getElementById(`${pos}-low-stock-alert`);
-        const lowText = document.getElementById(`${pos}-low-stock-text`);
-        if (lowAlert && lowText) {
-          if (lowItems.length) {
-            lowAlert.classList.remove('hidden');
-            lowText.textContent = `${lowItems.length} item(s) running LOW on stock`;
-          } else {
-            lowAlert.classList.add('hidden');
-          }
+    function updateFloatingCartBar() {
+      const pos = getActiveCartPos();
+      const cart = getCart(pos);
+      const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+      const totalAmount = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+      const headerBadge = document.getElementById('header-cart-badge');
+      const allCartQty = ['store', 'softdrinks', 'cigarettes'].reduce(
+        (sum, p) => sum + getCart(p).reduce((s, i) => s + i.qty, 0),
+        0
+      );
+      if (headerBadge) {
+        if (allCartQty > 0) {
+          headerBadge.textContent = String(allCartQty);
+          headerBadge.classList.remove('hidden');
+        } else {
+          headerBadge.classList.add('hidden');
+        }
+      }
+
+      const bar = document.getElementById('floating-cart-bar');
+      const countEl = document.getElementById('cart-badge-count');
+      const totalEl = document.getElementById('cart-badge-total');
+      if (!bar) return;
+
+      const isPosTab = currentTab === 'store' || currentTab === 'softdrinks' || currentTab === 'cigarettes';
+      if (isPosTab && totalQty > 0) {
+        if (countEl) countEl.textContent = String(totalQty);
+        if (totalEl) totalEl.textContent = formatCurrency(totalAmount);
+        bar.classList.remove('hidden');
+      } else {
+        bar.classList.add('hidden');
+      }
+    }
+
+    function openCartDrawer(pos = 'store') {
+      activeCartDrawerPos = pos;
+      document.getElementById('cart-modal').classList.remove('hidden');
+      renderCartDrawer();
+    }
+
+    function closeCartDrawer() {
+      document.getElementById('cart-modal').classList.add('hidden');
+    }
+
+    function toggleCartUtangCustomer() {
+      const method = document.getElementById('cart-payment-method').value;
+      const wrap = document.getElementById('cart-utang-customer-wrap');
+      if (method === 'Utang') {
+        wrap.classList.remove('hidden');
+      } else {
+        wrap.classList.add('hidden');
+      }
+      updateCartChangePreview();
+    }
+
+    function renderCartDrawer() {
+      const labels = { store: 'Store Cart', softdrinks: 'Softdrinks Cart', cigarettes: 'Cigarettes Cart' };
+      document.getElementById('cart-modal-title').textContent = labels[activeCartDrawerPos] || 'Cart & Checkout';
+      const cart = getCart(activeCartDrawerPos);
+      const list = document.getElementById('cart-items-list');
+
+      if (cart.length === 0) {
+        list.innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-6">Your cart is empty. Tap any product to add.</p>`;
+      } else {
+        list.innerHTML = cart.map((item) => `
+          <div class="flex items-center justify-between gap-2 bg-slate-50 rounded-2xl px-3 py-2 border border-slate-100">
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(item.name)}</p>
+              <p class="text-[11px] font-semibold text-slate-500">${formatCurrency(item.price)} each</p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="addToCart('${item.productId}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-slate-700">-</button>
+              <span class="w-6 text-center text-xs font-black text-slate-900">${item.qty}</span>
+              <button type="button" onclick="addToCart('${item.productId}', 1)" class="w-7 h-7 rounded-xl bg-brand-purple text-white font-black">+</button>
+            </div>
+            <p class="text-xs font-black text-slate-900 w-16 text-right shrink-0">${formatCurrency(item.price * item.qty)}</p>
+          </div>
+        `).join('');
+      }
+      renderCartTotals();
+    }
+
+    function renderCartTotals() {
+      const cart = getCart(activeCartDrawerPos);
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const discount = Math.max(0, Number(document.getElementById('cart-discount').value) || 0);
+      const total = Math.max(0, subtotal - discount);
+      document.getElementById('cart-summary-total').textContent = formatCurrency(total);
+      updateCartChangePreview();
+    }
+
+    function updateCartChangePreview() {
+      const cart = getCart(activeCartDrawerPos);
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const discount = Math.max(0, Number(document.getElementById('cart-discount').value) || 0);
+      const total = Math.max(0, subtotal - discount);
+      const method = document.getElementById('cart-payment-method').value;
+      const tendered = Number(document.getElementById('cart-cash-tendered').value);
+      const preview = document.getElementById('cart-change-preview');
+
+      if (method === 'Utang') {
+        preview.textContent = `Credit / Utang Balance: ${formatCurrency(total)}`;
+        preview.className = 'text-xs font-extrabold text-amber-700';
+      } else if (!Number.isNaN(tendered) && tendered > 0) {
+        const change = tendered - total;
+        if (change >= 0) {
+          preview.textContent = `Change: ${formatCurrency(change)}`;
+          preview.className = 'text-xs font-extrabold text-emerald-700';
+        } else {
+          preview.textContent = `Short by: ${formatCurrency(Math.abs(change))}`;
+          preview.className = 'text-xs font-extrabold text-rose-600';
+        }
+      } else {
+        preview.textContent = '';
+      }
+    }
+
+    function clearCurrentCart() {
+      carts[activeCartDrawerPos] = [];
+      updateFloatingCartBar();
+      renderCatalogByPos(activeCartDrawerPos);
+      renderCartDrawer();
+    }
+
+    function completeCartCheckout() {
+      const cart = getCart(activeCartDrawerPos);
+      if (cart.length === 0) {
+        showToast('Cart is empty.', 'error');
+        return;
+      }
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const totalCost = cart.reduce((sum, item) => sum + item.cost * item.qty, 0);
+      const discount = Math.max(0, Number(document.getElementById('cart-discount').value) || 0);
+      const total = Math.max(0, subtotal - discount);
+      const profit = total - totalCost;
+      const paymentMethod = document.getElementById('cart-payment-method').value;
+      const customerName = (document.getElementById('cart-utang-customer').value || '').trim();
+
+      if (paymentMethod === 'Utang' && !customerName) {
+        showToast('Please enter customer name for Utang.', 'error');
+        return;
+      }
+
+      for (const item of cart) {
+        const prod = state.products.find((p) => p.id === item.productId);
+        if (!prod || Number(prod.stock) < item.qty) {
+          showToast(`Insufficient stock for ${item.name}.`, 'error');
+          return;
+        }
+      }
+
+      cart.forEach((item) => {
+        const prod = state.products.find((p) => p.id === item.productId);
+        if (prod) {
+          prod.stock = Math.max(0, Number(prod.stock) - item.qty);
         }
       });
+
+      const txId = `tx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const nowIso = new Date().toISOString();
+      const itemSummary = cart.map((i) => `${i.qty}x ${i.name}`).join(', ');
+
+      state.transactions.unshift({
+        id: txId,
+        kind: 'sale',
+        counter: activeCartDrawerPos,
+        items: cart.map((i) => ({ ...i })),
+        summary: itemSummary,
+        subtotal,
+        discount,
+        total,
+        cost: totalCost,
+        profit,
+        paymentMethod,
+        customerName: paymentMethod === 'Utang' ? customerName : '',
+        createdAt: nowIso,
+        voided: false
+      });
+
+      if (paymentMethod === 'Utang') {
+        state.utangRecords.unshift({
+          id: `utang-${Date.now()}`,
+          txId,
+          customerName,
+          note: itemSummary,
+          amount: total,
+          paidAmount: 0,
+          paid: false,
+          payments: [],
+          createdAt: nowIso
+        });
+      }
+
+      carts[activeCartDrawerPos] = [];
+      document.getElementById('cart-discount').value = '';
+      document.getElementById('cart-cash-tendered').value = '';
+      document.getElementById('cart-utang-customer').value = '';
+      document.getElementById('cart-payment-method').value = 'Cash';
+      toggleCartUtangCustomer();
+
+      saveState();
+      closeCartDrawer();
+      updateFloatingCartBar();
+      playCashierSaleSound();
+      renderAll();
+      showToast(`Sale recorded: ${formatCurrency(total)} (${paymentMethod})`, 'success');
     }
 
     function renderProductCard(product) {
       const stock = Number(product.stock) || 0;
-      const thresh = Number(product.lowStockThreshold ?? 5);
+      const threshold = Number(product.lowStockThreshold) || 5;
       const isOut = stock <= 0;
-      const isLow = !isOut && stock <= thresh;
-      const cartList = state.carts[product.pos] || [];
-      const inCart = cartList.find((c) => c.productId === product.id);
-      const cartQty = inCart ? inCart.qty : 0;
+      const isLow = !isOut && stock <= threshold;
+      const cart = getCart(product.pos || 'store');
+      const inCart = cart.find((c) => c.productId === product.id);
+      const qtyInCart = inCart ? inCart.qty : 0;
 
       const stockBadge = isOut
-        ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Out of stock</span>`
+        ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Out of Stock</span>`
         : isLow
-        ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Low: ${stock}</span>`
-        : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Stock: ${stock}</span>`;
+          ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Low: ${stock}</span>`
+          : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Stock: ${stock}</span>`;
 
-      const imgHtml = product.image
-        ? `<img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none'" class="w-full max-h-28 object-contain rounded-2xl mb-2 bg-slate-50" />`
-        : '';
+      const fallbackImg = `https://placehold.co/300x300/fce7f3/be185d?text=${encodeURIComponent(product.name.slice(0, 14))}`;
+      const imgUrl = product.image || fallbackImg;
 
       return `
-        <div class="smooth-card bg-white rounded-3xl p-3 border border-slate-100 shadow-card flex flex-col justify-between gap-2.5">
-          <div onclick="openProductDetail('${escapeHtml(product.id)}')" class="cursor-pointer space-y-1">
-            ${imgHtml}
+        <div class="smooth-card bg-white rounded-3xl p-2.5 border border-slate-100 shadow-card flex flex-col justify-between gap-2 relative">
+          <div onclick="openProductDetail('${product.id}')" class="cursor-pointer space-y-2">
+            <div class="relative w-full h-28 bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center p-1.5">
+              <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src='${fallbackImg}';"
+                class="max-w-full max-h-28 w-auto h-auto object-contain rounded-xl" />
+              ${qtyInCart > 0 ? `<span class="absolute top-1.5 right-1.5 min-w-[22px] h-[22px] px-1.5 rounded-full bg-brand-purple text-white text-[11px] font-black flex items-center justify-center shadow">${qtyInCart}</span>` : ''}
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide truncate">${escapeHtml(product.category || 'General')}</p>
+              <h3 class="text-xs font-extrabold text-slate-900 leading-snug line-clamp-2 min-h-[32px]">${escapeHtml(product.name)}</h3>
+            </div>
+          </div>
+          <div class="space-y-1.5 pt-1">
             <div class="flex items-center justify-between gap-1">
-              <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 truncate">${escapeHtml(product.category || 'General')}</span>
+              <span class="text-sm font-black text-brand-purple">${formatCurrency(product.price)}</span>
               ${stockBadge}
             </div>
-            <h3 class="text-xs sm:text-sm font-black text-slate-900 leading-snug line-clamp-2">${escapeHtml(product.name)}</h3>
-            <p class="text-sm sm:text-base font-black theme-accent-text">${formatCurrency(product.price)}</p>
-          </div>
-          <div class="flex items-center gap-1.5 pt-1">
-            <button type="button" onclick="openEditorModal('${escapeHtml(product.pos)}', '${escapeHtml(product.id)}')"
-              class="min-h-[36px] px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold transition">
-              Edit
-            </button>
-            <button type="button" ${isOut ? 'disabled' : ''} onclick="addToCart('${escapeHtml(product.id)}')"
-              class="flex-1 min-h-[36px] py-1.5 px-2.5 rounded-xl text-xs font-black transition ${
-                isOut
-                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                  : 'theme-accent-btn shadow-xs'
-              }">
-              ${isOut ? 'Sold Out' : cartQty > 0 ? `+ Add (${cartQty})` : '+ Add'}
-            </button>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="openEditorModal('${product.pos || 'store'}', '${product.id}')"
+                class="min-h-[34px] px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold">
+                Edit
+              </button>
+              <button type="button" ${isOut ? 'disabled' : ''} onclick="addToCart('${product.id}', 1)"
+                class="flex-1 min-h-[34px] py-1.5 px-2.5 rounded-xl text-[11px] font-black transition ${isOut ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-brand-purple hover:bg-brand-purpleDark text-white shadow-xs'}">
+                ${isOut ? 'Sold Out' : '+ Add'}
+              </button>
+            </div>
           </div>
         </div>
       `;
     }
 
+    function updateCounterBannerAndAlerts(pos) {
+      const metrics = computeTimeMetrics(makeCounterFilter(pos));
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setTxt(`${pos}-sales-banner`, formatCurrency(metrics.dailySales));
+      setTxt(`${pos}-profit-banner`, formatCurrency(metrics.dailyProfit));
+      setTxt(`total-amount-${pos}`, formatCurrency(metrics.dailyAmount));
+      setTxt(`${pos}-weekly-sales`, formatCurrency(metrics.weeklySales));
+      setTxt(`${pos}-weekly-profit`, formatCurrency(metrics.weeklyProfit));
+      setTxt(`${pos}-monthly-sales`, formatCurrency(metrics.monthlySales));
+      setTxt(`${pos}-monthly-profit`, formatCurrency(metrics.monthlyProfit));
+
+      const prods = state.products.filter((p) => (p.pos || 'store') === pos);
+      const origTotal = prods.reduce((s, p) => s + (Number(p.cost) || 0) * Math.max(0, Number(p.stock) || 0), 0);
+      const sellTotal = prods.reduce((s, p) => s + (Number(p.price) || 0) * Math.max(0, Number(p.stock) || 0), 0);
+      setTxt(`${pos}-orig-total`, formatCurrency(origTotal));
+      setTxt(`${pos}-sell-total`, formatCurrency(sellTotal));
+
+      const outItems = prods.filter((p) => (Number(p.stock) || 0) <= 0);
+      const lowItems = prods.filter((p) => {
+        const st = Number(p.stock) || 0;
+        const th = Number(p.lowStockThreshold) || 5;
+        return st > 0 && st <= th;
+      });
+
+      const outAlert = document.getElementById(`${pos}-out-of-stock-alert`);
+      const outText = document.getElementById(`${pos}-out-of-stock-text`);
+      if (outAlert && outText) {
+        if (outItems.length > 0) {
+          outText.textContent = `${outItems.length} item(s) OUT OF STOCK: ${outItems.slice(0, 2).map((i) => i.name).join(', ')}${outItems.length > 2 ? '...' : ''}`;
+          outAlert.classList.remove('hidden');
+        } else {
+          outAlert.classList.add('hidden');
+        }
+      }
+
+      const lowAlert = document.getElementById(`${pos}-low-stock-alert`);
+      const lowText = document.getElementById(`${pos}-low-stock-text`);
+      if (lowAlert && lowText) {
+        if (lowItems.length > 0) {
+          lowText.textContent = `${lowItems.length} item(s) LOW ON STOCK: ${lowItems.slice(0, 2).map((i) => `${i.name} (${i.stock})`).join(', ')}${lowItems.length > 2 ? '...' : ''}`;
+          lowAlert.classList.remove('hidden');
+        } else {
+          lowAlert.classList.add('hidden');
+        }
+      }
+    }
+
     function renderStoreCatalog() {
-      const search = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
-      const storeProducts = state.products.filter((p) => p.pos === 'store');
-      const categories = ['All', ...Array.from(new Set(storeProducts.map((p) => p.category || 'General')))];
+      updateCounterBannerAndAlerts('store');
+      const storeProds = state.products.filter((p) => (p.pos || 'store') === 'store');
+      const categories = ['All', ...new Set(storeProds.map((p) => p.category || 'General'))];
       if (!categories.includes(selectedStoreCategory)) selectedStoreCategory = 'All';
 
       const catWrap = document.getElementById('store-categories');
       if (catWrap) {
         catWrap.innerHTML = categories.map((cat) => {
           const active = cat === selectedStoreCategory;
-          return `<button type="button" onclick="selectStoreCategory('${escapeHtml(cat)}')"
-            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
-              active ? 'theme-accent-btn shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
-            }">${escapeHtml(cat)}</button>`;
+          return `<button type="button" onclick="selectedStoreCategory='${escapeHtml(cat)}';renderStoreCatalog();"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${active ? 'bg-brand-purple text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+            ${escapeHtml(cat)}
+          </button>`;
         }).join('');
       }
 
-      const filtered = storeProducts.filter((p) => {
+      const q = (document.getElementById('store-search')?.value || '').trim().toLowerCase();
+      const filtered = storeProds.filter((p) => {
         const matchCat = selectedStoreCategory === 'All' || (p.category || 'General') === selectedStoreCategory;
-        const matchSearch = !search ||
-          (p.name || '').toLowerCase().includes(search) ||
-          (p.category || '').toLowerCase().includes(search) ||
-          (p.barcode || '').toLowerCase().includes(search);
+        const matchSearch = !q || p.name.toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q) || (p.barcode || '').toLowerCase().includes(q);
         return matchCat && matchSearch;
       });
 
@@ -1856,440 +1974,167 @@
       if (grid) {
         grid.innerHTML = filtered.length
           ? filtered.map(renderProductCard).join('')
-          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No store items matched your search.</div>`;
+          : `<div class="col-span-full text-center py-10 text-xs font-bold text-slate-400">No store products found.</div>`;
       }
     }
 
-    function selectStoreCategory(cat) {
-      selectedStoreCategory = cat;
-      renderStoreCatalog();
-    }
-
     function renderSoftdrinksCatalog() {
-      const search = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
-      const list = state.products.filter((p) => p.pos === 'softdrinks' && (
-        !search ||
-        (p.name || '').toLowerCase().includes(search) ||
-        (p.category || '').toLowerCase().includes(search) ||
-        (p.barcode || '').toLowerCase().includes(search)
-      ));
+      updateCounterBannerAndAlerts('softdrinks');
+      const prods = state.products.filter((p) => p.pos === 'softdrinks');
+      const q = (document.getElementById('softdrinks-search')?.value || '').trim().toLowerCase();
+      const filtered = prods.filter((p) => !q || p.name.toLowerCase().includes(q) || (p.barcode || '').toLowerCase().includes(q));
       const grid = document.getElementById('softdrinks-grid');
       if (grid) {
-        grid.innerHTML = list.length
-          ? list.map(renderProductCard).join('')
-          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No softdrinks matched your search.</div>`;
+        grid.innerHTML = filtered.length
+          ? filtered.map(renderProductCard).join('')
+          : `<div class="col-span-full text-center py-10 text-xs font-bold text-slate-400">No softdrinks found.</div>`;
       }
     }
 
     function renderCigarettesCatalog() {
-      const search = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
-      const list = state.products.filter((p) => p.pos === 'cigarettes' && (
-        !search ||
-        (p.name || '').toLowerCase().includes(search) ||
-        (p.category || '').toLowerCase().includes(search) ||
-        (p.barcode || '').toLowerCase().includes(search)
-      ));
+      updateCounterBannerAndAlerts('cigarettes');
+      const prods = state.products.filter((p) => p.pos === 'cigarettes');
+      const q = (document.getElementById('cigarettes-search')?.value || '').trim().toLowerCase();
+      const filtered = prods.filter((p) => !q || p.name.toLowerCase().includes(q) || (p.barcode || '').toLowerCase().includes(q));
       const grid = document.getElementById('cigarettes-grid');
       if (grid) {
-        grid.innerHTML = list.length
-          ? list.map(renderProductCard).join('')
-          : `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No cigarette items matched your search.</div>`;
+        grid.innerHTML = filtered.length
+          ? filtered.map(renderProductCard).join('')
+          : `<div class="col-span-full text-center py-10 text-xs font-bold text-slate-400">No cigarettes found.</div>`;
       }
     }
 
-    function addToCart(productId, qtyToAdd = 1) {
-      const product = state.products.find((p) => p.id === productId);
-      if (!product) return;
-      const stock = Number(product.stock) || 0;
-      if (stock <= 0) {
-        showToast(`${product.name} is out of stock.`, 'error');
-        return;
-      }
-      const pos = product.pos || 'store';
-      if (!state.carts[pos]) state.carts[pos] = [];
-      const existing = state.carts[pos].find((c) => c.productId === productId);
-      const currentQty = existing ? existing.qty : 0;
-      if (currentQty + qtyToAdd > stock) {
-        showToast(`Only ${stock} left in stock for ${product.name}.`, 'warn');
-        return;
-      }
-      if (existing) {
-        existing.qty += qtyToAdd;
-      } else {
-        state.carts[pos].push({ productId, qty: qtyToAdd });
-      }
-      playCartBeep();
-      saveState();
-      renderCatalogs();
-      updateCartIndicators();
-      showToast(`Added ${product.name} to cart`, 'success');
-    }
-
-    function updateCartIndicators() {
-      const pos = getActiveCartPos();
-      const cart = state.carts[pos] || [];
-      let count = 0;
-      let total = 0;
-      cart.forEach((item) => {
-        const prod = state.products.find((p) => p.id === item.productId);
-        if (prod) {
-          count += item.qty;
-          total += (Number(prod.price) || 0) * item.qty;
-        }
-      });
-
-      const headerBadge = document.getElementById('header-cart-badge');
-      if (headerBadge) {
-        if (count > 0) {
-          headerBadge.textContent = String(count);
-          headerBadge.classList.remove('hidden');
-        } else {
-          headerBadge.classList.add('hidden');
-        }
-      }
-
-      const floatingBar = document.getElementById('floating-cart-bar');
-      const badgeCount = document.getElementById('cart-badge-count');
-      const badgeTotal = document.getElementById('cart-badge-total');
-      const isPosTab = ['store', 'softdrinks', 'cigarettes'].includes(currentTab);
-      if (floatingBar && badgeCount && badgeTotal) {
-        if (count > 0 && isPosTab) {
-          badgeCount.textContent = String(count);
-          badgeTotal.textContent = formatCurrency(total);
-          floatingBar.classList.remove('hidden');
-        } else {
-          floatingBar.classList.add('hidden');
-        }
-      }
-    }
-
-    function openCartDrawer(pos = 'store') {
-      activeCartPos = ['store', 'softdrinks', 'cigarettes'].includes(pos) ? pos : 'store';
-      const title = document.getElementById('cart-modal-title');
-      if (title) {
-        const label = activeCartPos === 'softdrinks' ? 'Softdrinks' : activeCartPos === 'cigarettes' ? 'Cigarettes' : 'Store';
-        title.textContent = `${label} Cart & Checkout`;
-      }
-      renderCartDrawerItems();
-      document.getElementById('cart-modal')?.classList.remove('hidden');
-    }
-
-    function closeCartDrawer() {
-      document.getElementById('cart-modal')?.classList.add('hidden');
-    }
-
-    function renderCartDrawerItems() {
-      const listEl = document.getElementById('cart-items-list');
-      const cart = state.carts[activeCartPos] || [];
-      if (!listEl) return;
-      if (!cart.length) {
-        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-5 text-center text-xs font-bold text-slate-500">Cart is empty. Tap + Add on any product.</div>`;
-        renderCartTotals();
-        return;
-      }
-
-      listEl.innerHTML = cart.map((item) => {
-        const prod = state.products.find((p) => p.id === item.productId);
-        if (!prod) return '';
-        const subtotal = (Number(prod.price) || 0) * item.qty;
-        return `
-          <div class="bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-2 border border-slate-200/70">
-            <div class="min-w-0">
-              <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(prod.name)}</p>
-              <p class="text-[11px] font-semibold text-slate-500">${formatCurrency(prod.price)} each</p>
-            </div>
-            <div class="flex items-center gap-1.5 shrink-0">
-              <button type="button" onclick="changeCartQty('${escapeHtml(prod.id)}', -1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">-</button>
-              <span class="w-6 text-center text-xs font-black">${item.qty}</span>
-              <button type="button" onclick="changeCartQty('${escapeHtml(prod.id)}', 1)" class="w-7 h-7 rounded-xl bg-white border border-slate-200 font-black text-xs">+</button>
-              <span class="w-16 text-right text-xs font-black text-slate-900">${formatCurrency(subtotal)}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-      renderCartTotals();
-    }
-
-    function changeCartQty(productId, delta) {
-      const cart = state.carts[activeCartPos] || [];
-      const idx = cart.findIndex((c) => c.productId === productId);
-      if (idx === -1) return;
-      const prod = state.products.find((p) => p.id === productId);
-      const maxStock = prod ? (Number(prod.stock) || 0) : 0;
-      const nextQty = cart[idx].qty + delta;
-      if (nextQty <= 0) {
-        cart.splice(idx, 1);
-      } else if (nextQty > maxStock) {
-        showToast(`Only ${maxStock} left in stock.`, 'warn');
-        return;
-      } else {
-        cart[idx].qty = nextQty;
-      }
-      saveState();
-      renderCartDrawerItems();
-      renderCatalogs();
-      updateCartIndicators();
-    }
-
-    function clearCurrentCart() {
-      state.carts[activeCartPos] = [];
-      saveState();
-      renderCartDrawerItems();
-      renderCatalogs();
-      updateCartIndicators();
-    }
-
-    function getCartSubtotal() {
-      const cart = state.carts[activeCartPos] || [];
-      return cart.reduce((sum, item) => {
-        const prod = state.products.find((p) => p.id === item.productId);
-        return sum + (prod ? (Number(prod.price) || 0) * item.qty : 0);
-      }, 0);
-    }
-
-    function renderCartTotals() {
-      const sub = getCartSubtotal();
-      const discount = Math.max(0, Number(document.getElementById('cart-discount')?.value) || 0);
-      const net = Math.max(0, sub - discount);
-      const totalEl = document.getElementById('cart-summary-total');
-      if (totalEl) totalEl.textContent = formatCurrency(net);
-      updateCartChangePreview();
-    }
-
-    function updateCartChangePreview() {
-      const sub = getCartSubtotal();
-      const discount = Math.max(0, Number(document.getElementById('cart-discount')?.value) || 0);
-      const net = Math.max(0, sub - discount);
-      const tendered = Number(document.getElementById('cart-cash-tendered')?.value) || 0;
-      const preview = document.getElementById('cart-change-preview');
-      if (!preview) return;
-      if (tendered > 0 && tendered >= net) {
-        preview.textContent = `Change: ${formatCurrency(tendered - net)}`;
-      } else if (tendered > 0 && tendered < net) {
-        preview.textContent = `Short by: ${formatCurrency(net - tendered)}`;
-      } else {
-        preview.textContent = '';
-      }
-    }
-
-    function toggleCartUtangCustomer() {
-      const method = document.getElementById('cart-payment-method')?.value;
-      const wrap = document.getElementById('cart-utang-customer-wrap');
-      if (wrap) {
-        if (method === 'Utang') wrap.classList.remove('hidden');
-        else wrap.classList.add('hidden');
-      }
-    }
-
-    function completeCartCheckout() {
-      const cart = state.carts[activeCartPos] || [];
-      if (!cart.length) {
-        showToast('Cart is empty.', 'warn');
-        return;
-      }
-      const method = document.getElementById('cart-payment-method')?.value || 'Cash';
-      const discount = Math.max(0, Number(document.getElementById('cart-discount')?.value) || 0);
-      const utangCustomer = (document.getElementById('cart-utang-customer')?.value || '').trim();
-
-      if (method === 'Utang' && !utangCustomer) {
-        showToast('Please enter customer name for Utang.', 'error');
-        return;
-      }
-
-      let grossSales = 0;
-      let totalCost = 0;
-      const itemsSnapshot = [];
-
-      for (const item of cart) {
-        const prod = state.products.find((p) => p.id === item.productId);
-        if (!prod) continue;
-        if ((Number(prod.stock) || 0) < item.qty) {
-          showToast(`Insufficient stock for ${prod.name}.`, 'error');
-          return;
-        }
-        const price = Number(prod.price) || 0;
-        const cost = Number(prod.cost) || 0;
-        grossSales += price * item.qty;
-        totalCost += cost * item.qty;
-        itemsSnapshot.push({
-          productId: prod.id,
-          name: prod.name,
-          qty: item.qty,
-          price,
-          cost
-        });
-      }
-
-      const netSales = Math.max(0, grossSales - discount);
-      const profit = netSales - totalCost;
-      const tendered = Number(document.getElementById('cart-cash-tendered')?.value) || netSales;
-      if (method === 'Cash' && tendered < netSales) {
-        showToast('Cash tendered is less than total.', 'error');
-        return;
-      }
-
-      itemsSnapshot.forEach((it) => {
-        const prod = state.products.find((p) => p.id === it.productId);
-        if (prod) {
-          prod.stock = Math.max(0, (Number(prod.stock) || 0) - it.qty);
-        }
-      });
-
-      const txId = 'tx-' + Date.now();
-      const summaryNames = itemsSnapshot.map((i) => `${i.name} x${i.qty}`).join(', ');
-      state.transactions.unshift({
-        id: txId,
-        kind: 'sale',
-        pos: activeCartPos,
-        paymentMethod: method,
-        customerName: method === 'Utang' ? utangCustomer : '',
-        description: summaryNames,
-        items: itemsSnapshot,
-        sales: netSales,
-        profit,
-        discount,
-        createdAt: new Date().toISOString(),
-        voided: false
-      });
-
-      if (method === 'Utang') {
-        state.utangRecords.unshift({
-          id: 'utang-' + Date.now(),
-          customerName: utangCustomer,
-          note: summaryNames,
-          amount: netSales,
-          paidAmount: 0,
-          paid: false,
-          txId,
-          createdAt: new Date().toISOString()
-        });
-      }
-
-      state.carts[activeCartPos] = [];
-      if (document.getElementById('cart-discount')) document.getElementById('cart-discount').value = '';
-      if (document.getElementById('cart-cash-tendered')) document.getElementById('cart-cash-tendered').value = '';
-      if (document.getElementById('cart-utang-customer')) document.getElementById('cart-utang-customer').value = '';
-
-      playCashierSaleSound();
-      saveState();
-      closeCartDrawer();
-      renderAll();
-      const changeMsg = method === 'Cash' && tendered > netSales ? ` (Change: ${formatCurrency(tendered - netSales)})` : '';
-      showToast(`Sale completed: ${formatCurrency(netSales)}${changeMsg}`, 'success');
+    function renderCatalogByPos(pos) {
+      if (pos === 'softdrinks') renderSoftdrinksCatalog();
+      else if (pos === 'cigarettes') renderCigarettesCatalog();
+      else renderStoreCatalog();
     }
 
     function openProductDetail(productId) {
-      const prod = state.products.find((p) => p.id === productId);
-      if (!prod) return;
-      const content = document.getElementById('detail-content');
-      if (!content) return;
-      content.innerHTML = `
+      const p = state.products.find((x) => x.id === productId);
+      if (!p) return;
+      const margin = (Number(p.price) || 0) - (Number(p.cost) || 0);
+      const fallbackImg = `https://placehold.co/300x300/fce7f3/be185d?text=${encodeURIComponent(p.name.slice(0, 14))}`;
+      document.getElementById('detail-content').innerHTML = `
         <div class="flex items-center justify-between">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full theme-accent-badge border">${escapeHtml(prod.pos)} • ${escapeHtml(prod.category || 'General')}</span>
-          <button type="button" onclick="closeDetailModal()" class="text-xs font-extrabold text-slate-500 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
+          <span class="text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-purple-100 text-brand-purple">${escapeHtml(p.pos || 'store')}</span>
+          <button type="button" onclick="closeProductDetail()" class="text-xs font-extrabold text-slate-500 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
         </div>
-        <div>
-          <h3 class="text-lg font-black text-slate-900">${escapeHtml(prod.name)}</h3>
-          ${prod.barcode ? `<p class="text-xs font-mono text-slate-500 mt-0.5">Barcode: ${escapeHtml(prod.barcode)}</p>` : ''}
-        </div>
-        <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="bg-slate-50 rounded-2xl p-2.5">
-            <p class="text-[10px] font-bold text-slate-400 uppercase">Price</p>
-            <p class="text-sm font-black theme-accent-text">${formatCurrency(prod.price)}</p>
+        <div class="flex items-center gap-3.5">
+          <img src="${escapeHtml(p.image || fallbackImg)}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null;this.src='${fallbackImg}';"
+            class="w-20 h-20 rounded-2xl object-contain bg-slate-50 p-1 border border-slate-100" />
+          <div class="min-w-0">
+            <h3 class="text-base font-black text-slate-900">${escapeHtml(p.name)}</h3>
+            <p class="text-xs font-semibold text-slate-500">${escapeHtml(p.category || 'General')}</p>
+            <p class="text-sm font-black text-brand-purple mt-1">${formatCurrency(p.price)}</p>
           </div>
-          <div class="bg-slate-50 rounded-2xl p-2.5">
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center bg-slate-50 rounded-2xl p-3">
+          <div>
             <p class="text-[10px] font-bold text-slate-400 uppercase">Cost</p>
-            <p class="text-sm font-black text-slate-800">${formatCurrency(prod.cost)}</p>
+            <p class="text-xs font-black text-slate-800 mt-0.5">${formatCurrency(p.cost)}</p>
           </div>
-          <div class="bg-slate-50 rounded-2xl p-2.5">
+          <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase">Profit/pc</p>
+            <p class="text-xs font-black text-emerald-700 mt-0.5">${formatCurrency(margin)}</p>
+          </div>
+          <div>
             <p class="text-[10px] font-bold text-slate-400 uppercase">Stock</p>
-            <p class="text-sm font-black text-slate-800">${Number(prod.stock) || 0}</p>
+            <p class="text-xs font-black text-slate-800 mt-0.5">${p.stock}</p>
           </div>
         </div>
+        ${p.barcode ? `<p class="text-xs font-semibold text-slate-500">Barcode: <span class="font-mono font-bold text-slate-800">${escapeHtml(p.barcode)}</span></p>` : ''}
+        ${p.expiryDate ? `<p class="text-xs font-semibold text-slate-500">Expiry Date: <span class="font-bold text-slate-800">${escapeHtml(p.expiryDate)}</span></p>` : ''}
         <div class="flex items-center gap-2 pt-1">
-          <button type="button" onclick="closeDetailModal(); openEditorModal('${escapeHtml(prod.pos)}', '${escapeHtml(prod.id)}')"
+          <button type="button" onclick="closeProductDetail();openEditorModal('${p.pos || 'store'}', '${p.id}')"
             class="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold">
-            Edit Item
+            Edit Product
           </button>
-          <button type="button" onclick="addToCart('${escapeHtml(prod.id)}'); closeDetailModal();"
-            class="flex-1 py-2.5 rounded-2xl theme-accent-btn text-xs font-black">
+          <button type="button" ${Number(p.stock) <= 0 ? 'disabled' : ''} onclick="addToCart('${p.id}', 1);closeProductDetail()"
+            class="flex-1 py-2.5 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-black disabled:opacity-50">
             + Add to Cart
           </button>
         </div>
       `;
-      document.getElementById('detail-modal')?.classList.remove('hidden');
+      document.getElementById('detail-modal').classList.remove('hidden');
     }
 
-    function closeDetailModal() {
-      document.getElementById('detail-modal')?.classList.add('hidden');
+    function closeProductDetail() {
+      document.getElementById('detail-modal').classList.add('hidden');
     }
 
-    function openEditorModal(pos = 'store', productId = null, prefillBarcode = '') {
-      const prod = productId ? state.products.find((p) => p.id === productId) : null;
-      document.getElementById('editor-title').textContent = prod ? 'Edit Product' : 'Add Product';
-      document.getElementById('editor-id').value = prod ? prod.id : '';
-      document.getElementById('editor-pos').value = prod ? prod.pos : pos;
-      document.getElementById('editor-name').value = prod ? prod.name : '';
-      document.getElementById('editor-category').value = prod ? prod.category : (pos === 'softdrinks' ? 'Soda' : pos === 'cigarettes' ? 'Stick' : 'General');
-      document.getElementById('editor-barcode').value = prod ? (prod.barcode || '') : prefillBarcode;
-      document.getElementById('editor-price').value = prod ? prod.price : '';
-      document.getElementById('editor-cost').value = prod ? prod.cost : '';
-      document.getElementById('editor-stock').value = prod ? prod.stock : '';
-      document.getElementById('editor-low-stock').value = prod ? (prod.lowStockThreshold ?? 5) : 5;
-      document.getElementById('editor-expiry').value = prod ? (prod.expiryDate || '') : '';
-      document.getElementById('editor-image').value = prod ? (prod.image || '') : '';
-
-      const delBtn = document.getElementById('editor-delete-btn');
-      if (delBtn) {
-        if (prod) delBtn.classList.remove('hidden');
-        else delBtn.classList.add('hidden');
+    function openEditorModal(defaultPos = 'store', productId = null) {
+      const modal = document.getElementById('editor-modal');
+      const deleteBtn = document.getElementById('editor-delete-btn');
+      if (productId) {
+        const p = state.products.find((x) => x.id === productId);
+        if (!p) return;
+        document.getElementById('editor-title').textContent = 'Edit Product';
+        document.getElementById('editor-id').value = p.id;
+        document.getElementById('editor-pos').value = p.pos || 'store';
+        document.getElementById('editor-name').value = p.name || '';
+        document.getElementById('editor-category').value = p.category || '';
+        document.getElementById('editor-barcode').value = p.barcode || '';
+        document.getElementById('editor-price').value = p.price ?? '';
+        document.getElementById('editor-cost').value = p.cost ?? '';
+        document.getElementById('editor-stock').value = p.stock ?? 0;
+        document.getElementById('editor-low-stock').value = p.lowStockThreshold ?? 5;
+        document.getElementById('editor-expiry').value = p.expiryDate || '';
+        document.getElementById('editor-image').value = p.image || '';
+        deleteBtn.classList.remove('hidden');
+      } else {
+        document.getElementById('editor-title').textContent = 'Add Product';
+        document.getElementById('editor-id').value = '';
+        document.getElementById('editor-pos').value = defaultPos;
+        document.getElementById('editor-name').value = '';
+        document.getElementById('editor-category').value = defaultPos === 'softdrinks' ? 'Softdrinks' : defaultPos === 'cigarettes' ? 'Sticks' : 'General';
+        document.getElementById('editor-barcode').value = '';
+        document.getElementById('editor-price').value = '';
+        document.getElementById('editor-cost').value = '';
+        document.getElementById('editor-stock').value = '10';
+        document.getElementById('editor-low-stock').value = '5';
+        document.getElementById('editor-expiry').value = '';
+        document.getElementById('editor-image').value = '';
+        deleteBtn.classList.add('hidden');
       }
-      document.getElementById('editor-modal')?.classList.remove('hidden');
+      modal.classList.remove('hidden');
     }
 
     function closeEditorModal() {
-      document.getElementById('editor-modal')?.classList.add('hidden');
+      document.getElementById('editor-modal').classList.add('hidden');
     }
 
     function saveProductFromForm(e) {
       e.preventDefault();
       const id = document.getElementById('editor-id').value;
-      const pos = document.getElementById('editor-pos').value;
-      const name = document.getElementById('editor-name').value.trim();
-      const category = document.getElementById('editor-category').value.trim() || 'General';
-      const barcode = document.getElementById('editor-barcode').value.trim();
-      const price = Number(document.getElementById('editor-price').value) || 0;
-      const cost = Number(document.getElementById('editor-cost').value) || 0;
-      const stock = Math.max(0, Math.floor(Number(document.getElementById('editor-stock').value) || 0));
-      const lowStockThreshold = Math.max(0, Math.floor(Number(document.getElementById('editor-low-stock').value) || 5));
-      const expiryDate = document.getElementById('editor-expiry').value || '';
-      const image = document.getElementById('editor-image').value.trim();
+      const payload = {
+        pos: document.getElementById('editor-pos').value,
+        name: document.getElementById('editor-name').value.trim(),
+        category: document.getElementById('editor-category').value.trim() || 'General',
+        barcode: document.getElementById('editor-barcode').value.trim(),
+        price: Math.max(0, Number(document.getElementById('editor-price').value) || 0),
+        cost: Math.max(0, Number(document.getElementById('editor-cost').value) || 0),
+        stock: Math.max(0, parseInt(document.getElementById('editor-stock').value, 10) || 0),
+        lowStockThreshold: Math.max(0, parseInt(document.getElementById('editor-low-stock').value, 10) || 5),
+        expiryDate: document.getElementById('editor-expiry').value || '',
+        image: document.getElementById('editor-image').value.trim()
+      };
 
-      if (!name) return;
+      if (!payload.name) return;
 
       if (id) {
-        const existing = state.products.find((p) => p.id === id);
-        if (existing) {
-          Object.assign(existing, { pos, name, category, barcode, price, cost, stock, lowStockThreshold, expiryDate, image });
+        const idx = state.products.findIndex((p) => p.id === id);
+        if (idx !== -1) {
+          state.products[idx] = { ...state.products[idx], ...payload };
         }
-        showToast(`Updated ${name}`, 'success');
+        showToast('Product updated!', 'success');
       } else {
         state.products.unshift({
-          id: 'prod-' + Date.now(),
-          pos,
-          name,
-          category,
-          barcode,
-          price,
-          cost,
-          stock,
-          lowStockThreshold,
-          expiryDate,
-          image
+          id: `prod-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+          ...payload
         });
-        showToast(`Added ${name}`, 'success');
+        showToast('Product added!', 'success');
       }
-
       saveState();
       closeEditorModal();
       renderAll();
@@ -2302,81 +2147,104 @@
       saveState();
       closeEditorModal();
       renderAll();
-      showToast('Product deleted', 'warn');
+      showToast('Product deleted.', 'info');
     }
 
-    function openExpenseModal() {
-      const sel = document.getElementById('expense-counter');
-      if (sel && ['store', 'softdrinks', 'cigarettes', 'gcash'].includes(currentTab)) {
-        sel.value = currentTab;
-      }
-      document.getElementById('expense-modal')?.classList.remove('hidden');
+    function openLowStockModal(pos = 'store', type = 'out') {
+      lowStockModalPos = pos;
+      lowStockModalAllCounters = false;
+      lowStockModalType = type;
+      renderLowStockModal(pos, false, type);
+      document.getElementById('low-stock-modal').classList.remove('hidden');
     }
 
-    function closeExpenseModal() {
-      document.getElementById('expense-modal')?.classList.add('hidden');
+    function closeLowStockModal() {
+      document.getElementById('low-stock-modal').classList.add('hidden');
     }
 
-    function recordExpense(e) {
-      e.preventDefault();
-      const pos = document.getElementById('expense-counter').value || 'general';
-      const desc = document.getElementById('expense-desc').value.trim();
-      const amount = Number(document.getElementById('expense-amount').value) || 0;
-      if (!desc || amount <= 0) return;
+    function renderLowStockModal(pos, allCounters, type) {
+      lowStockModalPos = pos;
+      lowStockModalAllCounters = allCounters;
+      lowStockModalType = type;
 
-      state.transactions.unshift({
-        id: 'exp-' + Date.now(),
-        kind: 'expense',
-        pos,
-        description: desc,
-        amount,
-        sales: 0,
-        profit: 0,
-        createdAt: new Date().toISOString(),
-        voided: false
+      const setBtnStyle = (id, active) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = active
+          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
+          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
+      };
+      setBtnStyle('low-stock-type-out', type === 'out');
+      setBtnStyle('low-stock-type-low', type === 'low');
+      setBtnStyle('low-stock-scope-counter', !allCounters);
+      setBtnStyle('low-stock-scope-all', allCounters);
+
+      const items = state.products.filter((p) => {
+        if (!allCounters && (p.pos || 'store') !== pos) return false;
+        const st = Number(p.stock) || 0;
+        const th = Number(p.lowStockThreshold) || 5;
+        return type === 'out' ? st <= 0 : (st > 0 && st <= th);
       });
 
-      document.getElementById('expense-desc').value = '';
-      document.getElementById('expense-amount').value = '';
-      saveState();
-      closeExpenseModal();
-      renderAll();
-      showToast(`Expense recorded: ${formatCurrency(amount)}`, 'warn');
+      const list = document.getElementById('low-stock-modal-list');
+      if (!items.length) {
+        list.innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-6">No items in this list.</p>`;
+        return;
+      }
+      list.innerHTML = items.map((p) => `
+        <div class="flex items-center justify-between gap-2 bg-slate-50 rounded-2xl p-3 border border-slate-100">
+          <div class="min-w-0">
+            <p class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(p.name)}</p>
+            <p class="text-[11px] font-semibold text-slate-500 uppercase">${escapeHtml(p.pos || 'store')} • Stock: <span class="font-black text-rose-600">${p.stock}</span></p>
+          </div>
+          <button type="button" onclick="closeLowStockModal();openEditorModal('${p.pos || 'store'}', '${p.id}')"
+            class="px-3 py-1.5 rounded-xl bg-brand-purple text-white text-xs font-extrabold shrink-0">
+            Restock
+          </button>
+        </div>
+      `).join('');
     }
 
+    // GCASH & E-LOAD
     function setGcashType(type) {
-      selectedGcashType = type;
+      gcashType = type;
       ['cash_in', 'cash_out', 'eload'].forEach((t) => {
-        const btn = document.getElementById('gcash-type-' + t);
+        const btn = document.getElementById(`gcash-type-${t}`);
         if (!btn) return;
         btn.className = t === type
           ? 'gcash-type-btn min-h-[44px] py-2.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold bg-brand-purple text-white transition'
           : 'gcash-type-btn min-h-[44px] py-2.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-100 text-slate-700 transition';
       });
+      autoSuggestGcashFee();
     }
 
-    function setGcashAmount(amt) {
-      const input = document.getElementById('gcash-amount');
-      if (input) {
-        input.value = amt;
-        autoSuggestGcashFee();
-      }
+    function setGcashAmount(amount) {
+      document.getElementById('gcash-amount').value = amount;
+      autoSuggestGcashFee();
     }
 
     function autoSuggestGcashFee() {
-      const amt = Number(document.getElementById('gcash-amount')?.value) || 0;
+      const amt = Number(document.getElementById('gcash-amount').value) || 0;
       const feeInput = document.getElementById('gcash-fee');
-      if (!feeInput || amt <= 0) return;
-      if (selectedGcashType === 'eload') {
-        feeInput.value = amt >= 100 ? 5 : 3;
+      if (!feeInput) return;
+      if (amt <= 0) {
+        feeInput.value = '';
+        return;
+      }
+      if (gcashType === 'eload') {
+        feeInput.value = amt <= 50 ? 3 : 5;
       } else {
-        feeInput.value = Math.max(5, Math.ceil(amt / 500) * 10);
+        const tiers = Math.max(1, Math.ceil(amt / 500));
+        feeInput.value = tiers * 10;
       }
     }
 
     function setGcashPuhunan() {
-      const val = Number(document.getElementById('gcash-puhunan-input')?.value);
-      if (isNaN(val) || val < 0) return;
+      const val = Number(document.getElementById('gcash-puhunan-input').value);
+      if (Number.isNaN(val) || val < 0) {
+        showToast('Enter a valid capital amount.', 'error');
+        return;
+      }
       state.gcashPuhunan = val;
       document.getElementById('gcash-puhunan-input').value = '';
       saveState();
@@ -2385,8 +2253,11 @@
     }
 
     function addGcashPuhunan() {
-      const val = Number(document.getElementById('gcash-puhunan-input')?.value);
-      if (isNaN(val) || val <= 0) return;
+      const val = Number(document.getElementById('gcash-puhunan-input').value);
+      if (Number.isNaN(val) || val <= 0) {
+        showToast('Enter an amount to add.', 'error');
+        return;
+      }
       state.gcashPuhunan = (Number(state.gcashPuhunan) || 0) + val;
       document.getElementById('gcash-puhunan-input').value = '';
       saveState();
@@ -2394,61 +2265,71 @@
       showToast(`Added ${formatCurrency(val)} to GCash Capital`, 'success');
     }
 
+    function clearGcashForm() {
+      document.getElementById('gcash-amount').value = '';
+      document.getElementById('gcash-fee').value = '';
+      document.getElementById('gcash-note').value = '';
+    }
+
     function recordGcashTransaction() {
-      const amount = Number(document.getElementById('gcash-amount')?.value) || 0;
-      const fee = Math.max(0, Number(document.getElementById('gcash-fee')?.value) || 0);
-      const note = (document.getElementById('gcash-note')?.value || '').trim();
+      const amount = Number(document.getElementById('gcash-amount').value) || 0;
+      const fee = Math.max(0, Number(document.getElementById('gcash-fee').value) || 0);
+      const note = (document.getElementById('gcash-note').value || '').trim();
+
       if (amount <= 0) {
-        showToast('Enter a valid amount.', 'error');
+        showToast('Please enter a valid GCash / E-Load amount.', 'error');
         return;
       }
 
-      if (selectedGcashType === 'cash_out') {
+      if (gcashType === 'cash_out' || gcashType === 'eload') {
         state.gcashPuhunan = Math.max(0, (Number(state.gcashPuhunan) || 0) - amount);
-      } else if (selectedGcashType === 'cash_in') {
+      } else if (gcashType === 'cash_in') {
         state.gcashPuhunan = (Number(state.gcashPuhunan) || 0) + amount;
-      } else if (selectedGcashType === 'eload') {
-        // E-Load deducts from capital
-        state.gcashPuhunan = Math.max(0, (Number(state.gcashPuhunan) || 0) - amount);
       }
 
-      const labelMap = { cash_in: 'GCash Cash In', cash_out: 'GCash Cash Out', eload: 'E-Load' };
-      const desc = `${labelMap[selectedGcashType] || 'GCash'} ${formatCurrency(amount)}${note ? ' (' + note + ')' : ''}`;
-
+      const typeLabel = gcashType === 'cash_in' ? 'GCash Cash In' : gcashType === 'cash_out' ? 'GCash Cash Out' : 'E-Load';
       state.transactions.unshift({
-        id: 'gcash-' + Date.now(),
+        id: `gcash-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
         kind: 'gcash',
-        pos: 'gcash',
-        gcashType: selectedGcashType,
-        description: desc,
+        counter: 'gcash',
+        gcashType,
+        summary: `${typeLabel}: ${formatCurrency(amount)}${note ? ` (${note})` : ''}`,
         amount,
-        sales: fee,
+        fee,
+        total: fee,
         profit: fee,
+        paymentMethod: 'GCash',
         createdAt: new Date().toISOString(),
         voided: false
       });
 
       clearGcashForm();
       saveState();
+      playCashierSaleSound();
       renderAll();
-      showToast(`Recorded ${labelMap[selectedGcashType]} (+${formatCurrency(fee)} fee)`, 'success');
-    }
-
-    function clearGcashForm() {
-      if (document.getElementById('gcash-amount')) document.getElementById('gcash-amount').value = '';
-      if (document.getElementById('gcash-fee')) document.getElementById('gcash-fee').value = '';
-      if (document.getElementById('gcash-note')) document.getElementById('gcash-note').value = '';
+      showToast(`${typeLabel} recorded! Fee: ${formatCurrency(fee)}`, 'success');
     }
 
     function renderGcashTab() {
       const metrics = computeTimeMetrics(makeCounterFilter('gcash'));
       const cap = Number(state.gcashPuhunan) || 0;
+      const now = new Date();
+      const currentMonthKey = getLocalMonthKey(now);
+      const startOfMonthMs = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
 
       let totalCashOut = 0;
       let totalCashIn = 0;
       let totalEload = 0;
       state.transactions.forEach((tx) => {
         if (!tx || tx.voided || tx.kind !== 'gcash') return;
+        const parsedDate = tx.createdAt ? new Date(tx.createdAt) : now;
+        const isValidDate = !Number.isNaN(parsedDate.getTime());
+        const effectiveDate = isValidDate ? parsedDate : now;
+        const isCurrentMonth = !tx.createdAt ||
+          getLocalMonthKey(effectiveDate) === currentMonthKey ||
+          effectiveDate.getTime() >= startOfMonthMs;
+        if (!isCurrentMonth) return;
+
         const amt = Number(tx.amount) || 0;
         if (tx.gcashType === 'cash_out') totalCashOut += amt;
         else if (tx.gcashType === 'cash_in') totalCashIn += amt;
@@ -2470,41 +2351,46 @@
       setTxt('gcash-monthly-profit', formatCurrency(metrics.monthlyProfit));
     }
 
-    function addManualUtang() {
-      const customerName = (document.getElementById('utang-customer-input')?.value || '').trim();
-      const note = (document.getElementById('utang-note-input')?.value || '').trim();
-      const amount = Number(document.getElementById('utang-amount-input')?.value) || 0;
-      if (!customerName || amount <= 0) {
-        showToast('Enter customer name and amount.', 'error');
-        return;
-      }
-      state.utangRecords.unshift({
-        id: 'utang-' + Date.now(),
-        customerName,
-        note: note || 'Manual Utang',
-        amount,
-        paidAmount: 0,
-        paid: false,
-        createdAt: new Date().toISOString()
-      });
-      document.getElementById('utang-customer-input').value = '';
-      document.getElementById('utang-note-input').value = '';
-      document.getElementById('utang-amount-input').value = '';
-      saveState();
-      renderUtangTab();
-      showToast(`Utang recorded for ${customerName}`, 'success');
-    }
-
+    // UTANG TRACKER
     function setUtangFilter(filter) {
-      selectedUtangFilter = filter;
+      utangFilter = filter;
       ['unpaid', 'paid', 'all'].forEach((f) => {
-        const btn = document.getElementById('utang-filter-' + f);
+        const btn = document.getElementById(`utang-filter-${f}`);
         if (!btn) return;
         btn.className = f === filter
           ? 'min-h-[40px] px-3.5 py-2 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
           : 'min-h-[40px] px-3.5 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-600 border border-slate-200 transition';
       });
       renderUtangTab();
+    }
+
+    function addManualUtang() {
+      const customerName = (document.getElementById('utang-customer-input').value || '').trim();
+      const note = (document.getElementById('utang-note-input').value || '').trim();
+      const amount = Number(document.getElementById('utang-amount-input').value) || 0;
+
+      if (!customerName || amount <= 0) {
+        showToast('Enter customer name and amount.', 'error');
+        return;
+      }
+
+      state.utangRecords.unshift({
+        id: `utang-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+        customerName,
+        note: note || 'Store credit',
+        amount,
+        paidAmount: 0,
+        paid: false,
+        payments: [],
+        createdAt: new Date().toISOString()
+      });
+
+      document.getElementById('utang-customer-input').value = '';
+      document.getElementById('utang-note-input').value = '';
+      document.getElementById('utang-amount-input').value = '';
+      saveState();
+      renderUtangTab();
+      showToast(`Utang added for ${customerName}`, 'success');
     }
 
     function markUtangPaid(utangId) {
@@ -2523,286 +2409,296 @@
       if (!rec) return;
       const remaining = Math.max(0, (Number(rec.amount) || 0) - (Number(rec.paidAmount) || 0));
       document.getElementById('partial-utang-id').value = rec.id;
-      document.getElementById('partial-utang-subtitle').textContent = `${rec.customerName} — ${rec.note || 'Utang'}`;
+      document.getElementById('partial-utang-subtitle').textContent = `${rec.customerName} • ${rec.note || ''}`;
       document.getElementById('partial-utang-remaining').textContent = formatCurrency(remaining);
+      document.getElementById('partial-utang-remaining').dataset.remaining = String(remaining);
       document.getElementById('partial-utang-amount').value = '';
       document.getElementById('partial-utang-note').value = '';
-      document.getElementById('partial-utang-modal')?.classList.remove('hidden');
+      document.getElementById('partial-utang-modal').classList.remove('hidden');
     }
 
     function closePartialUtangModal() {
-      document.getElementById('partial-utang-modal')?.classList.add('hidden');
+      document.getElementById('partial-utang-modal').classList.add('hidden');
     }
 
     function setQuickPartialAmount(val) {
-      const inp = document.getElementById('partial-utang-amount');
-      if (inp) inp.value = val;
+      const rem = Number(document.getElementById('partial-utang-remaining').dataset.remaining) || 0;
+      document.getElementById('partial-utang-amount').value = Math.min(rem, val);
     }
 
     function setFullRemainingPartialAmount() {
-      const id = document.getElementById('partial-utang-id')?.value;
-      const rec = state.utangRecords.find((u) => u.id === id);
-      if (!rec) return;
-      const remaining = Math.max(0, (Number(rec.amount) || 0) - (Number(rec.paidAmount) || 0));
-      const inp = document.getElementById('partial-utang-amount');
-      if (inp) inp.value = remaining.toFixed(2);
+      const rem = Number(document.getElementById('partial-utang-remaining').dataset.remaining) || 0;
+      document.getElementById('partial-utang-amount').value = rem;
     }
 
     function submitPartialUtangPayment(e) {
       e.preventDefault();
-      const id = document.getElementById('partial-utang-id')?.value;
+      const id = document.getElementById('partial-utang-id').value;
+      const payAmt = Number(document.getElementById('partial-utang-amount').value) || 0;
+      const note = (document.getElementById('partial-utang-note').value || '').trim();
       const rec = state.utangRecords.find((u) => u.id === id);
-      if (!rec) return;
-      const payAmt = Number(document.getElementById('partial-utang-amount')?.value) || 0;
-      if (payAmt <= 0) return;
+      if (!rec || payAmt <= 0) return;
+
       const total = Number(rec.amount) || 0;
-      rec.paidAmount = Math.min(total, (Number(rec.paidAmount) || 0) + payAmt);
-      if (rec.paidAmount >= total - 0.009) {
-        rec.paidAmount = total;
+      const prevPaid = Number(rec.paidAmount) || 0;
+      const nextPaid = Math.min(total, prevPaid + payAmt);
+      rec.paidAmount = nextPaid;
+      if (!Array.isArray(rec.payments)) rec.payments = [];
+      rec.payments.push({ amount: payAmt, note, createdAt: new Date().toISOString() });
+      if (nextPaid >= total) {
         rec.paid = true;
         rec.paidAt = new Date().toISOString();
       }
       saveState();
       closePartialUtangModal();
       renderUtangTab();
-      showToast(`Recorded ${formatCurrency(payAmt)} payment for ${rec.customerName}`, 'success');
+      showToast(`Partial payment of ${formatCurrency(payAmt)} saved!`, 'success');
+    }
+
+    function deleteUtangRecord(utangId) {
+      state.utangRecords = state.utangRecords.filter((u) => u.id !== utangId);
+      saveState();
+      renderUtangTab();
+      showToast('Utang record deleted.', 'info');
     }
 
     function renderUtangTab() {
-      const search = (document.getElementById('utang-search')?.value || '').trim().toLowerCase();
       let unpaidTotal = 0;
       let paidTotal = 0;
-      let activeAccounts = 0;
+      let activeCount = 0;
 
       state.utangRecords.forEach((u) => {
         const total = Number(u.amount) || 0;
         const paidAmt = u.paid ? total : (Number(u.paidAmount) || 0);
         const rem = Math.max(0, total - paidAmt);
-        unpaidTotal += rem;
         paidTotal += paidAmt;
-        if (rem > 0) activeAccounts += 1;
+        unpaidTotal += rem;
+        if (!u.paid && rem > 0) activeCount += 1;
       });
 
-      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-      setTxt('utang-unpaid-banner', formatCurrency(unpaidTotal));
-      setTxt('utang-paid-banner', formatCurrency(paidTotal));
-      setTxt('utang-count-banner', String(activeAccounts));
+      document.getElementById('utang-unpaid-banner').textContent = formatCurrency(unpaidTotal);
+      document.getElementById('utang-paid-banner').textContent = formatCurrency(paidTotal);
+      document.getElementById('utang-count-banner').textContent = String(activeCount);
 
+      const q = (document.getElementById('utang-search')?.value || '').trim().toLowerCase();
       const filtered = state.utangRecords.filter((u) => {
-        const total = Number(u.amount) || 0;
-        const paidAmt = u.paid ? total : (Number(u.paidAmount) || 0);
-        const isPaid = paidAmt >= total - 0.009;
-        if (selectedUtangFilter === 'unpaid' && isPaid) return false;
-        if (selectedUtangFilter === 'paid' && !isPaid) return false;
-        if (!search) return true;
-        return (u.customerName || '').toLowerCase().includes(search) || (u.note || '').toLowerCase().includes(search);
+        const isPaid = Boolean(u.paid);
+        if (utangFilter === 'unpaid' && isPaid) return false;
+        if (utangFilter === 'paid' && !isPaid) return false;
+        if (q && !(u.customerName || '').toLowerCase().includes(q) && !(u.note || '').toLowerCase().includes(q)) return false;
+        return true;
       });
 
-      const listEl = document.getElementById('utang-list');
-      if (!listEl) return;
+      const list = document.getElementById('utang-list');
       if (!filtered.length) {
-        listEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">No utang records found.</div>`;
+        list.innerHTML = `<div class="col-span-full text-center py-8 text-xs font-bold text-slate-400">No utang records found.</div>`;
         return;
       }
 
-      listEl.innerHTML = filtered.map((u) => {
+      list.innerHTML = filtered.map((u) => {
         const total = Number(u.amount) || 0;
         const paidAmt = u.paid ? total : (Number(u.paidAmount) || 0);
         const rem = Math.max(0, total - paidAmt);
-        const isPaid = rem <= 0.009;
-        const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-
+        const dt = u.createdAt ? new Date(u.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
         return `
-          <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-card space-y-2.5">
+          <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                  <h3 class="text-sm font-black text-slate-900">${escapeHtml(u.customerName)}</h3>
-                  <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">
-                    ${isPaid ? 'PAID' : 'UNPAID'}
+                  <h3 class="text-sm font-black text-slate-900 truncate">${escapeHtml(u.customerName)}</h3>
+                  <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${u.paid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">
+                    ${u.paid ? 'PAID' : 'UNPAID'}
                   </span>
                 </div>
-                <p class="text-xs font-semibold text-slate-600 mt-0.5">${escapeHtml(u.note || '')}</p>
-                <p class="text-[10px] font-semibold text-slate-400 mt-0.5">${escapeHtml(dateStr)}</p>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">${escapeHtml(u.note || '')}</p>
+                <p class="text-[10px] font-semibold text-slate-400 mt-0.5">${dt}</p>
               </div>
               <div class="text-right shrink-0">
-                <p class="text-sm font-black ${isPaid ? 'text-emerald-700' : 'text-amber-700'}">${formatCurrency(rem)}</p>
-                <p class="text-[10px] font-semibold text-slate-400">of ${formatCurrency(total)}</p>
+                <p class="text-sm font-black ${u.paid ? 'text-emerald-700' : 'text-amber-700'}">${formatCurrency(rem)}</p>
+                ${paidAmt > 0 && !u.paid ? `<p class="text-[10px] font-bold text-slate-400">Paid: ${formatCurrency(paidAmt)} / ${formatCurrency(total)}</p>` : ''}
               </div>
             </div>
-            ${!isPaid ? `
-              <div class="flex items-center gap-2 pt-1">
-                <button type="button" onclick="openPartialUtangModal('${escapeHtml(u.id)}')"
-                  class="flex-1 min-h-[38px] py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-extrabold transition">
+            <div class="flex items-center gap-1.5 pt-1">
+              ${!u.paid ? `
+                <button type="button" onclick="openPartialUtangModal('${u.id}')"
+                  class="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-extrabold">
                   Partial Pay
                 </button>
-                <button type="button" onclick="markUtangPaid('${escapeHtml(u.id)}')"
-                  class="flex-1 min-h-[38px] py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition">
-                  Mark Full Paid
+                <button type="button" onclick="markUtangPaid('${u.id}')"
+                  class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">
+                  Mark Paid
                 </button>
-              </div>
-            ` : ''}
+              ` : ''}
+              <button type="button" onclick="deleteUtangRecord('${u.id}')"
+                class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 text-xs font-extrabold">
+                Delete
+              </button>
+            </div>
           </div>
         `;
       }).join('');
     }
 
-    function setReportFilter(filter) {
-      selectedReportFilter = filter || 'all';
-      renderReports();
+    // EXPENSES
+    function openExpenseModal() {
+      const defaultCounter = ['store', 'softdrinks', 'cigarettes', 'gcash'].includes(currentTab) ? currentTab : 'store';
+      document.getElementById('expense-counter').value = defaultCounter;
+      document.getElementById('expense-desc').value = '';
+      document.getElementById('expense-amount').value = '';
+      document.getElementById('expense-modal').classList.remove('hidden');
     }
 
+    function closeExpenseModal() {
+      document.getElementById('expense-modal').classList.add('hidden');
+    }
+
+    function recordExpense(e) {
+      e.preventDefault();
+      const counter = document.getElementById('expense-counter').value;
+      const desc = document.getElementById('expense-desc').value.trim();
+      const amount = Number(document.getElementById('expense-amount').value) || 0;
+      if (!desc || amount <= 0) return;
+
+      const nowIso = new Date().toISOString();
+      const id = `exp-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
+      state.expenses.unshift({ id, counter, desc, amount, createdAt: nowIso, voided: false });
+      state.transactions.unshift({
+        id,
+        kind: 'expense',
+        counter,
+        summary: `Expense (${counter}): ${desc}`,
+        amount,
+        total: amount,
+        createdAt: nowIso,
+        voided: false
+      });
+
+      saveState();
+      closeExpenseModal();
+      renderAll();
+      showToast(`Expense recorded: ${formatCurrency(amount)}`, 'info');
+    }
+
+    // REPORTS & LEDGER
     function togglePastLedgerView() {
-      showPastLedger = !showPastLedger;
+      showPastLedgerDays = !showPastLedgerDays;
       renderReports();
     }
 
     function renderReports() {
-      const allMetrics = computeTimeMetrics(null);
+      const overall = computeTimeMetrics(null);
       const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-      setTxt('rep-gross-sales', formatCurrency(allMetrics.dailySales));
-      setTxt('rep-gross-profit', formatCurrency(allMetrics.dailyProfit));
-      setTxt('rep-total-expenses', formatCurrency(allMetrics.dailyExpenses));
-      setTxt('rep-total-amount', formatCurrency(allMetrics.dailyAmount));
-      setTxt('rep-weekly-sales', formatCurrency(allMetrics.weeklySales));
-      setTxt('rep-weekly-profit', formatCurrency(allMetrics.weeklyProfit));
-      setTxt('rep-monthly-sales', formatCurrency(allMetrics.monthlySales));
-      setTxt('rep-monthly-profit', formatCurrency(allMetrics.monthlyProfit));
-      setTxt('rep-monthly-expenses', formatCurrency(allMetrics.monthlyExpenses));
+      setTxt('rep-gross-sales', formatCurrency(overall.dailySales));
+      setTxt('rep-gross-profit', formatCurrency(overall.dailyProfit));
+      setTxt('rep-total-expenses', formatCurrency(overall.dailyExpenses));
+      setTxt('rep-total-amount', formatCurrency(overall.dailyAmount));
+      setTxt('rep-weekly-sales', formatCurrency(overall.weeklySales));
+      setTxt('rep-weekly-profit', formatCurrency(overall.weeklyProfit));
+      setTxt('rep-monthly-sales', formatCurrency(overall.monthlySales));
+      setTxt('rep-monthly-profit', formatCurrency(overall.monthlyProfit));
+      setTxt('rep-monthly-expenses', formatCurrency(overall.monthlyExpenses));
 
       const counters = [
         { key: 'store', label: 'Store' },
         { key: 'softdrinks', label: 'Softdrinks' },
-        { key: 'cigarettes', label: 'Yosi' },
+        { key: 'cigarettes', label: 'Cigarettes' },
         { key: 'gcash', label: 'GCash' }
       ];
-      const counterCardsEl = document.getElementById('rep-counter-cards');
-      if (counterCardsEl) {
-        counterCardsEl.innerHTML = counters.map((c) => {
+      const counterWrap = document.getElementById('rep-counter-cards');
+      if (counterWrap) {
+        counterWrap.innerHTML = counters.map((c) => {
           const m = computeTimeMetrics(makeCounterFilter(c.key));
           return `
-            <div class="bg-slate-50 rounded-2xl p-2.5 border border-slate-200/70">
+            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
               <p class="text-[10px] font-extrabold uppercase text-slate-500">${c.label}</p>
-              <p class="text-xs font-black text-slate-900 mt-0.5">${formatCurrency(m.dailySales)}</p>
-              <p class="text-[10px] font-bold text-emerald-700">Profit: ${formatCurrency(m.dailyProfit)}</p>
+              <p class="text-xs font-black text-slate-900 mt-1">Today: ${formatCurrency(m.dailySales)}</p>
+              <p class="text-[11px] font-bold text-emerald-700">Profit: ${formatCurrency(m.dailyProfit)}</p>
+              <p class="text-[10px] font-semibold text-slate-500 mt-0.5">Month Net: ${formatCurrency(m.monthlySales)}</p>
             </div>
           `;
         }).join('');
       }
 
-      const now = new Date();
-      const todayKey = getLocalDayKey(now);
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      const isTxToday = (tx) => {
-        if (!tx || !tx.createdAt) return true;
-        const d = new Date(tx.createdAt);
-        if (Number.isNaN(d.getTime())) return true;
-        return getLocalDayKey(d) === todayKey || d >= startOfDay;
-      };
-
-      // Daily Top 10 Sales (resets every day)
-      const dailySalesMap = {};
-      let dailyTotalUnits = 0;
+      // Daily Top 10 Sales
+      const todayKey = getLocalDayKey();
+      const todayQtyMap = {};
+      const allQtyMap = {};
       state.transactions.forEach((tx) => {
-        if (!tx || tx.voided || tx.kind !== 'sale') return;
-        if (!isTxToday(tx)) return;
-        (tx.items || []).forEach((it) => {
-          const key = it.productId || it.name;
-          if (!key) return;
-          if (!dailySalesMap[key]) {
-            dailySalesMap[key] = { name: it.name, qty: 0, revenue: 0 };
+        if (!tx || tx.voided || tx.kind !== 'sale' || !Array.isArray(tx.items)) return;
+        const isToday = !tx.createdAt || getLocalDayKey(new Date(tx.createdAt)) === todayKey;
+        tx.items.forEach((it) => {
+          const qty = Number(it.qty) || 0;
+          const rev = (Number(it.price) || 0) * qty;
+          if (!allQtyMap[it.name]) allQtyMap[it.name] = { name: it.name, qty: 0, rev: 0 };
+          allQtyMap[it.name].qty += qty;
+          allQtyMap[it.name].rev += rev;
+
+          if (isToday) {
+            if (!todayQtyMap[it.name]) todayQtyMap[it.name] = { name: it.name, qty: 0, rev: 0 };
+            todayQtyMap[it.name].qty += qty;
+            todayQtyMap[it.name].rev += rev;
           }
-          const q = Number(it.qty) || 0;
-          const rev = (Number(it.price) || 0) * q;
-          dailySalesMap[key].qty += q;
-          dailySalesMap[key].revenue += rev;
-          dailyTotalUnits += q;
         });
       });
 
-      const dailyTop10 = Object.values(dailySalesMap)
-        .sort((a, b) => b.qty - a.qty || b.revenue - a.revenue)
-        .slice(0, 10);
-
-      const top10SummaryEl = document.getElementById('rep-daily-top10-summary');
-      if (top10SummaryEl) top10SummaryEl.textContent = `${dailyTotalUnits} sold today`;
-
-      const top10ChartEl = document.getElementById('rep-daily-top10-chart');
-      if (top10ChartEl) {
-        if (!dailyTop10.length) {
-          top10ChartEl.innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-3">No product sales recorded today yet.</p>`;
+      const top10Today = Object.values(todayQtyMap).sort((a, b) => b.qty - a.qty).slice(0, 10);
+      const totalSoldToday = top10Today.reduce((s, x) => s + x.qty, 0);
+      setTxt('rep-daily-top10-summary', `${totalSoldToday} sold today`);
+      const top10El = document.getElementById('rep-daily-top10-chart');
+      if (top10El) {
+        if (!top10Today.length) {
+          top10El.innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-3">No sales recorded yet today.</p>`;
         } else {
-          const maxQty = Math.max(1, dailyTop10[0].qty);
-          top10ChartEl.innerHTML = dailyTop10.map((item, idx) => {
-            const pct = Math.max(8, Math.round((item.qty / maxQty) * 100));
-            return `
-              <div class="space-y-1">
-                <div class="flex items-center justify-between text-[11px] font-bold gap-2">
-                  <span class="truncate text-slate-800"><span class="font-black theme-accent-text mr-1">#${idx + 1}</span>${escapeHtml(item.name)}</span>
-                  <span class="shrink-0 font-black text-slate-900">${item.qty} sold • ${formatCurrency(item.revenue)}</span>
-                </div>
-                <div class="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
-                  <div class="h-full rounded-full theme-accent-btn" style="width: ${pct}%"></div>
-                </div>
+          const maxQ = top10Today[0].qty || 1;
+          top10El.innerHTML = top10Today.map((item, idx) => `
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-extrabold text-slate-800 truncate">#${idx + 1} ${escapeHtml(item.name)}</span>
+                <span class="font-black text-brand-purple shrink-0">${item.qty} sold (${formatCurrency(item.rev)})</span>
               </div>
-            `;
-          }).join('');
+              <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-full bg-brand-purple rounded-full" style="width: ${Math.max(8, Math.round((item.qty / maxQ) * 100))}%"></div>
+              </div>
+            </div>
+          `).join('');
         }
       }
 
-      // Overall Best-Selling to Slow-Moving
-      const allSalesMap = {};
-      state.products.forEach((p) => {
-        allSalesMap[p.id] = { name: p.name, qty: 0, revenue: 0 };
-      });
-      state.transactions.forEach((tx) => {
-        if (!tx || tx.voided || tx.kind !== 'sale') return;
-        (tx.items || []).forEach((it) => {
-          const key = it.productId || it.name;
-          if (!key) return;
-          if (!allSalesMap[key]) {
-            allSalesMap[key] = { name: it.name, qty: 0, revenue: 0 };
-          }
-          const q = Number(it.qty) || 0;
-          allSalesMap[key].qty += q;
-          allSalesMap[key].revenue += (Number(it.price) || 0) * q;
-        });
-      });
-
-      const rankedAll = Object.values(allSalesMap).sort((a, b) => b.qty - a.qty || b.revenue - a.revenue);
-      const chartSummaryEl = document.getElementById('rep-product-chart-summary');
-      if (chartSummaryEl) chartSummaryEl.textContent = `${rankedAll.length} items`;
-
-      const chartEl = document.getElementById('rep-product-sales-chart');
-      if (chartEl) {
-        if (!rankedAll.length) {
-          chartEl.innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-3">No products available.</p>`;
+      // Overall Product Ranking
+      const rankedProducts = Object.values(allQtyMap).sort((a, b) => b.qty - a.qty);
+      setTxt('rep-product-chart-summary', `${rankedProducts.length} items`);
+      const rankEl = document.getElementById('rep-product-sales-chart');
+      if (rankEl) {
+        if (!rankedProducts.length) {
+          rankEl.innerHTML = `<p class="text-xs font-semibold text-slate-400 text-center py-3">No product sales history yet.</p>`;
         } else {
-          const maxAll = Math.max(1, rankedAll[0].qty);
-          chartEl.innerHTML = rankedAll.slice(0, 12).map((item) => {
-            const pct = item.qty > 0 ? Math.max(6, Math.round((item.qty / maxAll) * 100)) : 2;
-            return `
-              <div class="space-y-1">
-                <div class="flex items-center justify-between text-[11px] font-bold gap-2">
-                  <span class="truncate text-slate-700">${escapeHtml(item.name)}</span>
-                  <span class="shrink-0 text-slate-600">${item.qty} sold (${formatCurrency(item.revenue)})</span>
-                </div>
-                <div class="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
-                  <div class="h-full rounded-full ${item.qty > 0 ? 'bg-emerald-500' : 'bg-slate-300'}" style="width: ${pct}%"></div>
-                </div>
+          const maxAll = rankedProducts[0].qty || 1;
+          rankEl.innerHTML = rankedProducts.slice(0, 15).map((item) => `
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-700 truncate">${escapeHtml(item.name)}</span>
+                <span class="font-extrabold text-slate-900 shrink-0">${item.qty} pcs • ${formatCurrency(item.rev)}</span>
               </div>
-            `;
-          }).join('');
+              <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-full bg-emerald-500 rounded-full" style="width: ${Math.max(6, Math.round((item.qty / maxAll) * 100))}%"></div>
+              </div>
+            </div>
+          `).join('');
         }
       }
 
-      // Filter pills
+      // Ledger Scope & Filters
+      const scopeLabel = document.getElementById('ledger-scope-label');
+      const toggleBtn = document.getElementById('toggle-past-ledger-btn');
+      if (scopeLabel) scopeLabel.textContent = showPastLedgerDays ? 'All Transactions (Including Past Days)' : "Today's Transactions";
+      if (toggleBtn) toggleBtn.textContent = showPastLedgerDays ? 'Hide Past Days' : 'Show Past Days';
+
       const filters = [
         { key: 'all', label: 'All' },
         { key: 'store', label: 'Store' },
-        { key: 'softdrinks', label: 'Drinks' },
-        { key: 'cigarettes', label: 'Yosi' },
+        { key: 'softdrinks', label: 'Softdrinks' },
+        { key: 'cigarettes', label: 'Cigarettes' },
         { key: 'gcash', label: 'GCash' },
         { key: 'expense', label: 'Expenses' }
       ];
@@ -2810,71 +2706,48 @@
       if (filterWrap) {
         filterWrap.innerHTML = filters.map((f) => {
           const active = selectedReportFilter === f.key;
-          return `<button type="button" onclick="setReportFilter('${f.key}')"
-            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${
-              active ? 'theme-accent-btn shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }">${f.label}</button>`;
+          return `<button type="button" onclick="selectedReportFilter='${f.key}';renderReports();"
+            class="px-3 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition ${active ? 'bg-brand-purple text-white' : 'bg-white text-slate-600 border border-slate-200'}">
+            ${f.label}
+          </button>`;
         }).join('');
       }
 
-      // Daily Transactions Ledger (hides previous days after the day by default)
       const ledgerEl = document.getElementById('transactions-ledger');
-      const scopeLabelEl = document.getElementById('ledger-scope-label');
-      const togglePastBtn = document.getElementById('toggle-past-ledger-btn');
-
-      if (scopeLabelEl) {
-        scopeLabelEl.textContent = showPastLedger ? 'All Transactions (Including Past Days)' : "Today's Transactions";
-      }
-      if (togglePastBtn) {
-        togglePastBtn.textContent = showPastLedger ? 'Hide Past Days' : 'Show Past Days';
-        togglePastBtn.className = showPastLedger
-          ? 'min-h-[34px] px-3 py-1.5 rounded-xl theme-accent-btn text-[11px] font-extrabold shrink-0 transition'
-          : 'min-h-[34px] px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-[11px] font-extrabold shrink-0 transition';
-      }
-
       if (ledgerEl) {
         const filteredTx = state.transactions.filter((tx) => {
           if (!tx) return false;
-          if (!showPastLedger && !isTxToday(tx)) {
+          if (!showPastLedgerDays && tx.createdAt && getLocalDayKey(new Date(tx.createdAt)) !== todayKey) {
             return false;
           }
           if (selectedReportFilter === 'all') return true;
           if (selectedReportFilter === 'expense') return tx.kind === 'expense';
-          return tx.pos === selectedReportFilter;
+          return (tx.counter || 'store') === selectedReportFilter;
         });
 
         if (!filteredTx.length) {
-          ledgerEl.innerHTML = `<div class="col-span-full bg-white rounded-3xl p-6 text-center text-xs font-bold text-slate-500">${
-            showPastLedger ? 'No transactions recorded yet.' : 'No transactions recorded today yet.'
-          }</div>`;
+          ledgerEl.innerHTML = `<div class="col-span-full text-center py-8 text-xs font-bold text-slate-400">No transactions for this view.</div>`;
         } else {
           ledgerEl.innerHTML = filteredTx.map((tx) => {
-            const isExpense = tx.kind === 'expense';
+            const dt = tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+            const amt = tx.kind === 'gcash' ? (Number(tx.amount) || 0) : (Number(tx.total) ?? Number(tx.amount) ?? 0);
             const isVoided = Boolean(tx.voided);
-            const displayAmt = isExpense ? (Number(tx.amount) || 0) : (Number(tx.sales) || 0);
-            const timeStr = tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
             return `
-              <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-card flex items-start justify-between gap-2 ${isVoided ? 'opacity-55' : ''}">
-                <div class="min-w-0 space-y-1">
+              <div class="bg-white rounded-3xl p-3.5 shadow-card border border-slate-100 flex items-start justify-between gap-2.5 ${isVoided ? 'opacity-55' : ''}">
+                <div class="min-w-0">
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                      isExpense ? 'bg-rose-100 text-rose-700' : 'theme-accent-badge border'
-                    }">${escapeHtml(tx.pos || 'store')}</span>
-                    ${tx.paymentMethod ? `<span class="text-[10px] font-bold text-slate-500">${escapeHtml(tx.paymentMethod)}</span>` : ''}
+                    <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${tx.kind === 'expense' ? 'bg-rose-100 text-rose-700' : tx.kind === 'gcash' ? 'bg-sky-100 text-sky-700' : 'bg-purple-100 text-brand-purple'}">
+                      ${escapeHtml(tx.counter || tx.kind || 'sale')}
+                    </span>
                     ${isVoided ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">VOIDED</span>` : ''}
+                    <span class="text-[10px] font-semibold text-slate-400">${dt}</span>
                   </div>
-                  <p class="text-xs font-black text-slate-900 leading-snug">${escapeHtml(tx.description || '')}</p>
-                  <p class="text-[10px] font-semibold text-slate-400">${escapeHtml(timeStr)}</p>
+                  <p class="text-xs font-extrabold text-slate-900 mt-1">${escapeHtml(tx.summary || '')}</p>
+                  ${tx.kind === 'gcash' ? `<p class="text-[11px] font-bold text-emerald-700">Fee Earned: ${formatCurrency(tx.fee || 0)}</p>` : ''}
                 </div>
                 <div class="text-right shrink-0 space-y-1">
-                  <p class="text-sm font-black ${isExpense ? 'text-rose-600' : 'text-slate-900'}">${isExpense ? '-' : ''}${formatCurrency(displayAmt)}</p>
-                  ${!isExpense && !isVoided ? `<p class="text-[10px] font-bold text-emerald-700">Profit: ${formatCurrency(tx.profit)}</p>` : ''}
-                  ${!isVoided ? `
-                    <button type="button" onclick="openVoidModal('${escapeHtml(tx.id)}')"
-                      class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-extrabold">
-                      Void
-                    </button>
-                  ` : ''}
+                  <p class="text-sm font-black ${tx.kind === 'expense' ? 'text-rose-600' : 'text-slate-900'}">${tx.kind === 'expense' ? '-' : ''}${formatCurrency(amt)}</p>
+                  ${!isVoided ? `<button type="button" onclick="openVoidModal('${tx.id}')" class="text-[10px] font-extrabold text-rose-600 hover:underline">Void</button>` : ''}
                 </div>
               </div>
             `;
@@ -2882,6 +2755,9 @@
         }
       }
     }
+
+    // VOID SYSTEM
+    let pendingVoidTxId = null;
 
     function getVoidPassword() {
       return localStorage.getItem(VOID_PASSWORD_KEY) || '1234';
@@ -2890,50 +2766,35 @@
     function openVoidModal(txId) {
       const tx = state.transactions.find((t) => t.id === txId);
       if (!tx || tx.voided) return;
-      pendingVoidId = txId;
-      document.getElementById('void-modal-desc').textContent = `${tx.description} (${formatCurrency(tx.kind === 'expense' ? tx.amount : tx.sales)})`;
+      pendingVoidTxId = txId;
+      document.getElementById('void-modal-desc').textContent = tx.summary || 'Void this transaction?';
       document.getElementById('void-password-input').value = '';
-      document.getElementById('void-password-error')?.classList.add('hidden');
-      const hintEl = document.getElementById('void-password-hint');
-      if (hintEl) hintEl.textContent = getVoidPassword() === '1234' ? '1234' : '••••';
-      document.getElementById('void-modal')?.classList.remove('hidden');
-
-      const confirmBtn = document.getElementById('void-confirm-btn');
-      if (confirmBtn) {
-        confirmBtn.onclick = () => {
-          const entered = document.getElementById('void-password-input')?.value || '';
-          if (entered !== getVoidPassword()) {
-            document.getElementById('void-password-error')?.classList.remove('hidden');
-            return;
-          }
-          executeVoidTransaction(pendingVoidId);
-          closeVoidModal();
-        };
-      }
+      document.getElementById('void-password-error').classList.add('hidden');
+      document.getElementById('void-password-hint').textContent = getVoidPassword() === '1234' ? '1234' : '••••';
+      toggleChangeVoidPasswordBox(false);
+      document.getElementById('void-confirm-btn').onclick = confirmVoidTransaction;
+      document.getElementById('void-modal').classList.remove('hidden');
     }
 
     function closeVoidModal() {
-      pendingVoidId = null;
-      document.getElementById('void-modal')?.classList.add('hidden');
+      pendingVoidTxId = null;
+      document.getElementById('void-modal').classList.add('hidden');
     }
 
     function toggleChangeVoidPasswordBox(forceState) {
       const box = document.getElementById('change-void-pass-box');
-      if (!box) return;
-      const shouldShow = typeof forceState === 'boolean' ? forceState : box.classList.contains('hidden');
-      if (shouldShow) box.classList.remove('hidden');
-      else box.classList.add('hidden');
+      if (typeof forceState === 'boolean') {
+        box.classList.toggle('hidden', !forceState);
+      } else {
+        box.classList.toggle('hidden');
+      }
     }
 
     function saveNewVoidPassword() {
-      const cur = document.getElementById('void-current-pass-input')?.value || '';
-      const next = (document.getElementById('void-new-pass-input')?.value || '').trim();
-      if (cur !== getVoidPassword()) {
-        showToast('Current void password is incorrect.', 'error');
-        return;
-      }
-      if (!next) {
-        showToast('Enter a new void password.', 'error');
+      const cur = document.getElementById('void-current-pass-input').value;
+      const next = document.getElementById('void-new-pass-input').value.trim();
+      if (cur !== getVoidPassword() || !next) {
+        showToast('Invalid current or new void password.', 'error');
         return;
       }
       localStorage.setItem(VOID_PASSWORD_KEY, next);
@@ -2943,10 +2804,23 @@
       showToast('Void password updated!', 'success');
     }
 
+    function confirmVoidTransaction() {
+      const pass = document.getElementById('void-password-input').value;
+      if (pass !== getVoidPassword()) {
+        document.getElementById('void-password-error').classList.remove('hidden');
+        return;
+      }
+      if (pendingVoidTxId) {
+        executeVoidTransaction(pendingVoidTxId);
+      }
+      closeVoidModal();
+    }
+
     function executeVoidTransaction(txId) {
       const tx = state.transactions.find((t) => t.id === txId);
       if (!tx || tx.voided) return;
       tx.voided = true;
+
       if (tx.kind === 'sale' && Array.isArray(tx.items)) {
         tx.items.forEach((it) => {
           const prod = state.products.find((p) => p.id === it.productId);
@@ -2954,270 +2828,138 @@
             prod.stock = (Number(prod.stock) || 0) + (Number(it.qty) || 0);
           }
         });
-      }
-      if (tx.kind === 'gcash') {
+        if (tx.paymentMethod === 'Utang') {
+          state.utangRecords = state.utangRecords.filter((u) => u.txId !== tx.id);
+        }
+      } else if (tx.kind === 'gcash') {
         const amt = Number(tx.amount) || 0;
-        if (tx.gcashType === 'cash_out') {
+        if (tx.gcashType === 'cash_out' || tx.gcashType === 'eload') {
           state.gcashPuhunan = (Number(state.gcashPuhunan) || 0) + amt;
         } else if (tx.gcashType === 'cash_in') {
           state.gcashPuhunan = Math.max(0, (Number(state.gcashPuhunan) || 0) - amt);
-        } else if (tx.gcashType === 'eload') {
-          // Restore E-Load deduction to capital on void
-          state.gcashPuhunan = (Number(state.gcashPuhunan) || 0) + amt;
         }
+      } else if (tx.kind === 'expense') {
+        const exp = state.expenses.find((e) => e.id === tx.id);
+        if (exp) exp.voided = true;
       }
+
       saveState();
       renderAll();
-      showToast('Transaction voided and stock restored.', 'warn');
+      showToast('Transaction voided and stock/capital restored.', 'info');
     }
 
-    function openLowStockModal(pos = 'store', type = 'low') {
-      lowStockModalPos = pos;
-      lowStockModalAllCounters = false;
-      lowStockModalType = type;
-      renderLowStockModal(pos, false, type);
-      document.getElementById('low-stock-modal')?.classList.remove('hidden');
-    }
-
-    function closeLowStockModal() {
-      document.getElementById('low-stock-modal')?.classList.add('hidden');
-    }
-
-    function renderLowStockModal(pos, allCounters, type) {
-      lowStockModalPos = pos;
-      lowStockModalAllCounters = allCounters;
-      lowStockModalType = type;
-
-      const setBtnStyle = (id, active) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.className = active
-          ? 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-brand-purple text-white transition'
-          : 'px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-slate-100 text-slate-700 transition';
-      };
-      setBtnStyle('low-stock-type-out', type === 'out');
-      setBtnStyle('low-stock-type-low', type === 'low');
-      setBtnStyle('low-stock-scope-counter', !allCounters);
-      setBtnStyle('low-stock-scope-all', allCounters);
-
-      const items = state.products.filter((p) => {
-        if (!allCounters && p.pos !== pos) return false;
-        const st = Number(p.stock) || 0;
-        const thresh = Number(p.lowStockThreshold ?? 5);
-        return type === 'out' ? st <= 0 : (st > 0 && st <= thresh);
-      });
-
-      const listEl = document.getElementById('low-stock-modal-list');
-      if (!listEl) return;
-      if (!items.length) {
-        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl p-5 text-center text-xs font-bold text-slate-500">No items in this category.</div>`;
-        return;
-      }
-
-      listEl.innerHTML = items.map((p) => `
-        <div class="bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-2 border border-slate-200/70">
-          <div class="min-w-0">
-            <p class="text-xs font-black text-slate-900 truncate">${escapeHtml(p.name)}</p>
-            <p class="text-[11px] font-semibold text-slate-500 uppercase">${escapeHtml(p.pos)} • Stock: ${Number(p.stock) || 0}</p>
-          </div>
-          <button type="button" onclick="closeLowStockModal(); openEditorModal('${escapeHtml(p.pos)}', '${escapeHtml(p.id)}')"
-            class="px-3 py-1.5 rounded-xl theme-accent-btn text-xs font-extrabold shrink-0">
-            Restock
-          </button>
-        </div>
-      `).join('');
-    }
-
-    function openBarcodeScanner(mode = 'pos') {
-      barcodeMode = mode;
-      document.getElementById('barcode-unmatched-box')?.classList.add('hidden');
-      document.getElementById('barcode-manual-input').value = '';
-      document.getElementById('barcode-modal')?.classList.remove('hidden');
-      startCameraBarcodeScan();
-    }
-
-    function closeBarcodeScanner() {
-      stopCameraBarcodeScan();
-      document.getElementById('barcode-modal')?.classList.add('hidden');
-    }
-
-    async function startCameraBarcodeScan() {
-      const video = document.getElementById('barcode-video');
-      const fallback = document.getElementById('barcode-camera-fallback');
-      if (!video) return;
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          fallback?.classList.remove('hidden');
-          return;
-        }
-        fallback?.classList.add('hidden');
-        barcodeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        video.srcObject = barcodeStream;
-        await video.play();
-
-        if ('BarcodeDetector' in window) {
-          const detector = new window.BarcodeDetector();
-          barcodeDetectorInterval = setInterval(async () => {
-            try {
-              const codes = await detector.detect(video);
-              if (codes && codes.length && codes[0].rawValue) {
-                handleDetectedBarcode(codes[0].rawValue);
-              }
-            } catch (e) {}
-          }, 450);
-        } else if (window.ZXing && window.ZXing.BrowserMultiFormatReader) {
-          zxingCodeReader = new window.ZXing.BrowserMultiFormatReader();
-          zxingCodeReader.decodeFromVideoElement(video, (result) => {
-            if (result && result.text) {
-              handleDetectedBarcode(result.text);
-            }
-          });
-        }
-      } catch (e) {
-        fallback?.classList.remove('hidden');
-      }
-    }
-
-    function stopCameraBarcodeScan() {
-      if (barcodeDetectorInterval) {
-        clearInterval(barcodeDetectorInterval);
-        barcodeDetectorInterval = null;
-      }
-      if (zxingCodeReader) {
-        try { zxingCodeReader.reset(); } catch (e) {}
-        zxingCodeReader = null;
-      }
-      if (barcodeStream) {
-        barcodeStream.getTracks().forEach((t) => t.stop());
-        barcodeStream = null;
-      }
-    }
-
-    function submitManualBarcode(e) {
-      e.preventDefault();
-      const code = (document.getElementById('barcode-manual-input')?.value || '').trim();
-      if (!code) return;
-      handleDetectedBarcode(code);
-    }
-
-    function handleDetectedBarcode(code) {
-      const cleanCode = String(code || '').trim();
-      if (!cleanCode) return;
-      if (barcodeMode === 'editor') {
-        const inp = document.getElementById('editor-barcode');
-        if (inp) inp.value = cleanCode;
-        closeBarcodeScanner();
-        showToast(`Barcode ${cleanCode} set`, 'success');
-        return;
-      }
-
-      const matched = state.products.find((p) => (p.barcode || '').trim() === cleanCode);
-      if (matched) {
-        closeBarcodeScanner();
-        switchTab(matched.pos || 'store');
-        addToCart(matched.id, 1);
-      } else {
-        lastUnmatchedBarcode = cleanCode;
-        const codeSpan = document.getElementById('barcode-unmatched-code');
-        if (codeSpan) codeSpan.textContent = cleanCode;
-        document.getElementById('barcode-unmatched-box')?.classList.remove('hidden');
-      }
-    }
-
-    function createProductFromScannedBarcode() {
-      const code = lastUnmatchedBarcode;
-      closeBarcodeScanner();
-      openEditorModal(getActiveCartPos(), null, code);
+    // CLOUD SYNC & JSON BACKUP
+    function getSyncCode() {
+      return (localStorage.getItem(SYNC_CODE_KEY) || '').trim();
     }
 
     function toggleAutoSync() {
       autoSyncEnabled = !autoSyncEnabled;
       localStorage.setItem(AUTOSYNC_KEY, String(autoSyncEnabled));
+      updateAutoSyncUI();
+      showToast(`Auto Sync ${autoSyncEnabled ? 'ON' : 'OFF'}`, 'info');
+    }
+
+    function updateAutoSyncUI() {
       const btn = document.getElementById('autosync-toggle-btn');
       if (btn) {
-        btn.textContent = autoSyncEnabled ? 'Auto Sync: ON' : 'Auto Sync: OFF';
+        btn.textContent = `Auto Sync: ${autoSyncEnabled ? 'ON' : 'OFF'}`;
         btn.className = autoSyncEnabled
           ? 'min-h-[38px] px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-extrabold transition'
           : 'min-h-[38px] px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-xs font-extrabold transition';
       }
-      showToast(autoSyncEnabled ? 'Auto Sync enabled' : 'Auto Sync disabled');
+      const statusText = document.getElementById('autosync-status-text');
+      const code = getSyncCode();
+      if (statusText) {
+        statusText.textContent = code ? `Room: ${code}` : 'Local Only';
+      }
     }
 
     function openCloudSyncModal() {
-      const inp = document.getElementById('cloud-sync-code-input');
-      if (inp) inp.value = localStorage.getItem(SYNC_CODE_KEY) || '';
-      document.getElementById('cloud-sync-modal')?.classList.remove('hidden');
+      document.getElementById('cloud-sync-code-input').value = getSyncCode();
+      document.getElementById('cloud-sync-modal').classList.remove('hidden');
     }
 
     function closeCloudSyncModal() {
-      document.getElementById('cloud-sync-modal')?.classList.add('hidden');
+      document.getElementById('cloud-sync-modal').classList.add('hidden');
     }
 
     function generateSyncCode() {
-      const code = 'store-' + Math.random().toString(36).substring(2, 8);
-      const inp = document.getElementById('cloud-sync-code-input');
-      if (inp) inp.value = code;
-    }
-
-    function scheduleCloudPush() {
-      const code = (localStorage.getItem(SYNC_CODE_KEY) || '').trim();
-      if (!code) return;
-      clearTimeout(cloudPushTimer);
-      cloudPushTimer = setTimeout(() => pushAllToCloud(false), 1500);
+      const code = `sari-${Math.random().toString(36).slice(2, 8)}-${new Date().getFullYear()}`;
+      document.getElementById('cloud-sync-code-input').value = code;
     }
 
     async function saveSyncCodeAndPull() {
-      const code = (document.getElementById('cloud-sync-code-input')?.value || '').trim();
+      const code = (document.getElementById('cloud-sync-code-input').value || '').trim();
       if (!code) {
         showToast('Enter a Sync Code first.', 'error');
         return;
       }
       localStorage.setItem(SYNC_CODE_KEY, code);
+      updateAutoSyncUI();
       await pullFromCloud(true);
     }
 
-    async function pushAllToCloud(manual = false) {
-      const code = (localStorage.getItem(SYNC_CODE_KEY) || '').trim();
-      if (!code) {
-        if (manual) showToast('Set a Sync Code first.', 'warn');
-        return;
-      }
-      const payload = JSON.stringify({ state, updatedAt: Date.now() });
-      for (const base of CLOUD_SYNC_ENDPOINTS) {
-        try {
-          const res = await fetch(base + encodeURIComponent(code), {
-            method: 'POST',
-            body: payload
-          });
-          if (res.ok) {
-            if (manual) showToast('Pushed store data to cloud!', 'success');
-            return;
-          }
-        } catch (e) {}
-      }
-      if (manual) showToast('Cloud push unreachable; saved locally.', 'warn');
-    }
-
-    async function pullFromCloud(manual = false) {
-      const code = (localStorage.getItem(SYNC_CODE_KEY) || '').trim();
+    async function pushAllToCloud(notify = false) {
+      const code = getSyncCode();
       if (!code || isCloudSyncing) return;
       isCloudSyncing = true;
-      for (const base of CLOUD_SYNC_ENDPOINTS) {
-        try {
-          const res = await fetch(base + encodeURIComponent(code));
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.state) {
-              state = sanitizeState(data.state);
-              saveState(true);
-              renderAll();
-              if (manual) showToast('Synced latest store data!', 'success');
-            }
-            break;
-          }
-        } catch (e) {}
+      const detail = document.getElementById('cloud-sync-status-detail');
+      if (detail) detail.textContent = 'Status: Pushing data...';
+      try {
+        const body = JSON.stringify(state);
+        for (const base of CLOUD_SYNC_ENDPOINTS) {
+          try {
+            const res = await fetch(`${base}${encodeURIComponent(code)}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body
+            });
+            if (res.ok) break;
+          } catch (e) {}
+        }
+        if (detail) detail.textContent = `Status: Synced (${new Date().toLocaleTimeString()})`;
+        if (notify) showToast('Data pushed to sync room!', 'success');
+      } finally {
+        isCloudSyncing = false;
       }
-      isCloudSyncing = false;
+    }
+
+    async function pullFromCloud(notify = false) {
+      const code = getSyncCode();
+      if (!code || isCloudSyncing) return;
+      isCloudSyncing = true;
+      const detail = document.getElementById('cloud-sync-status-detail');
+      if (detail) detail.textContent = 'Status: Checking remote updates...';
+      try {
+        for (const base of CLOUD_SYNC_ENDPOINTS) {
+          try {
+            const res = await fetch(`${base}${encodeURIComponent(code)}`);
+            if (res.ok) {
+              const remote = await res.json();
+              if (remote && Array.isArray(remote.products) && (Number(remote.updatedAt) || 0) > (Number(state.updatedAt) || 0)) {
+                state = {
+                  products: remote.products,
+                  transactions: Array.isArray(remote.transactions) ? remote.transactions : [],
+                  expenses: Array.isArray(remote.expenses) ? remote.expenses : [],
+                  utangRecords: Array.isArray(remote.utangRecords) ? remote.utangRecords : [],
+                  gcashPuhunan: Number(remote.gcashPuhunan) || 0,
+                  updatedAt: Number(remote.updatedAt) || Date.now()
+                };
+                saveState(false);
+                renderAll();
+                if (notify) showToast('Synced latest data from cloud!', 'success');
+              } else if (notify) {
+                showToast('Already up to date!', 'info');
+              }
+              break;
+            }
+          } catch (e) {}
+        }
+        if (detail) detail.textContent = `Status: Connected (${new Date().toLocaleTimeString()})`;
+      } finally {
+        isCloudSyncing = false;
+      }
     }
 
     function exportBackupJSON() {
@@ -3228,98 +2970,192 @@
       a.download = `sarisari-backup-${getLocalDayKey()}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast('Backup JSON downloaded', 'success');
+      showToast('Backup JSON downloaded!', 'success');
     }
 
-    function importBackupJSON(e) {
-      const file = e.target.files?.[0];
+    function importBackupJSON(event) {
+      const file = event.target.files?.[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         try {
           const parsed = JSON.parse(String(reader.result || '{}'));
-          state = sanitizeState(parsed);
+          if (!Array.isArray(parsed.products)) throw new Error('Invalid backup');
+          state = {
+            products: parsed.products,
+            transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [],
+            expenses: Array.isArray(parsed.expenses) ? parsed.expenses : [],
+            utangRecords: Array.isArray(parsed.utangRecords) ? parsed.utangRecords : [],
+            gcashPuhunan: Number(parsed.gcashPuhunan) || 0,
+            updatedAt: Date.now()
+          };
           saveState();
           renderAll();
-          showToast('JSON backup imported!', 'success');
+          showToast('Backup imported successfully!', 'success');
         } catch (err) {
-          showToast('Invalid JSON file.', 'error');
+          showToast('Invalid JSON backup file.', 'error');
         }
       };
       reader.readAsText(file);
+      event.target.value = '';
     }
 
     function copyJsonBackup() {
+      const text = JSON.stringify(state);
       const ta = document.createElement('textarea');
-      ta.value = JSON.stringify(state);
+      ta.value = text;
       document.body.appendChild(ta);
       ta.select();
-      try {
-        document.execCommand('copy');
-        showToast('JSON backup copied to clipboard!', 'success');
-      } catch (e) {
-        showToast('Could not copy JSON.', 'error');
-      }
+      document.execCommand('copy');
       document.body.removeChild(ta);
+      showToast('Backup JSON copied to clipboard!', 'success');
     }
 
     function openJsonRestoreModal() {
       document.getElementById('json-restore-textarea').value = '';
-      document.getElementById('json-restore-modal')?.classList.remove('hidden');
+      document.getElementById('json-restore-modal').classList.remove('hidden');
     }
 
     function closeJsonRestoreModal() {
-      document.getElementById('json-restore-modal')?.classList.add('hidden');
+      document.getElementById('json-restore-modal').classList.add('hidden');
     }
 
     function applyJsonBackupFromModal() {
       try {
-        const raw = document.getElementById('json-restore-textarea')?.value || '';
+        const raw = document.getElementById('json-restore-textarea').value.trim();
         const parsed = JSON.parse(raw);
-        state = sanitizeState(parsed);
+        if (!Array.isArray(parsed.products)) throw new Error('Invalid');
+        state = {
+          products: parsed.products,
+          transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [],
+          expenses: Array.isArray(parsed.expenses) ? parsed.expenses : [],
+          utangRecords: Array.isArray(parsed.utangRecords) ? parsed.utangRecords : [],
+          gcashPuhunan: Number(parsed.gcashPuhunan) || 0,
+          updatedAt: Date.now()
+        };
         saveState();
         closeJsonRestoreModal();
         renderAll();
         showToast('JSON backup restored!', 'success');
-      } catch (e) {
+      } catch (err) {
         showToast('Invalid JSON format.', 'error');
       }
     }
 
-    function renderCatalogs() {
-      renderStoreCatalog();
-      renderSoftdrinksCatalog();
-      renderCigarettesCatalog();
+    // BARCODE SCANNER
+    async function openBarcodeScanner(mode = 'pos') {
+      barcodeMode = mode;
+      lastUnmatchedBarcode = '';
+      document.getElementById('barcode-unmatched-box').classList.add('hidden');
+      document.getElementById('barcode-manual-input').value = '';
+      document.getElementById('barcode-modal').classList.remove('hidden');
+
+      const video = document.getElementById('barcode-video');
+      const fallback = document.getElementById('barcode-camera-fallback');
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          barcodeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          video.srcObject = barcodeStream;
+          await video.play();
+          fallback.classList.add('hidden');
+
+          if ('BarcodeDetector' in window) {
+            const detector = new window.BarcodeDetector();
+            barcodeScanInterval = setInterval(async () => {
+              try {
+                const codes = await detector.detect(video);
+                if (codes && codes.length > 0 && codes[0].rawValue) {
+                  handleDetectedBarcode(codes[0].rawValue);
+                }
+              } catch (e) {}
+            }, 400);
+          } else if (window.ZXing && window.ZXing.BrowserMultiFormatReader) {
+            zxingReader = new window.ZXing.BrowserMultiFormatReader();
+            zxingReader.decodeFromVideoElement(video, (result) => {
+              if (result && result.text) {
+                handleDetectedBarcode(result.text);
+              }
+            });
+          }
+        } else {
+          fallback.classList.remove('hidden');
+        }
+      } catch (err) {
+        fallback.classList.remove('hidden');
+      }
+    }
+
+    function closeBarcodeScanner() {
+      clearInterval(barcodeScanInterval);
+      barcodeScanInterval = null;
+      if (zxingReader) {
+        try { zxingReader.reset(); } catch (e) {}
+        zxingReader = null;
+      }
+      if (barcodeStream) {
+        barcodeStream.getTracks().forEach((t) => t.stop());
+        barcodeStream = null;
+      }
+      document.getElementById('barcode-modal').classList.add('hidden');
+    }
+
+    function submitManualBarcode(e) {
+      e.preventDefault();
+      const code = (document.getElementById('barcode-manual-input').value || '').trim();
+      if (!code) return;
+      handleDetectedBarcode(code);
+    }
+
+    function handleDetectedBarcode(code) {
+      const clean = String(code || '').trim();
+      if (!clean) return;
+      if (barcodeMode === 'editor') {
+        document.getElementById('editor-barcode').value = clean;
+        closeBarcodeScanner();
+        showToast(`Barcode set: ${clean}`, 'success');
+        return;
+      }
+
+      const matched = state.products.find((p) => (p.barcode || '').trim() === clean);
+      if (matched) {
+        closeBarcodeScanner();
+        switchTab(matched.pos || 'store');
+        addToCart(matched.id, 1);
+        showToast(`Added ${matched.name} to cart!`, 'success');
+      } else {
+        lastUnmatchedBarcode = clean;
+        document.getElementById('barcode-unmatched-code').textContent = clean;
+        document.getElementById('barcode-unmatched-box').classList.remove('hidden');
+      }
+    }
+
+    function createProductFromScannedBarcode() {
+      const code = lastUnmatchedBarcode;
+      const defaultPos = ['store', 'softdrinks', 'cigarettes'].includes(currentTab) ? currentTab : 'store';
+      closeBarcodeScanner();
+      openEditorModal(defaultPos);
+      document.getElementById('editor-barcode').value = code;
     }
 
     function renderAll() {
-      applyBestSellerUiTheme();
-      renderCounterBanners();
-      renderCatalogs();
+      renderStoreCatalog();
+      renderSoftdrinksCatalog();
+      renderCigarettesCatalog();
       renderGcashTab();
       renderUtangTab();
       renderReports();
-      updateCartIndicators();
+      updateFloatingCartBar();
+      updateAutoSyncUI();
     }
-
-    // Bottom-up iPhone app opening animation on button clicks
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('button, [role="button"]');
-      if (!btn || btn.disabled) return;
-      btn.classList.remove('btn-bounce-active');
-      void btn.offsetWidth;
-      btn.classList.add('btn-bounce-active');
-      clearTimeout(btn._animTimer);
-      btn._animTimer = setTimeout(() => {
-        btn.classList.remove('btn-bounce-active');
-      }, 420);
-    }, true);
 
     window.addEventListener('DOMContentLoaded', () => {
       loadState();
       checkDailySalesReset(false);
       renderAll();
-      setInterval(() => checkDailySalesReset(true), 30000);
+      setInterval(() => checkDailySalesReset(true), 60000);
+      if (autoSyncEnabled && getSyncCode()) {
+        pullFromCloud(false);
+      }
     });
   </script>
 </body>
