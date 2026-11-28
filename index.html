@@ -1447,19 +1447,25 @@
         });
       });
 
-      const sorted = Object.values(qtyByProduct).sort((a, b) => b.qty - a.qty);
-      const topEntry = sorted[0];
+      const sorted = Object.values(qtyByProduct)
+        .filter((item) => item.qty > 0)
+        .sort((a, b) => b.qty - a.qty);
+
+      // Adopt the color of the exact #5 best-selling product (index 4),
+      // falling back to the last ranked item if fewer than 5 products have sales.
+      const rankIndex = sorted.length >= 5 ? 4 : Math.max(0, sorted.length - 1);
+      const targetEntry = sorted.length > 0 ? sorted[rankIndex] : null;
       const pill = document.getElementById('best-seller-ui-pill');
 
-      let bestProduct = null;
-      if (topEntry && topEntry.qty > 0) {
-        bestProduct = state.products.find((p) => p.id === topEntry.productId || p.name === topEntry.name) || {
-          id: topEntry.productId || topEntry.name,
-          name: topEntry.name
+      let targetProduct = null;
+      if (targetEntry && targetEntry.qty > 0) {
+        targetProduct = state.products.find((p) => p.id === targetEntry.productId || p.name === targetEntry.name) || {
+          id: targetEntry.productId || targetEntry.name,
+          name: targetEntry.name
         };
       }
 
-      const colorKey = detectBestSellerColorKey(bestProduct);
+      const colorKey = detectBestSellerColorKey(targetProduct);
       const palette = THEME_PALETTES[colorKey] || THEME_PALETTES.pink;
       const root = document.documentElement;
       root.style.setProperty('--ui-bg', palette.bg);
@@ -1473,15 +1479,16 @@
       root.style.setProperty('--ui-glow', palette.glow);
 
       if (pill) {
-        if (bestProduct && topEntry) {
-          pill.textContent = `★ #1 ${bestProduct.name} (${topEntry.qty})`;
+        if (targetProduct && targetEntry) {
+          const rankLabel = rankIndex + 1;
+          pill.textContent = `#${rankLabel} ${targetProduct.name} (${targetEntry.qty})`;
           pill.classList.remove('hidden');
         } else {
           pill.classList.add('hidden');
         }
       }
 
-      lastAppliedThemeProductId = bestProduct ? bestProduct.id : null;
+      lastAppliedThemeProductId = targetProduct ? targetProduct.id : null;
     }
 
     function formatCurrency(val) {
