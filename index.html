@@ -1766,6 +1766,7 @@
         const isValidDate = !Number.isNaN(parsedDate.getTime());
         const effectiveDate = isValidDate ? parsedDate : now;
         const expMs = effectiveDate.getTime();
+        const isToday = !exp.createdAt || !isValidDate || getLocalDayKey(effectiveDate) === todayKey || expMs >= startOfTodayMs;
         const isThisMonth = !exp.createdAt || !isValidDate || getLocalMonthKey(effectiveDate) === getLocalMonthKey(now) || expMs >= startOfMonthMs;
 
         const summaryMatch = String(exp.summary || '').match(/₱\s*([0-9,.]+)/);
@@ -1773,6 +1774,9 @@
         const amt = Math.max(0, Number(exp.amount ?? exp.total ?? fallbackSummaryAmt) || 0);
 
         if (!filterFn || filterFn(exp)) {
+          if (isToday) {
+            dailyExpenses += amt;
+          }
           if (isThisMonth) {
             monthlyExpenses += amt;
           }
@@ -1795,7 +1799,7 @@
       return {
         dailySales,
         dailyProfit,
-        dailyExpenses: 0,
+        dailyExpenses,
         monthlyExpenses,
         dailyAmount: dailySales,
         weeklySales,
