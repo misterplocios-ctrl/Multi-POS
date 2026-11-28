@@ -1754,20 +1754,25 @@
       let dailyExpenses = 0;
       let monthlyExpenses = 0;
       let monthlyExpenseForCounter = 0;
-      state.expenses.forEach((exp) => {
+      const seenExpenseIds = new Set();
+
+      const addExpenseEntry = (exp) => {
         if (!exp || exp.voided) return;
+        const expId = exp.id ? String(exp.id) : '';
+        if (expId && seenExpenseIds.has(expId)) return;
+        if (expId) seenExpenseIds.add(expId);
+
         const parsedDate = exp.createdAt ? new Date(exp.createdAt) : now;
         const isValidDate = !Number.isNaN(parsedDate.getTime());
         const effectiveDate = isValidDate ? parsedDate : now;
         const expMs = effectiveDate.getTime();
-        const isToday = !exp.createdAt || getLocalDayKey(effectiveDate) === todayKey || expMs >= startOfTodayMs;
-        const isThisMonth = !exp.createdAt || getLocalMonthKey(effectiveDate) === getLocalMonthKey(now) || expMs >= startOfMonthMs;
-        const amt = Number(exp.amount) || 0;
+        const isThisMonth = !exp.createdAt || !isValidDate || getLocalMonthKey(effectiveDate) === getLocalMonthKey(now) || expMs >= startOfMonthMs;
+
+        const summaryMatch = String(exp.summary || '').match(/₱\s*([0-9,.]+)/);
+        const fallbackSummaryAmt = summaryMatch ? (Number(String(summaryMatch[1]).replace(/,/g, '')) || 0) : 0;
+        const amt = Math.max(0, Number(exp.amount ?? exp.total ?? fallbackSummaryAmt) || 0);
 
         if (!filterFn || filterFn(exp)) {
-          if (isToday) {
-            dailyExpenses += amt;
-          }
           if (isThisMonth) {
             monthlyExpenses += amt;
           }
@@ -1776,6 +1781,13 @@
         if (filterFn && filterFn(exp) && isThisMonth) {
           monthlyExpenseForCounter += amt;
         }
+      };
+
+      state.expenses.forEach(addExpenseEntry);
+      state.transactions.forEach((tx) => {
+        if (tx && !tx.voided && tx.kind === 'expense') {
+          addExpenseEntry(tx);
+        }
       });
 
       const netMonthlySales = filterFn ? (monthlySales - monthlyExpenseForCounter) : (monthlySales - monthlyExpenses);
@@ -1783,7 +1795,7 @@
       return {
         dailySales,
         dailyProfit,
-        dailyExpenses,
+        dailyExpenses: 0,
         monthlyExpenses,
         dailyAmount: dailySales,
         weeklySales,
