@@ -1312,6 +1312,177 @@
     let zxingReader = null;
     let isCloudSyncing = false;
     let cloudSyncDebounceTimer = null;
+    let lastAppliedThemeProductId = null;
+
+    const THEME_PALETTES = {
+      pink: {
+        bg: '#FDF2F8',
+        surface: '#FFFFFF',
+        border: '#FBCFE8',
+        accent: '#DB2777',
+        accentDark: '#BE185D',
+        accentLight: '#EC4899',
+        accentSoft: '#FCE7F3',
+        accentText: '#BE185D',
+        glow: 'rgba(219, 39, 119, 0.48)'
+      },
+      red: {
+        bg: '#FEF2F2',
+        surface: '#FFFFFF',
+        border: '#FECACA',
+        accent: '#DC2626',
+        accentDark: '#B91C1C',
+        accentLight: '#EF4444',
+        accentSoft: '#FEE2E2',
+        accentText: '#B91C1C',
+        glow: 'rgba(220, 38, 38, 0.45)'
+      },
+      green: {
+        bg: '#F0FDF4',
+        surface: '#FFFFFF',
+        border: '#BBF7D0',
+        accent: '#16A34A',
+        accentDark: '#15803D',
+        accentLight: '#22C55E',
+        accentSoft: '#DCFCE7',
+        accentText: '#15803D',
+        glow: 'rgba(22, 163, 74, 0.45)'
+      },
+      orange: {
+        bg: '#FFF7ED',
+        surface: '#FFFFFF',
+        border: '#FED7AA',
+        accent: '#EA580C',
+        accentDark: '#C2410C',
+        accentLight: '#F97316',
+        accentSoft: '#FFEDD5',
+        accentText: '#C2410C',
+        glow: 'rgba(234, 88, 12, 0.45)'
+      },
+      amber: {
+        bg: '#FFFBEB',
+        surface: '#FFFFFF',
+        border: '#FDE68A',
+        accent: '#D97706',
+        accentDark: '#B45309',
+        accentLight: '#F59E0B',
+        accentSoft: '#FEF3C7',
+        accentText: '#B45309',
+        glow: 'rgba(217, 119, 6, 0.45)'
+      },
+      blue: {
+        bg: '#EFF6FF',
+        surface: '#FFFFFF',
+        border: '#BFDBFE',
+        accent: '#2563EB',
+        accentDark: '#1D4ED8',
+        accentLight: '#3B82F6',
+        accentSoft: '#DBEAFE',
+        accentText: '#1D4ED8',
+        glow: 'rgba(37, 99, 235, 0.45)'
+      },
+      purple: {
+        bg: '#FAF5FF',
+        surface: '#FFFFFF',
+        border: '#E9D5FF',
+        accent: '#9333EA',
+        accentDark: '#7E22CE',
+        accentLight: '#A855F7',
+        accentSoft: '#F3E8FF',
+        accentText: '#7E22CE',
+        glow: 'rgba(147, 51, 234, 0.45)'
+      }
+    };
+
+    function classifyColorKeyFromHex(hex) {
+      const clean = String(hex || '').replace('#', '').trim();
+      if (clean.length !== 6) return null;
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      if ([r, g, b].some(Number.isNaN)) return null;
+
+      if (r > 200 && g > 200 && b > 200) return null;
+      if (r > b + 45 && g > b + 20 && r - g < 55) return 'amber';
+      if (r > g + 45 && g > b + 25) return 'orange';
+      if (r > g + 40 && b > g + 25) return 'pink';
+      if (r > g + 45 && r > b + 45) return 'red';
+      if (g > r + 25 && g > b + 20) return 'green';
+      if (b > r + 35 && b > g + 20) return 'blue';
+      if (b > g + 35 && r > g + 20) return 'purple';
+      return null;
+    }
+
+    function detectBestSellerColorKey(product) {
+      if (!product) return 'pink';
+      const img = String(product.image || '');
+      const hexMatches = img.match(/\/([0-9a-fA-F]{6})(?=\/|\?|$)/g);
+      if (hexMatches && hexMatches.length > 0) {
+        const lastHex = hexMatches[hexMatches.length - 1].replace('/', '');
+        const fromHex = classifyColorKeyFromHex(lastHex);
+        if (fromHex) return fromHex;
+      }
+
+      const text = `${product.name || ''} ${product.category || ''}`.toLowerCase();
+      if (/coke|coca|red|strawberry|sardines|ketchup|spicy|chili|hotdog|tender juicy/.test(text)) return 'red';
+      if (/sprite|mountain dew|menthol|green|lime|calamansi|matcha|gulay|apple/.test(text)) return 'green';
+      if (/royal|orange|mirinda|mango|carrot|cheese|c2|nescafe|coffee|kopiko/.test(text)) return 'orange';
+      if (/marlboro|mighty|yosi|cigarette|gold|beer|san mig|red horse|chips|piattos|egg|rice/.test(text)) return 'amber';
+      if (/pepsi|water|nature|wilkins|blue|gatorade|safeguard|surf|ariel|downy/.test(text)) return 'blue';
+      if (/ube|grape|taro|violet|purple/.test(text)) return 'purple';
+      return 'pink';
+    }
+
+    function applyBestSellerColorTheme() {
+      const qtyByProduct = {};
+      state.transactions.forEach((tx) => {
+        if (!tx || tx.voided || tx.kind !== 'sale' || !Array.isArray(tx.items)) return;
+        tx.items.forEach((it) => {
+          const key = it.productId || it.name;
+          if (!key) return;
+          if (!qtyByProduct[key]) {
+            qtyByProduct[key] = { productId: it.productId, name: it.name, qty: 0 };
+          }
+          qtyByProduct[key].qty += Number(it.qty) || 0;
+        });
+      });
+
+      const sorted = Object.values(qtyByProduct).sort((a, b) => b.qty - a.qty);
+      const topEntry = sorted[0];
+      const pill = document.getElementById('best-seller-ui-pill');
+
+      let bestProduct = null;
+      if (topEntry && topEntry.qty > 0) {
+        bestProduct = state.products.find((p) => p.id === topEntry.productId || p.name === topEntry.name) || {
+          id: topEntry.productId || topEntry.name,
+          name: topEntry.name
+        };
+      }
+
+      const colorKey = detectBestSellerColorKey(bestProduct);
+      const palette = THEME_PALETTES[colorKey] || THEME_PALETTES.pink;
+      const root = document.documentElement;
+      root.style.setProperty('--ui-bg', palette.bg);
+      root.style.setProperty('--ui-surface', palette.surface);
+      root.style.setProperty('--ui-border', palette.border);
+      root.style.setProperty('--ui-accent', palette.accent);
+      root.style.setProperty('--ui-accent-dark', palette.accentDark);
+      root.style.setProperty('--ui-accent-light', palette.accentLight);
+      root.style.setProperty('--ui-accent-soft', palette.accentSoft);
+      root.style.setProperty('--ui-accent-text', palette.accentText);
+      root.style.setProperty('--ui-glow', palette.glow);
+
+      if (pill) {
+        if (bestProduct && topEntry) {
+          pill.textContent = `★ #1 ${bestProduct.name} (${topEntry.qty})`;
+          pill.classList.remove('hidden');
+        } else {
+          pill.classList.add('hidden');
+        }
+      }
+
+      lastAppliedThemeProductId = bestProduct ? bestProduct.id : null;
+    }
 
     function formatCurrency(val) {
       const num = Number(val) || 0;
@@ -3138,6 +3309,7 @@
     }
 
     function renderAll() {
+      applyBestSellerColorTheme();
       renderStoreCatalog();
       renderSoftdrinksCatalog();
       renderCigarettesCatalog();
