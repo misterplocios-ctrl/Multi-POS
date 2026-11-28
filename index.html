@@ -1712,14 +1712,15 @@
         const isValidDate = !Number.isNaN(parsedDate.getTime());
         const effectiveDate = isValidDate ? parsedDate : now;
         const txMs = effectiveDate.getTime();
-        const isToday = !tx.createdAt || getLocalDayKey(effectiveDate) === todayKey || txMs >= startOfTodayMs;
+        const isToday = !tx.createdAt || !isValidDate || getLocalDayKey(effectiveDate) === todayKey || txMs >= startOfTodayMs;
 
+        const rawAmt = Number(tx.total ?? tx.amount ?? tx.subtotal ?? 0) || 0;
         const txSales = tx.kind === 'gcash'
           ? (Number(tx.fee) || 0)
-          : (Number(tx.total) ?? Number(tx.amount) ?? 0);
+          : (tx.kind === 'expense' ? 0 : rawAmt);
         const txProfit = tx.kind === 'gcash'
           ? (Number(tx.fee) || 0)
-          : (Number(tx.profit) || 0);
+          : (tx.kind === 'expense' ? 0 : (Number(tx.profit) || 0));
 
         if (isToday) {
           dailySales += txSales;
@@ -1737,24 +1738,32 @@
 
       let dailyExpenses = 0;
       let monthlyExpenses = 0;
+      let monthlyExpenseForCounter = 0;
       state.expenses.forEach((exp) => {
         if (!exp || exp.voided) return;
-        if (filterFn && !filterFn(exp)) return;
         const parsedDate = exp.createdAt ? new Date(exp.createdAt) : now;
         const isValidDate = !Number.isNaN(parsedDate.getTime());
         const effectiveDate = isValidDate ? parsedDate : now;
         const expMs = effectiveDate.getTime();
         const isToday = !exp.createdAt || getLocalDayKey(effectiveDate) === todayKey || expMs >= startOfTodayMs;
+        const isThisMonth = !exp.createdAt || getLocalMonthKey(effectiveDate) === getLocalMonthKey(now) || expMs >= startOfMonthMs;
         const amt = Number(exp.amount) || 0;
-        if (isToday) {
-          dailyExpenses += amt;
+
+        if (!filterFn || filterFn(exp)) {
+          if (isToday) {
+            dailyExpenses += amt;
+          }
+          if (isThisMonth) {
+            monthlyExpenses += amt;
+          }
         }
-        if (isToday || expMs >= startOfMonthMs) {
-          monthlyExpenses += amt;
+
+        if (filterFn && filterFn(exp) && isThisMonth) {
+          monthlyExpenseForCounter += amt;
         }
       });
 
-      const netMonthlySales = monthlySales - monthlyExpenses;
+      const netMonthlySales = filterFn ? (monthlySales - monthlyExpenseForCounter) : (monthlySales - monthlyExpenses);
 
       return {
         dailySales,
