@@ -1313,6 +1313,7 @@
     let isCloudSyncing = false;
     let cloudSyncDebounceTimer = null;
     let lastAppliedThemeProductId = null;
+    let lastAppliedThemeImageSrc = null;
 
     const THEME_PALETTES = {
       pink: {
@@ -1413,6 +1414,94 @@
       return null;
     }
 
+    function classifyColorKeyFromRgb(r, g, b) {
+      if ([r, g, b].some(Number.isNaN)) return null;
+      const maxC = Math.max(r, g, b);
+      const minC = Math.min(r, g, b);
+      const sat = maxC - minC;
+
+      // Ignore near-white, near-black, or low-saturation gray background pixels
+      if (maxC > 228 && sat < 28) return null;
+      if (maxC < 32 && sat < 20) return null;
+      if (sat < 22) return null;
+
+      if (r > b + 45 && g > b + 20 && r - g < 55) return 'amber';
+      if (r > g + 42 && g > b + 22) return 'orange';
+      if (r > g + 38 && b > g + 22) return 'pink';
+      if (r > g + 42 && r > b + 42) return 'red';
+      if (g > r + 22 && g > b + 18) return 'green';
+      if (b > r + 32 && b > g + 18) return 'blue';
+      if (b > g + 32 && r > g + 18) return 'purple';
+      return null;
+    }
+
+    function sampleImageDominantColorKey(imgUrl) {
+      return new Promise((resolve) => {
+        const cleanUrl = String(imgUrl || '').trim();
+        if (!cleanUrl) return resolve(null);
+
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            const size = 24;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return resolve(null);
+
+            ctx.drawImage(img, 0, 0, size, size);
+            const data = ctx.getImageData(0, 0, size, size).data;
+            const scores = {};
+
+            for (let i = 0; i < data.length; i += 4) {
+              const alpha = data[i + 3];
+              if (alpha < 128) continue;
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+              const key = classifyColorKeyFromRgb(r, g, b);
+              if (!key) continue;
+
+              const maxC = Math.max(r, g, b);
+              const minC = Math.min(r, g, b);
+              const vibrancy = (maxC - minC) + 1;
+              scores[key] = (scores[key] || 0) + vibrancy;
+            }
+
+            let bestKey = null;
+            let bestScore = 0;
+            Object.entries(scores).forEach(([k, sc]) => {
+              if (sc > bestScore) {
+                bestScore = sc;
+                bestKey = k;
+              }
+            });
+            resolve(bestKey);
+          } catch (e) {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+        img.src = cleanUrl;
+      });
+    }
+
+    function applyPaletteToRoot(colorKey) {
+      const palette = THEME_PALETTES[colorKey] || THEME_PALETTES.pink;
+      const root = document.documentElement;
+      root.style.setProperty('--ui-bg', palette.bg);
+      root.style.setProperty('--ui-surface', palette.surface);
+      root.style.setProperty('--ui-border', palette.border);
+      root.style.setProperty('--ui-accent', palette.accent);
+      root.style.setProperty('--ui-accent-dark', palette.accentDark);
+      root.style.setProperty('--ui-accent-light', palette.accentLight);
+      root.style.setProperty('--ui-accent-soft', palette.accentSoft);
+      root.style.setProperty('--ui-accent-text', palette.accentText);
+      root.style.setProperty('--ui-glow', palette.glow);
+    }
+
     function detectBestSellerColorKey(product) {
       if (!product) return 'pink';
       const img = String(product.image || '');
@@ -1466,17 +1555,17 @@
       }
 
       const colorKey = detectBestSellerColorKey(targetProduct);
-      const palette = THEME_PALETTES[colorKey] || THEME_PALETTES.pink;
-      const root = document.documentElement;
-      root.style.setProperty('--ui-bg', palette.bg);
-      root.style.setProperty('--ui-surface', palette.surface);
-      root.style.setProperty('--ui-border', palette.border);
-      root.style.setProperty('--ui-accent', palette.accent);
-      root.style.setProperty('--ui-accent-dark', palette.accentDark);
-      root.style.setProperty('--ui-accent-light', palette.accentLight);
-      root.style.setProperty('--ui-accent-soft', palette.accentSoft);
-      root.style.setProperty('--ui-accent-text', palette.accentText);
-      root.style.setProperty('--ui-glow', palette.glow);
+      applyPaletteToRoot(colorKey);
+
+      const imgSrc = targetProduct && targetProduct.image ? String(targetProduct.image) : '';
+      if (imgSrc && imgSrc !== lastAppliedThemeImageSrc) {
+        lastAppliedThemeImageSrc = imgSrc;
+        sampleImageDominantColorKey(imgSrc).then((sampledKey) => {
+          if (sampledKey && THEME_PALETTES[sampledKey] && lastAppliedThemeImageSrc === imgSrc) {
+            applyPaletteToRoot(sampledKey);
+          }
+        });
+      }
 
       if (pill) {
         if (targetProduct && targetEntry) {
@@ -1489,6 +1578,7 @@
       }
 
       lastAppliedThemeProductId = targetProduct ? targetProduct.id : null;
+      if (!imgSrc) lastAppliedThemeImageSrc = null;
     }
 
     function formatCurrency(val) {
@@ -2095,17 +2185,31 @@
       });
 
       if (paymentMethod === 'Utang') {
-        state.utangRecords.unshift({
-          id: `utang-${Date.now()}`,
-          txId,
-          customerName,
-          note: itemSummary,
-          amount: total,
-          paidAmount: 0,
-          paid: false,
-          payments: [],
-          createdAt: nowIso
-        });
+        const existingUtang = state.utangRecords.find(
+          (u) => !u.paid && String(u.customerName || '').trim().toLowerCase() === customerName.toLowerCase()
+        );
+        if (existingUtang) {
+          existingUtang.amount = (Number(existingUtang.amount) || 0) + total;
+          existingUtang.note = existingUtang.note ? `${existingUtang.note}, ${itemSummary}` : itemSummary;
+          if (!Array.isArray(existingUtang.txIds)) {
+            existingUtang.txIds = existingUtang.txId ? [existingUtang.txId] : [];
+          }
+          existingUtang.txIds.push(txId);
+          existingUtang.createdAt = nowIso;
+        } else {
+          state.utangRecords.unshift({
+            id: `utang-${Date.now()}`,
+            txId,
+            txIds: [txId],
+            customerName,
+            note: itemSummary,
+            amount: total,
+            paidAmount: 0,
+            paid: false,
+            payments: [],
+            createdAt: nowIso
+          });
+        }
       }
 
       carts[activeCartDrawerPos] = [];
@@ -2114,85 +2218,75 @@
       document.getElementById('cart-utang-customer').value = '';
       document.getElementById('cart-payment-method').value = 'Cash';
       toggleCartUtangCustomer();
-
       saveState();
       closeCartDrawer();
-      updateFloatingCartBar();
       playCashierSaleSound();
       renderAll();
-      showToast(`Sale recorded: ${formatCurrency(total)} (${paymentMethod})`, 'success');
+      updateFloatingCartBar();
+      showToast(`Sale completed (${formatCurrency(total)})!`, 'success');
     }
 
-    function renderProductCard(product) {
-      const stock = Number(product.stock) || 0;
-      const threshold = Number(product.lowStockThreshold) || 5;
+    function renderProductCard(p) {
+      const stock = Number(p.stock) || 0;
+      const lowTh = Number(p.lowStockThreshold) || 5;
       const isOut = stock <= 0;
-      const isLow = !isOut && stock <= threshold;
-      const cart = getCart(product.pos || 'store');
-      const inCart = cart.find((c) => c.productId === product.id);
-      const qtyInCart = inCart ? inCart.qty : 0;
-
-      const stockBadge = isOut
-        ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Out of Stock</span>`
-        : isLow
-          ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Low: ${stock}</span>`
-          : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Stock: ${stock}</span>`;
-
-      const fallbackImg = `https://placehold.co/300x300/fce7f3/be185d?text=${encodeURIComponent(product.name.slice(0, 14))}`;
-      const imgUrl = product.image || fallbackImg;
+      const isLow = !isOut && stock <= lowTh;
+      const pos = p.pos || 'store';
+      const inCart = getCart(pos).find((i) => i.productId === p.id);
+      const cartQty = inCart ? inCart.qty : 0;
+      const fallbackImg = `https://placehold.co/300x300/fce7f3/be185d?text=${encodeURIComponent((p.name || 'Item').slice(0, 14))}`;
 
       return `
-        <div class="smooth-card bg-white rounded-3xl p-2.5 border border-slate-100 shadow-card flex flex-col justify-between gap-2 relative">
-          <div onclick="openProductDetail('${product.id}')" class="cursor-pointer space-y-2">
-            <div class="relative w-full h-28 bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center p-1.5">
-              <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src='${fallbackImg}';"
-                class="max-w-full max-h-28 w-auto h-auto object-contain rounded-xl" />
-              ${qtyInCart > 0 ? `<span class="absolute top-1.5 right-1.5 min-w-[22px] h-[22px] px-1.5 rounded-full bg-brand-purple text-white text-[11px] font-black flex items-center justify-center shadow">${qtyInCart}</span>` : ''}
+        <div class="smooth-card bg-white rounded-3xl p-3 shadow-card border ${isOut ? 'border-rose-200 opacity-80' : isLow ? 'border-amber-200' : 'border-slate-100'} flex flex-col justify-between gap-2">
+          <div onclick="openProductDetail('${escapeHtml(p.id)}')" class="cursor-pointer space-y-2">
+            <div class="relative aspect-square rounded-2xl bg-slate-50 overflow-hidden flex items-center justify-center p-2">
+              <img src="${escapeHtml(p.image || fallbackImg)}" alt="${escapeHtml(p.name)}"
+                onerror="this.onerror=null;this.src='${fallbackImg}';"
+                class="w-full h-full object-contain" />
+              <span class="absolute top-1.5 left-1.5 text-[10px] font-black px-2 py-0.5 rounded-full ${isOut ? 'bg-rose-600 text-white' : isLow ? 'bg-amber-400 text-slate-900' : 'bg-white/90 text-slate-700'}">
+                ${isOut ? 'Out' : `${stock} left`}
+              </span>
+              ${cartQty > 0 ? `<span class="absolute top-1.5 right-1.5 bg-brand-purple text-white text-[10px] font-black px-2 py-0.5 rounded-full">${cartQty} in cart</span>` : ''}
             </div>
             <div>
-              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide truncate">${escapeHtml(product.category || 'General')}</p>
-              <h3 class="text-xs font-extrabold text-slate-900 leading-snug line-clamp-2 min-h-[32px]">${escapeHtml(product.name)}</h3>
+              <h3 class="text-xs font-extrabold text-slate-900 line-clamp-2 leading-snug">${escapeHtml(p.name)}</h3>
+              <p class="text-sm font-black text-brand-purple mt-0.5">${formatCurrency(p.price)}</p>
             </div>
           </div>
-          <div class="space-y-1.5 pt-1">
-            <div class="flex items-center justify-between gap-1">
-              <span class="text-sm font-black text-brand-purple">${formatCurrency(product.price)}</span>
-              ${stockBadge}
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="openEditorModal('${product.pos || 'store'}', '${product.id}')"
-                class="min-h-[34px] px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold">
-                Edit
-              </button>
-              <button type="button" ${isOut ? 'disabled' : ''} onclick="addToCart('${product.id}', 1)"
-                class="flex-1 min-h-[34px] py-1.5 px-2.5 rounded-xl text-[11px] font-black transition ${isOut ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-brand-purple hover:bg-brand-purpleDark text-white shadow-xs'}">
-                ${isOut ? 'Sold Out' : '+ Add'}
-              </button>
-            </div>
+          <div class="flex items-center gap-1.5 pt-1">
+            <button type="button" onclick="openEditorModal('${escapeHtml(pos)}', '${escapeHtml(p.id)}')"
+              class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold shrink-0">
+              Edit
+            </button>
+            <button type="button" ${isOut ? 'disabled' : ''} onclick="addToCart('${escapeHtml(p.id)}', 1)"
+              class="flex-1 py-2 rounded-xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-black disabled:opacity-40">
+              ${isOut ? 'No Stock' : '+ Cart'}
+            </button>
           </div>
         </div>
       `;
     }
 
     function updateCounterBannerAndAlerts(pos) {
-      const metrics = computeTimeMetrics(makeCounterFilter(pos));
+      const m = computeTimeMetrics(makeCounterFilter(pos));
       const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-      setTxt(`${pos}-sales-banner`, formatCurrency(metrics.dailySales));
-      setTxt(`${pos}-profit-banner`, formatCurrency(metrics.dailyProfit));
-      setTxt(`total-amount-${pos}`, formatCurrency(metrics.dailyAmount));
-      setTxt(`${pos}-weekly-sales`, formatCurrency(metrics.weeklySales));
-      setTxt(`${pos}-weekly-profit`, formatCurrency(metrics.weeklyProfit));
-      setTxt(`${pos}-monthly-sales`, formatCurrency(metrics.monthlySales));
-      setTxt(`${pos}-monthly-profit`, formatCurrency(metrics.monthlyProfit));
 
-      const prods = state.products.filter((p) => (p.pos || 'store') === pos);
-      const origTotal = prods.reduce((s, p) => s + (Number(p.cost) || 0) * Math.max(0, Number(p.stock) || 0), 0);
-      const sellTotal = prods.reduce((s, p) => s + (Number(p.price) || 0) * Math.max(0, Number(p.stock) || 0), 0);
+      setTxt(`${pos}-sales-banner`, formatCurrency(m.dailySales));
+      setTxt(`${pos}-profit-banner`, formatCurrency(m.dailyProfit));
+      setTxt(`total-amount-${pos}`, formatCurrency(m.dailyAmount));
+      setTxt(`${pos}-weekly-sales`, formatCurrency(m.weeklySales));
+      setTxt(`${pos}-weekly-profit`, formatCurrency(m.weeklyProfit));
+      setTxt(`${pos}-monthly-sales`, formatCurrency(m.monthlySales));
+      setTxt(`${pos}-monthly-profit`, formatCurrency(m.monthlyProfit));
+
+      const counterProds = state.products.filter((p) => (p.pos || 'store') === pos);
+      const origTotal = counterProds.reduce((s, p) => s + (Number(p.cost) || 0) * (Number(p.stock) || 0), 0);
+      const sellTotal = counterProds.reduce((s, p) => s + (Number(p.price) || 0) * (Number(p.stock) || 0), 0);
       setTxt(`${pos}-orig-total`, formatCurrency(origTotal));
       setTxt(`${pos}-sell-total`, formatCurrency(sellTotal));
 
-      const outItems = prods.filter((p) => (Number(p.stock) || 0) <= 0);
-      const lowItems = prods.filter((p) => {
+      const outItems = counterProds.filter((p) => (Number(p.stock) || 0) <= 0);
+      const lowItems = counterProds.filter((p) => {
         const st = Number(p.stock) || 0;
         const th = Number(p.lowStockThreshold) || 5;
         return st > 0 && st <= th;
@@ -2649,42 +2743,111 @@
         return;
       }
 
-      state.utangRecords.unshift({
-        id: `utang-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
-        customerName,
-        note: note || 'Store credit',
-        amount,
-        paidAmount: 0,
-        paid: false,
-        payments: [],
-        createdAt: new Date().toISOString()
-      });
+      const nowIso = new Date().toISOString();
+      const cleanNote = note || 'Store credit';
+      const existingUtang = state.utangRecords.find(
+        (u) => !u.paid && String(u.customerName || '').trim().toLowerCase() === customerName.toLowerCase()
+      );
+
+      if (existingUtang) {
+        existingUtang.amount = (Number(existingUtang.amount) || 0) + amount;
+        existingUtang.note = existingUtang.note ? `${existingUtang.note}, ${cleanNote}` : cleanNote;
+        existingUtang.createdAt = nowIso;
+      } else {
+        state.utangRecords.unshift({
+          id: `utang-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+          customerName,
+          note: cleanNote,
+          amount,
+          paidAmount: 0,
+          paid: false,
+          payments: [],
+          createdAt: nowIso
+        });
+      }
 
       document.getElementById('utang-customer-input').value = '';
       document.getElementById('utang-note-input').value = '';
       document.getElementById('utang-amount-input').value = '';
       saveState();
       renderUtangTab();
-      showToast(`Utang added for ${customerName}`, 'success');
+      showToast(`Utang updated for ${customerName}`, 'success');
+    }
+
+    function getConsolidatedUtangEntries() {
+      const grouped = new Map();
+
+      state.utangRecords.forEach((u) => {
+        if (!u) return;
+        const normName = String(u.customerName || 'Unknown').trim().toLowerCase();
+        const statusBucket = u.paid ? 'paid' : 'unpaid';
+        const key = `${statusBucket}::${normName}`;
+        const total = Number(u.amount) || 0;
+        const paidAmt = u.paid ? total : (Number(u.paidAmount) || 0);
+
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            id: u.id,
+            ids: [u.id],
+            customerName: String(u.customerName || 'Unknown').trim(),
+            notes: u.note ? [String(u.note).trim()] : [],
+            amount: total,
+            paidAmount: paidAmt,
+            paid: Boolean(u.paid),
+            createdAt: u.createdAt
+          });
+        } else {
+          const entry = grouped.get(key);
+          entry.ids.push(u.id);
+          if (u.note && !entry.notes.includes(String(u.note).trim())) {
+            entry.notes.push(String(u.note).trim());
+          }
+          entry.amount += total;
+          entry.paidAmount += paidAmt;
+          if (u.createdAt && (!entry.createdAt || new Date(u.createdAt) > new Date(entry.createdAt))) {
+            entry.createdAt = u.createdAt;
+          }
+        }
+      });
+
+      return Array.from(grouped.values()).map((entry) => ({
+        ...entry,
+        note: entry.notes.join(' • ')
+      }));
     }
 
     function markUtangPaid(utangId) {
-      const rec = state.utangRecords.find((u) => u.id === utangId);
-      if (!rec) return;
-      rec.paidAmount = Number(rec.amount) || 0;
-      rec.paid = true;
-      rec.paidAt = new Date().toISOString();
+      const target = state.utangRecords.find((u) => u.id === utangId);
+      if (!target) return;
+      const normName = String(target.customerName || '').trim().toLowerCase();
+      const nowIso = new Date().toISOString();
+
+      state.utangRecords.forEach((u) => {
+        if (!u.paid && String(u.customerName || '').trim().toLowerCase() === normName) {
+          u.paidAmount = Number(u.amount) || 0;
+          u.paid = true;
+          u.paidAt = nowIso;
+        }
+      });
+
       saveState();
       renderUtangTab();
-      showToast(`Marked ${rec.customerName}'s utang as PAID`, 'success');
+      showToast(`Marked ${target.customerName}'s utang as PAID`, 'success');
     }
 
     function openPartialUtangModal(utangId) {
       const rec = state.utangRecords.find((u) => u.id === utangId);
       if (!rec) return;
-      const remaining = Math.max(0, (Number(rec.amount) || 0) - (Number(rec.paidAmount) || 0));
+      const normName = String(rec.customerName || '').trim().toLowerCase();
+      const matching = state.utangRecords.filter(
+        (u) => !u.paid && String(u.customerName || '').trim().toLowerCase() === normName
+      );
+      const totalAmt = matching.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+      const totalPaid = matching.reduce((s, x) => s + (Number(x.paidAmount) || 0), 0);
+      const remaining = Math.max(0, totalAmt - totalPaid);
+
       document.getElementById('partial-utang-id').value = rec.id;
-      document.getElementById('partial-utang-subtitle').textContent = `${rec.customerName} • ${rec.note || ''}`;
+      document.getElementById('partial-utang-subtitle').textContent = `${rec.customerName} • Combined Balance`;
       document.getElementById('partial-utang-remaining').textContent = formatCurrency(remaining);
       document.getElementById('partial-utang-remaining').dataset.remaining = String(remaining);
       document.getElementById('partial-utang-amount').value = '';
@@ -2709,40 +2872,62 @@
     function submitPartialUtangPayment(e) {
       e.preventDefault();
       const id = document.getElementById('partial-utang-id').value;
-      const payAmt = Number(document.getElementById('partial-utang-amount').value) || 0;
+      let payAmt = Number(document.getElementById('partial-utang-amount').value) || 0;
       const note = (document.getElementById('partial-utang-note').value || '').trim();
-      const rec = state.utangRecords.find((u) => u.id === id);
-      if (!rec || payAmt <= 0) return;
+      const anchor = state.utangRecords.find((u) => u.id === id);
+      if (!anchor || payAmt <= 0) return;
 
-      const total = Number(rec.amount) || 0;
-      const prevPaid = Number(rec.paidAmount) || 0;
-      const nextPaid = Math.min(total, prevPaid + payAmt);
-      rec.paidAmount = nextPaid;
-      if (!Array.isArray(rec.payments)) rec.payments = [];
-      rec.payments.push({ amount: payAmt, note, createdAt: new Date().toISOString() });
-      if (nextPaid >= total) {
-        rec.paid = true;
-        rec.paidAt = new Date().toISOString();
+      const normName = String(anchor.customerName || '').trim().toLowerCase();
+      const matching = state.utangRecords.filter(
+        (u) => !u.paid && String(u.customerName || '').trim().toLowerCase() === normName
+      );
+      const nowIso = new Date().toISOString();
+
+      for (const rec of matching) {
+        if (payAmt <= 0) break;
+        const total = Number(rec.amount) || 0;
+        const prevPaid = Number(rec.paidAmount) || 0;
+        const rem = Math.max(0, total - prevPaid);
+        if (rem <= 0) continue;
+
+        const applied = Math.min(rem, payAmt);
+        rec.paidAmount = prevPaid + applied;
+        payAmt -= applied;
+
+        if (!Array.isArray(rec.payments)) rec.payments = [];
+        rec.payments.push({ amount: applied, note, createdAt: nowIso });
+        if (rec.paidAmount >= total) {
+          rec.paid = true;
+          rec.paidAt = nowIso;
+        }
       }
+
       saveState();
       closePartialUtangModal();
       renderUtangTab();
-      showToast(`Partial payment of ${formatCurrency(payAmt)} saved!`, 'success');
+      showToast('Partial payment saved!', 'success');
     }
 
     function deleteUtangRecord(utangId) {
-      state.utangRecords = state.utangRecords.filter((u) => u.id !== utangId);
+      const target = state.utangRecords.find((u) => u.id === utangId);
+      if (!target) return;
+      const normName = String(target.customerName || '').trim().toLowerCase();
+      const isPaid = Boolean(target.paid);
+      state.utangRecords = state.utangRecords.filter(
+        (u) => !(Boolean(u.paid) === isPaid && String(u.customerName || '').trim().toLowerCase() === normName)
+      );
       saveState();
       renderUtangTab();
-      showToast('Utang record deleted.', 'info');
+      showToast(`Deleted ${target.customerName}'s utang record.`, 'info');
     }
 
     function renderUtangTab() {
+      const consolidated = getConsolidatedUtangEntries();
       let unpaidTotal = 0;
       let paidTotal = 0;
       let activeCount = 0;
 
-      state.utangRecords.forEach((u) => {
+      consolidated.forEach((u) => {
         const total = Number(u.amount) || 0;
         const paidAmt = u.paid ? total : (Number(u.paidAmount) || 0);
         const rem = Math.max(0, total - paidAmt);
@@ -2756,7 +2941,7 @@
       document.getElementById('utang-count-banner').textContent = String(activeCount);
 
       const q = (document.getElementById('utang-search')?.value || '').trim().toLowerCase();
-      const filtered = state.utangRecords.filter((u) => {
+      const filtered = consolidated.filter((u) => {
         const isPaid = Boolean(u.paid);
         if (utangFilter === 'unpaid' && isPaid) return false;
         if (utangFilter === 'paid' && !isPaid) return false;
