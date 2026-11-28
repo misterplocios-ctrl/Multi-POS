@@ -1680,11 +1680,48 @@
     function makeCounterFilter(pos) {
       return (item) => {
         if (!item) return false;
-        if (item.kind === 'gcash') return pos === 'gcash';
-        if (item.counter) return item.counter === pos;
-        if (item.pos) return item.pos === pos;
+        const rawCounter = String(item.counter || item.pos || '').toLowerCase().trim();
+        const kind = String(item.kind || '').toLowerCase().trim();
+        const summary = String(item.summary || '').toLowerCase();
+
+        if (pos === 'gcash') {
+          return kind === 'gcash' || rawCounter === 'gcash' || /\bgcash\b|\be-?load\b/.test(summary);
+        }
+        if (pos === 'cigarettes') {
+          if (rawCounter === 'cigarettes' || rawCounter === 'yosi' || rawCounter === 'cigarette') return true;
+          if (!rawCounter && Array.isArray(item.items)) {
+            return item.items.some((it) => {
+              const p = state.products.find((pr) => pr.id === it.productId || pr.name === it.name);
+              return p && (p.pos === 'cigarettes' || p.pos === 'yosi');
+            });
+          }
+          return false;
+        }
+        if (pos === 'softdrinks') {
+          if (rawCounter === 'softdrinks' || rawCounter === 'drinks' || rawCounter === 'softdrink') return true;
+          if (!rawCounter && Array.isArray(item.items)) {
+            return item.items.some((it) => {
+              const p = state.products.find((pr) => pr.id === it.productId || pr.name === it.name);
+              return p && (p.pos === 'softdrinks' || p.pos === 'drinks');
+            });
+          }
+          return false;
+        }
+        if (rawCounter) return rawCounter === pos;
+        if (kind === 'gcash') return false;
         return pos === 'store';
       };
+    }
+
+    function resolveTxCounterKey(tx) {
+      if (!tx) return 'store';
+      if (makeCounterFilter('gcash')(tx)) return 'gcash';
+      if (makeCounterFilter('cigarettes')(tx)) return 'cigarettes';
+      if (makeCounterFilter('softdrinks')(tx)) return 'softdrinks';
+      const raw = String(tx.counter || tx.pos || '').toLowerCase().trim();
+      if (raw === 'yosi' || raw === 'cigarette') return 'cigarettes';
+      if (raw === 'drinks' || raw === 'softdrink') return 'softdrinks';
+      return raw || 'store';
     }
 
     function computeTimeMetrics(filterFn = null) {
@@ -2932,14 +2969,18 @@
 
       const ledgerEl = document.getElementById('transactions-ledger');
       if (ledgerEl) {
+        const startOfTodayMs = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0, 0).getTime();
         const filteredTx = state.transactions.filter((tx) => {
           if (!tx) return false;
-          if (!showPastLedgerDays && tx.createdAt && getLocalDayKey(new Date(tx.createdAt)) !== todayKey) {
+          const parsed = tx.createdAt ? new Date(tx.createdAt) : null;
+          const hasValidDate = parsed && !Number.isNaN(parsed.getTime());
+          const isTxToday = !tx.createdAt || !hasValidDate || getLocalDayKey(parsed) === todayKey || parsed.getTime() >= startOfTodayMs;
+          if (!showPastLedgerDays && !isTxToday) {
             return false;
           }
           if (selectedReportFilter === 'all') return true;
           if (selectedReportFilter === 'expense') return tx.kind === 'expense';
-          return (tx.counter || 'store') === selectedReportFilter;
+          return resolveTxCounterKey(tx) === selectedReportFilter;
         });
 
         if (!filteredTx.length) {
@@ -2970,7 +3011,7 @@
                 <div class="min-w-0">
                   <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${tx.kind === 'expense' ? 'bg-rose-100 text-rose-700' : tx.kind === 'gcash' ? 'bg-sky-100 text-sky-700' : 'bg-purple-100 text-brand-purple'}">
-                      ${escapeHtml(tx.counter || tx.kind || 'sale')}
+                      ${escapeHtml(resolveTxCounterKey(tx) === 'gcash' && tx.kind !== 'gcash' ? 'gcash' : (tx.counter || resolveTxCounterKey(tx) || tx.kind || 'sale'))}
                     </span>
                     ${isVoided ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">VOIDED</span>` : ''}
                     <span class="text-[10px] font-semibold text-slate-400">${dt}</span>
