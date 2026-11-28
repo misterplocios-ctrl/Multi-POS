@@ -1714,13 +1714,18 @@
         const txMs = effectiveDate.getTime();
         const isToday = !tx.createdAt || !isValidDate || getLocalDayKey(effectiveDate) === todayKey || txMs >= startOfTodayMs;
 
+        const kind = tx.kind || 'sale';
         const rawAmt = Number(tx.total ?? tx.amount ?? tx.subtotal ?? 0) || 0;
-        const txSales = tx.kind === 'gcash'
+        const computedItemProfit = Array.isArray(tx.items)
+          ? tx.items.reduce((sum, it) => sum + ((Number(it.price) || 0) - (Number(it.cost) || 0)) * (Number(it.qty) || 0), 0) - (Number(tx.discount) || 0)
+          : 0;
+
+        const txSales = kind === 'gcash'
           ? (Number(tx.fee) || 0)
-          : (tx.kind === 'expense' ? 0 : rawAmt);
-        const txProfit = tx.kind === 'gcash'
+          : (kind === 'expense' ? 0 : rawAmt);
+        const txProfit = kind === 'gcash'
           ? (Number(tx.fee) || 0)
-          : (tx.kind === 'expense' ? 0 : (Number(tx.profit) || 0));
+          : (kind === 'expense' ? 0 : (tx.profit !== undefined && tx.profit !== null ? (Number(tx.profit) || 0) : computedItemProfit));
 
         if (isToday) {
           dailySales += txSales;
