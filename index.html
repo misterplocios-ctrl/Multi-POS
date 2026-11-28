@@ -1122,6 +1122,13 @@
       </div>
     </div>
 
+    <!-- CUSTOMER UTANG DETAILS MODAL -->
+    <div id="utang-detail-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 max-h-[90vh] overflow-y-auto">
+        <div id="utang-detail-content" class="space-y-3"></div>
+      </div>
+    </div>
+
     <!-- LOW STOCK & OUT OF STOCK PRODUCTS MODAL -->
     <div id="low-stock-modal" class="hidden fixed inset-0 z-50 modal-backdrop-polished flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="modal-smooth-enter modal-panel-polished w-full max-w-md md:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 max-h-[88vh] overflow-y-auto">
@@ -2791,6 +2798,15 @@
             ids: [u.id],
             customerName: String(u.customerName || 'Unknown').trim(),
             notes: u.note ? [String(u.note).trim()] : [],
+            itemsLog: [{
+              id: u.id,
+              note: String(u.note || 'Store credit').trim(),
+              amount: total,
+              paidAmount: paidAmt,
+              paid: Boolean(u.paid),
+              payments: Array.isArray(u.payments) ? [...u.payments] : [],
+              createdAt: u.createdAt || ''
+            }],
             amount: total,
             paidAmount: paidAmt,
             paid: Boolean(u.paid),
@@ -2802,6 +2818,15 @@
           if (u.note && !entry.notes.includes(String(u.note).trim())) {
             entry.notes.push(String(u.note).trim());
           }
+          entry.itemsLog.push({
+            id: u.id,
+            note: String(u.note || 'Store credit').trim(),
+            amount: total,
+            paidAmount: paidAmt,
+            paid: Boolean(u.paid),
+            payments: Array.isArray(u.payments) ? [...u.payments] : [],
+            createdAt: u.createdAt || ''
+          });
           entry.amount += total;
           entry.paidAmount += paidAmt;
           if (u.createdAt && (!entry.createdAt || new Date(u.createdAt) > new Date(entry.createdAt))) {
@@ -2814,6 +2839,118 @@
         ...entry,
         note: entry.notes.join(' • ')
       }));
+    }
+
+    function openCustomerUtangDetail(utangId, isPaidBucket = false) {
+      const anchor = state.utangRecords.find((u) => u.id === utangId);
+      if (!anchor) return;
+      const normName = String(anchor.customerName || 'Unknown').trim().toLowerCase();
+      const matching = state.utangRecords.filter(
+        (u) => Boolean(u.paid) === Boolean(isPaidBucket) && String(u.customerName || 'Unknown').trim().toLowerCase() === normName
+      );
+
+      const totalAmt = matching.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+      const totalPaid = matching.reduce((s, x) => s + (x.paid ? (Number(x.amount) || 0) : (Number(x.paidAmount) || 0)), 0);
+      const remaining = Math.max(0, totalAmt - totalPaid);
+
+      const allPayments = [];
+      matching.forEach((m) => {
+        if (Array.isArray(m.payments)) {
+          m.payments.forEach((p) => allPayments.push({ ...p, parentNote: m.note || '' }));
+        }
+      });
+
+      const entriesHtml = matching.map((m) => {
+        const dt = m.createdAt ? new Date(m.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'No date';
+        const mAmt = Number(m.amount) || 0;
+        const mPaid = m.paid ? mAmt : (Number(m.paidAmount) || 0);
+        const mRem = Math.max(0, mAmt - mPaid);
+        return `
+          <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1">
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-xs font-extrabold text-slate-900">${escapeHtml(m.note || 'Store credit')}</p>
+              <span class="text-xs font-black text-slate-900 shrink-0">${formatCurrency(mAmt)}</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500">
+              <span>${dt}</span>
+              <span>${m.paid ? 'Paid' : `Paid: ${formatCurrency(mPaid)} • Bal: ${formatCurrency(mRem)}`}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const paymentsHtml = allPayments.length
+        ? `<div class="space-y-1.5 pt-2 border-t border-slate-100">
+            <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Payment History</p>
+            ${allPayments.map((p) => {
+              const pDt = p.createdAt ? new Date(p.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+              return `<div class="flex items-center justify-between text-xs bg-emerald-50/70 rounded-xl px-3 py-2 border border-emerald-100">
+                <div>
+                  <span class="font-bold text-emerald-900">${escapeHtml(p.note || 'Partial payment')}</span>
+                  ${pDt ? `<span class="block text-[10px] text-emerald-700">${pDt}</span>` : ''}
+                </div>
+                <span class="font-black text-emerald-700">+${formatCurrency(p.amount)}</span>
+              </div>`;
+            }).join('')}
+          </div>`
+        : '';
+
+      document.getElementById('utang-detail-content').innerHTML = `
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${isPaidBucket ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">
+              ${isPaidBucket ? 'PAID ACCOUNT' : 'UNPAID ACCOUNT'}
+            </span>
+            <h3 class="text-base font-black text-slate-900 mt-1">${escapeHtml(anchor.customerName)}</h3>
+          </div>
+          <button type="button" onclick="closeCustomerUtangDetail()" class="text-xs font-extrabold text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">Close</button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 bg-brand-dark text-white rounded-2xl p-3 text-center">
+          <div>
+            <p class="text-[10px] font-bold text-slate-300 uppercase">Total Utang</p>
+            <p class="text-xs font-black mt-0.5">${formatCurrency(totalAmt)}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-emerald-300 uppercase">Paid</p>
+            <p class="text-xs font-black text-emerald-300 mt-0.5">${formatCurrency(totalPaid)}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-amber-300 uppercase">Balance</p>
+            <p class="text-xs font-black text-amber-300 mt-0.5">${formatCurrency(remaining)}</p>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Utang Items / Entries (${matching.length})</p>
+          <div class="space-y-2 max-h-52 overflow-y-auto">${entriesHtml}</div>
+        </div>
+
+        ${paymentsHtml}
+
+        <div class="flex items-center gap-2 pt-1">
+          ${!isPaidBucket ? `
+            <button type="button" onclick="closeCustomerUtangDetail();openPartialUtangModal('${anchor.id}')"
+              class="flex-1 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-extrabold">
+              Partial Pay
+            </button>
+            <button type="button" onclick="closeCustomerUtangDetail();markUtangPaid('${anchor.id}')"
+              class="flex-1 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">
+              Mark Paid
+            </button>
+          ` : `
+            <button type="button" onclick="closeCustomerUtangDetail()"
+              class="flex-1 py-2.5 rounded-2xl bg-brand-purple text-white text-xs font-black">
+              Done
+            </button>
+          `}
+        </div>
+      `;
+      document.getElementById('utang-detail-modal').classList.remove('hidden');
+    }
+
+    function closeCustomerUtangDetail() {
+      document.getElementById('utang-detail-modal').classList.add('hidden');
     }
 
     function markUtangPaid(utangId) {
@@ -2979,6 +3116,10 @@
               </div>
             </div>
             <div class="flex items-center gap-1.5 pt-1">
+              <button type="button" onclick="openCustomerUtangDetail('${u.id}', ${Boolean(u.paid)})"
+                class="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-brand-purple border border-purple-200 text-xs font-extrabold">
+                View
+              </button>
               ${!u.paid ? `
                 <button type="button" onclick="openPartialUtangModal('${u.id}')"
                   class="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-extrabold">
