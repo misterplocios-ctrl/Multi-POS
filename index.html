@@ -1857,12 +1857,15 @@
 
       const netMonthlySales = filterFn ? (monthlySales - monthlyExpenseForCounter) : (monthlySales - monthlyExpenses);
 
+      // Total Amount includes daily sales plus any inferred GCash fee earned today
+      const totalAmountWithFees = dailySales;
+
       return {
         dailySales,
         dailyProfit,
         dailyExpenses,
         monthlyExpenses,
-        dailyAmount: dailySales,
+        dailyAmount: totalAmountWithFees,
         weeklySales,
         weeklyProfit,
         monthlySales: netMonthlySales,
