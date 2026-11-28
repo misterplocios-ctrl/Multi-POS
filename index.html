@@ -766,6 +766,45 @@
         <div id="report-filters" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar"></div>
         <div id="transactions-ledger" class="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0"></div>
         </div>
+
+        <!-- BACKUP, IMPORT / EXPORT JSON & CLOUD SYNC -->
+        <div class="bg-white rounded-3xl p-4 shadow-card border border-slate-100 space-y-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <h2 class="text-xs font-black text-slate-900">Backup, JSON &amp; Cross-Device Sync</h2>
+              <p id="autosync-status-text" class="text-[10px] font-semibold text-slate-500">Local Only</p>
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button type="button" id="autosync-toggle-btn" onclick="toggleAutoSync()"
+                class="min-h-[36px] px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-extrabold transition">
+                Auto Sync: ON
+              </button>
+              <button type="button" onclick="openCloudSyncModal()"
+                class="min-h-[36px] px-3 py-1.5 rounded-xl bg-brand-dark text-white text-xs font-extrabold transition">
+                Sync Room
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button type="button" onclick="exportBackupJSON()"
+              class="min-h-[40px] px-3 py-2 rounded-2xl bg-brand-purple hover:bg-brand-purpleDark text-white text-xs font-extrabold transition">
+              Export JSON
+            </button>
+            <label class="min-h-[40px] px-3 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold flex items-center justify-center cursor-pointer transition">
+              <span>Import JSON</span>
+              <input type="file" accept=".json,application/json" onchange="importBackupJSON(event)" class="hidden" />
+            </label>
+            <button type="button" onclick="copyJsonBackup()"
+              class="min-h-[40px] px-3 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition">
+              Copy JSON
+            </button>
+            <button type="button" onclick="openJsonRestoreModal()"
+              class="min-h-[40px] px-3 py-2 rounded-2xl bg-purple-50 hover:bg-purple-100 text-brand-purple border border-purple-200 text-xs font-extrabold transition">
+              Paste JSON
+            </button>
+          </div>
+        </div>
       </section>
 
     </main>
